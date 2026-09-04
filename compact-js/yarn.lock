@@ -66,18 +66,18 @@ __metadata:
   linkType: hard
 
 "@changesets/apply-release-plan@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "@changesets/apply-release-plan@npm:8.0.0"
+  version: 8.1.0
+  resolution: "@changesets/apply-release-plan@npm:8.1.0"
   dependencies:
     "@changesets/config": "npm:^4.0.0"
-    "@changesets/format": "npm:^0.1.1"
-    "@changesets/git": "npm:^4.0.0"
+    "@changesets/format": "npm:^0.1.2"
+    "@changesets/git": "npm:^4.0.1"
     "@changesets/should-skip-package": "npm:^1.0.0"
     "@changesets/types": "npm:^7.0.0"
     import-meta-resolve: "npm:^4.2.0"
     jsonc-parser: "npm:^3.3.1"
     semver: "npm:^7.8.1"
-  checksum: 10/0d0244c712215f1a409dc37b1cd1d6fe17633aaf1510d206ac42ad625c9e72b63e1fcd91ca269e911c6605a572b78eff3f8b05bd48fd65912a7606835222dca8
+  checksum: 10/051b9632ba05fb99191c6b8c6c2e986f987c73462bd7d7e00dbac9fa7d9a78182e5875ccea7052c9e5077d8d34c702c8f17a7d204d61c43a8e132eda2174a70a
   languageName: node
   linkType: hard
 
@@ -113,9 +113,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@changesets/cli@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@changesets/cli@npm:3.0.0"
+"@changesets/cli@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@changesets/cli@npm:3.0.1"
   dependencies:
     "@changesets/apply-release-plan": "npm:^8.0.0"
     "@changesets/assemble-release-plan": "npm:^7.0.0"
@@ -128,7 +128,7 @@ __metadata:
     "@changesets/read": "npm:^1.0.0"
     "@changesets/should-skip-package": "npm:^1.0.0"
     "@changesets/types": "npm:^7.0.0"
-    "@changesets/write": "npm:^1.0.0"
+    "@changesets/write": "npm:^1.0.1"
     "@clack/prompts": "npm:^1.7.0"
     "@manypkg/get-packages": "npm:^3.1.0"
     "@pnpm/deps.graph-sequencer": "npm:^1100.0.1"
@@ -140,7 +140,7 @@ __metadata:
     tinyexec: "npm:^1.3.0"
   bin:
     changeset: bin.js
-  checksum: 10/11030de752427fdf551b0f83f9ecf78976129d552b1c1c0fc9d54ab8c105e8c67ca617ea841ebd0b9c5b73847f9cf39bc715abb500f045f2dffbd0f7aab73006
+  checksum: 10/b019b32b67c8c0c7fe2790d6334b2d593e72d5d88701ca7718399a4e0e621636d87d163c9d741940ae24dfd87073017f9a652f37fa16b98d4bf679675e7286c0
   languageName: node
   linkType: hard
 
@@ -164,7 +164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@changesets/format@npm:^0.1.1":
+"@changesets/format@npm:^0.1.1, @changesets/format@npm:^0.1.2":
   version: 0.1.2
   resolution: "@changesets/format@npm:0.1.2"
   dependencies:
@@ -193,16 +193,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@changesets/git@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@changesets/git@npm:4.0.0"
+"@changesets/git@npm:^4.0.0, @changesets/git@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@changesets/git@npm:4.0.1"
   dependencies:
     "@changesets/errors": "npm:^1.0.0"
     "@changesets/types": "npm:^7.0.0"
     "@manypkg/get-packages": "npm:^3.1.0"
     picomatch: "npm:^4.0.4"
     tinyexec: "npm:^1.3.0"
-  checksum: 10/f2907b0c3a9b8c1d135f87952505c675f304dc0162fef46a2e4fc255dea2b380730813e6e355bda5e70d453a1c8bf231ef1de947cc7b7bc3aca4f6926b09980f
+  checksum: 10/736600712aca85c01e8c0c7fe9956f283b01dbdd2957f8131903a1abec0736a038274522f9a5d79b09a7da07726f3abdb187b29e6f168804382a6b9fa03f8b98
   languageName: node
   linkType: hard
 
@@ -228,13 +228,13 @@ __metadata:
   linkType: hard
 
 "@changesets/read@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@changesets/read@npm:1.0.0"
+  version: 1.0.1
+  resolution: "@changesets/read@npm:1.0.1"
   dependencies:
-    "@changesets/git": "npm:^4.0.0"
+    "@changesets/git": "npm:^4.0.1"
     "@changesets/parse": "npm:^1.0.0"
     "@changesets/types": "npm:^7.0.0"
-  checksum: 10/505e723f87fd847b7264ce342a0b3f5aa849d5d6aba6806d1e7fc0490964e3716bb0fc065dd6a87e970a3684fe04d30ef789a1c0f1d49671dadc4b55c7a5c65d
+  checksum: 10/c6f3169e3d71e5a387cf4e83f23a743d6b61c6290d1b5fd6583b78146cb3d5bc875e013d9e531549066898ad3556dd050b93cdfe16def049f8e55e2a42fd5276
   languageName: node
   linkType: hard
 
@@ -254,7 +254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@changesets/write@npm:^1.0.0":
+"@changesets/write@npm:^1.0.1":
   version: 1.0.1
   resolution: "@changesets/write@npm:1.0.1"
   dependencies:
@@ -1022,7 +1022,7 @@ __metadata:
   resolution: "@midnight-ntwrk/compact-js-sources@workspace:."
   dependencies:
     "@changesets/changelog-github": "npm:^1.0.0"
-    "@changesets/cli": "npm:^3.0.0"
+    "@changesets/cli": "npm:^3.0.1"
     "@commitlint/cli": "npm:^21.2.2"
     "@commitlint/config-conventional": "npm:^21.2.2"
     "@effect/build-utils": "npm:^0.8.9"
