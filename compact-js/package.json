@@ -3,7 +3,6 @@
   "version": "2.5.5-rc.8",
   "description": "Typescript-based execution environment for smart contracts compiled with the Compact language",
   "type": "module",
-  "types": "./dist/dts/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": "./src/index.ts",
@@ -33,7 +32,7 @@
     "build-compact": "(shx --negate test -d ./test/contract/managed && yarn compact || true)",
     "clean": "shx rm -rf ./build ./dist ./.tsbuildinfo ./reports ./coverage .tsbuildinfo",
     "test": "yarn build-compact && vitest run && tstyche",
-    "package": "shx rm -rf ./dist/src && node ../scripts/resolve-workspace-protocol.mjs ./dist/package.json && (cd ./dist; npm pack)",
+    "package": "shx rm -rf ./dist/src && node ../scripts/finalize-dist-manifest.mjs ./dist/package.json && (cd ./dist; npm pack)",
     "compact": "fetch-compactc && yarn compact-counter && yarn compact-unshielded && yarn compact-ccc-inner && yarn compact-ccc-middle && yarn compact-ccc-outer && yarn compact-ccc-self",
     "compact-counter": "run-compactc ./test/contract/counter.compact ./test/contract/managed/counter",
     "compact-unshielded": "run-compactc ./test/contract/unshielded.compact ./test/contract/managed/unshielded",
