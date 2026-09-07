@@ -11,13 +11,6 @@ updates:
   - package-ecosystem: "npm"
     labels:
       - "bot:dependencies"
-    directory: "/compact-js"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "npm"
-    labels:
-      - "bot:dependencies"
-    directory: "/platform-js"
+    directory: "/"
     schedule:
       interval: "weekly"

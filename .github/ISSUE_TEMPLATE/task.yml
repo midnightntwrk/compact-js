@@ -4,7 +4,7 @@ title: "[Task] "
 type: Task
 labels:
   - status:untriaged
-  - component:midnight-sdk
+  - component:compact-js
 body:
   - type: dropdown
     id: components
@@ -13,7 +13,6 @@ body:
       description: Which components does this affect?
       multiple: true
       options:
-        - component:midnight-sdk
         - component:compact-js
     validations:
       required: true

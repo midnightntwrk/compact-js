@@ -12,10 +12,6 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
-      workspace:
-        type: string
-        description: The workspace folder that should be the target of the workflow.
-        required: true
       node-version-file:
         type: string
         required: false
@@ -35,9 +31,6 @@ jobs:
     name: Build, Lint and Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: ./${{ inputs.workspace }} # Workspace name has affinity to a folder in the root of the repo.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
         with:
@@ -116,25 +109,25 @@ jobs:
         run: |
           #ArtiomTr/jest-coverage-report-action@v2 has a bug, this is temp solution
           mv coverage coverage_$(date +"%Y%m%d%H%M%S")
-          zip -r coverage-${{ inputs.workspace }}.zip coverage*
+          zip -r coverage-compact-js.zip coverage*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # ratchet:actions/upload-artifact@v4
         with:
-          name: Coverage Report ${{ inputs.workspace }}
-          path: ${{ inputs.workspace }}/coverage-${{ inputs.workspace }}.zip
+          name: Coverage Report compact-js
+          path: coverage-compact-js.zip
 
       - name: Publish Test Coverage
         if: ${{ inputs.coverage-files }} # Publish the comment if we have received coverage files
         uses: MishaKav/jest-coverage-comment@642ef024cc554a34b7082cea12c7bf63575ae151 # ratchet:MishaKav/jest-coverage-comment@v1
         with:
           hide-comment: false
-          unique-id-for-comment: ${{ inputs.workspace }}-coverage
+          unique-id-for-comment: compact-js-coverage
           multiple-files: ${{ inputs.coverage-files }}
 
       - name: Pack and Upload Package Artifacts
         if: ${{ inputs.create-package-artifacts }}
         uses: ./.github/actions/create-package-artifacts
         with:
-          package-archive-name: ${{ inputs.workspace }}
-          working-directory: ./${{ inputs.workspace }}
+          package-archive-name: compact-js
+          working-directory: .

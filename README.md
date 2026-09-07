@@ -1,119 +1,70 @@
-# Midnight SDK
+# Compact.js
 
-Developer hub for [Midnight](https://midnight.network). This repo provides a map of all Midnight repositories and the components they produce, a [compatibility matrix](./COMPATIBILITY.md) for testnets and mainnet, an [ecosystem overview](./ECOSYSTEM.md) of the full architecture, and the source code for four npm libraries (`compact-js`, `platform-js`) that provide the execution environment for Compact smart contracts.
+## Introduction
 
-**Networks:** Local (`undeployed`) for fastest iteration, Preview / Preprod for public testnets, Mainnet for production. See [COMPATIBILITY.md](./COMPATIBILITY.md) for which versions are deployed on each network and which client libraries are compatible.
+Compact.js provides a Typescript-based execution environment for smart contracts
+compiled with the [Compact](https://docs.midnight.network/develop/reference/compact/) language.
+When a Compact smart contract is compiled with `compactc`, part of the output includes:
 
-## Repositories and Components
+1. A JavaScript file.
+2. A TypeScript [declaration file](https://www.typescriptlang.org/docs/handbook/2/type-declarations.html).
 
-### Infrastructure (server-side)
+The JavaScript file contains:
 
-| Repository | Produces | Artifacts |
-|---|---|---|
-| [midnightntwrk/midnight-node](https://github.com/midnightntwrk/midnight-node) | Node | [Docker](https://hub.docker.com/r/midnightntwrk/midnight-node) |
-| [midnightntwrk/midnight-ledger](https://github.com/midnightntwrk/midnight-ledger) | Ledger, Proof Server*, On-chain Runtime | [Docker](https://hub.docker.com/r/midnightntwrk/proof-server), [npm](https://www.npmjs.com/package/@midnight-ntwrk/onchain-runtime-v3) |
-| [midnightntwrk/midnight-indexer](https://github.com/midnightntwrk/midnight-indexer) | Indexer API, Chain Indexer, Wallet Indexer | [Docker](https://hub.docker.com/r/midnightntwrk/indexer-api) |
-| [input-output-hk/partner-chains](https://github.com/input-output-hk/partner-chains) | Partner Chains | GitHub releases |
-| [midnightntwrk/midnight-local-dev](https://github.com/midnightntwrk/midnight-local-dev) | Local dev stack | Docker Compose |
-| [midnightntwrk/midnight-faucet](https://github.com/midnightntwrk/midnight-faucet) | Faucet (tNIGHT) | Docker |
-| [midnightntwrk/midnight-explorer](https://github.com/midnightntwrk/midnight-explorer) | Block Explorer | Docker |
-| [midnightntwrk/midnight-cnight-to-dust-dapp](https://github.com/midnightntwrk/midnight-cnight-to-dust-dapp) | cNgD App — cNIGHT-generates-Dust registration (Cardano) | — |
+- The execution logic for each circuit in the source contract,
+- Logic for constructing the contract’s initial state,
+- Utilities for converting on-chain contract state into a JavaScript representation.
 
-*Proof Server can be run as shared infrastructure or locally by DApp developers for proof generation.
+Compact.js uses this file at run time to execute the circuits. The circuit execution results are
+then used by higher level tools and frameworks (such as Midnight.js) in order to create and submit
+transactions to the Midnight blockchain. At compile time, the types and utilities of Compact.js use
+the TypeScript declaration file and the definitions it contains, to map types that make working with
+the contract and its circuits more convenient, and TypeScript idiomatic.
 
-### Client-side (libraries and tools)
+> [!NOTE]  
+> The term _runtime_ is often used to describe the JavaScript executable for a contract. This is
+> distinct from the package `@midnight-ntwrk/compact-runtime`, which provides the utilities that each of
+> these JavaScript executables use.
 
-| Repository | Produces | Artifacts |
-|---|---|---|
-| [LFDT-Minokawa/compact](https://github.com/LFDT-Minokawa/compact) | Compact toolchain manager (`compact`) — installs and updates compiler versions, compiles contracts (`compact compile`). Also: `compactc` (compiler), Compact language, Compact runtime | [Releases](https://github.com/midnightntwrk/compact/releases), [npm](https://www.npmjs.com/package/@midnight-ntwrk/compact-runtime) |
-| [midnightntwrk/midnight-sdk](https://github.com/midnightntwrk/midnight-sdk) (this repo) | compact-js, compact-js-node, compact-js-command, platform-js | [npm](https://www.npmjs.com/package/@midnight-ntwrk/compact-js) |
-| [midnightntwrk/midnight-js](https://github.com/midnightntwrk/midnight-js) | 12 `@midnight-ntwrk/midnight-js-*` packages, [testkit-js](https://github.com/midnightntwrk/midnight-js) (E2E testing via midnight-js, dapp-connector-api, and wallet-sdk) | [npm](https://www.npmjs.com/package/@midnight-ntwrk/midnight-js-contracts) |
-| [midnightntwrk/midnight-wallet](https://github.com/midnightntwrk/midnight-wallet) | Wallet SDK (`wallet-sdk-*` packages) | [npm](https://www.npmjs.com/package/@midnight-ntwrk/wallet-sdk-facade) |
-| [midnightntwrk/midnight-dapp-connector-api](https://github.com/midnightntwrk/midnight-dapp-connector-api) | DApp Connector API | [npm](https://www.npmjs.com/package/@midnight-ntwrk/dapp-connector-api) |
-| [midnightntwrk/midnight-wallet-dapp](https://github.com/midnightntwrk/midnight-wallet-dapp) | Wallet DApp (reference app) | [Docker](https://hub.docker.com/r/midnightntwrk/wallet-dapp) |
-| [midnightntwrk/midnight-node](https://github.com/midnightntwrk/midnight-node) | Midnight Toolkit — CLI for deploying and interacting with contracts | [Docker](https://hub.docker.com/r/midnightntwrk/midnight-node-toolkit) |
+## Release Process
 
+Releases are automated via GitHub Actions triggered by git tags. To release:
 
-## Developer Paths
+### Step 1: Determine the new version
+Decide on the version:
+- **Patch** (2.5.1): Bug fixes only
+- **Minor** (2.6.0): New features, backwards compatible
+- **Major** (3.0.0): Breaking changes
 
-### Smart Contract Developers
-
-Write and test Compact smart contracts.
-
-- [LFDT-Minokawa/compact](https://github.com/LFDT-Minokawa/compact) — install the `compact` toolchain manager to install compilers and compile contracts (`compact compile`)
-- [Compact language reference](https://docs.midnight.network/compact) — documentation
-- [Midnight Toolkit](https://github.com/midnightntwrk/midnight-node) — CLI for deploying and interacting with contracts
-- [create-mn-app](https://github.com/midnightntwrk/create-mn-app) — scaffold a new project
-- [example-counter](https://github.com/midnightntwrk/example-counter) / [example-bboard](https://github.com/midnightntwrk/example-bboard) — reference contracts (use as templates)
-- [testkit-js](https://github.com/midnightntwrk/midnight-js) — E2E testing framework using midnight-js, dapp-connector-api, and wallet-sdk (in the midnight-js repo)
-- [Examples](https://docs.midnight.network/category/examples) — walkthroughs
-
-### DApp Developers
-
-Build web and Node.js applications on Midnight.
-
-- [Getting started](https://docs.midnight.network/getting-started) — first-time setup
-- [midnight-js](https://github.com/midnightntwrk/midnight-js) — DApp framework; install [`@midnight-ntwrk/midnight-js`](https://www.npmjs.com/package/@midnight-ntwrk/midnight-js) for core modules, plus individual provider packages as needed
-- [create-mn-app](https://github.com/midnightntwrk/create-mn-app) — scaffold a new project
-- [midnight-wallet-dapp](https://github.com/midnightntwrk/midnight-wallet-dapp) — reference DApp showing the provider pattern and wallet integration
-- [midnight-wallet](https://github.com/midnightntwrk/midnight-wallet) — wallet SDK, useful as an integration layer for Node.js DApps and with [testkit-js](https://github.com/midnightntwrk/midnight-js)
-- [DApp Connector API](https://github.com/midnightntwrk/midnight-dapp-connector-api) — wallet-DApp interface
-- [Tutorials](https://docs.midnight.network/category/tutorials) — end-to-end walkthroughs
-
-DApps need a local infrastructure stack (proof-server + indexer + midnight-node) or connection to a public testnet. See [midnight-local-dev](https://github.com/midnightntwrk/midnight-local-dev).
-
-### Tool Builders
-
-Build new tooling, providers, or frameworks on Midnight.
-
-- [platform-js](./platform-js/platform-js) (this repo) — core abstractions and types that midnight-js and other frameworks build on
-- [midnight-js](https://github.com/midnightntwrk/midnight-js) — reference implementation of a DApp framework; study its provider pattern to build alternatives
-- [midnight-wallet-dapp](https://github.com/midnightntwrk/midnight-wallet-dapp) — reference for the provider pattern in practice
-- [compact-js](./compact-js/compact-js) (this repo) — if building tooling that works with compiled Compact contracts
-- [DApp Connector API](https://github.com/midnightntwrk/midnight-dapp-connector-api) — spec for wallet-DApp communication
-
-### Wallet Builders
-
-Build wallets or integrate Midnight into existing wallets.
-
-- [midnight-wallet](https://github.com/midnightntwrk/midnight-wallet) — wallet SDK; [`wallet-sdk-facade`](https://www.npmjs.com/package/@midnight-ntwrk/wallet-sdk-facade) is the key entry point (also used by Node.js DApps as an integration layer)
-- [DApp Connector API](https://github.com/midnightntwrk/midnight-dapp-connector-api) — the interface between wallets and DApps
-- [platform-js](./platform-js/platform-js) (this repo) — shared types and abstractions
-- [Wallet SDK release notes](https://docs.midnight.network/relnotes/wallet) — latest changes and migration guides
-
-## Libraries (this repo)
-
-| Library | npm | Description |
-|---------|-----|-------------|
-| [compact-js](./compact-js/compact-js) | [@midnight-ntwrk/compact-js](https://www.npmjs.com/package/@midnight-ntwrk/compact-js) | TypeScript execution environment for Compact smart contracts compiled with `compactc` |
-| [compact-js-node](./compact-js/compact-js-node) | [@midnight-ntwrk/compact-js-node](https://www.npmjs.com/package/@midnight-ntwrk/compact-js-node) | Node.js platform layer — ZK file configuration, clustering, workflows, RPC |
-| [compact-js-command](./compact-js/compact-js-command) | [@midnight-ntwrk/compact-js-command](https://www.npmjs.com/package/@midnight-ntwrk/compact-js-command) | CLI tooling for compiled Compact contracts (deploy, circuit management) |
-| [platform-js](./platform-js/platform-js) | [@midnight-ntwrk/platform-js](https://www.npmjs.com/package/@midnight-ntwrk/platform-js) | Core abstractions, utilities, and types for building Midnight services and libraries |
-
-The repo is organized into two workspaces — `compact-js/` and `platform-js/` — managed with Yarn 4 workspaces and Turborepo.
-
-## Development
-
-Prerequisites: Node.js >= 22, Yarn 4.
+### Step 2: Update versions on main
+Update the version in all four `package.json` files:
+- Root: `/package.json`
+- `compact-js/package.json`
+- `compact-js-node/package.json`
+- `compact-js-command/package.json`
 
 ```bash
-# compact-js workspace
-cd compact-js
-yarn install
-yarn build
-yarn test
-
-# platform-js workspace
-cd platform-js
-yarn install
-yarn build
-yarn test
+git checkout main
+git pull origin main
+# Edit all package.json files with new version
+git add -A
+git commit -m "chore: bump to 2.5.1"
+git push origin main
 ```
 
-## Contributing
+### Step 3: Create and push the release tag
+```bash
+git tag -a cjs-2.5.1 -m "Release 2.5.1"
+git push origin cjs-2.5.1
+```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full contribution guide. This project uses [Conventional Commits](https://www.conventionalcommits.org/) with scopes `compact-js` and `platform-js`.
+That's it! The GitHub Action will automatically:
+- Build all packages
+- Run tests
+- Publish to npm
+- Create a GitHub release
 
-## License
-
-[Apache-2.0](./LICENSE)
+### Notes
+- **Tag format**: `cjs-X.Y.Z` (e.g., `cjs-2.5.1`)
+- **All three packages release together** at the same version
+- Releases happen directly from `main`—no release branches needed
