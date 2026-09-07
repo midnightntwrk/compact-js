@@ -71,13 +71,17 @@ jobs:
       - name: Cache Turbo and Yarn dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
+          # node_modules is deliberately not cached. Its layout depends on where the
+          # workspace root sits, so a restore-keys fallback can resurrect a tree from a
+          # previous repo layout and shadow the real one. Caching Yarn's own cache gives
+          # the same speed-up while leaving `yarn install` authoritative.
           path: |
-            **/node_modules
-            ~/.yarn
+            .yarn/cache
             .turbo
-          key: turbo-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/turbo.json') }}
+          key: turbo-v2-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('turbo.json') }}
           restore-keys: |
-            turbo-${{ runner.os }}-
+            turbo-v2-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-
+            turbo-v2-${{ runner.os }}-
 
       - name: Install dependencies
         run: |
