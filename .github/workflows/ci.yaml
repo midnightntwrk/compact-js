@@ -25,38 +25,11 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
-    outputs:
-      build_c_js: ${{ steps.build-targets.outputs.compact-js }}
-      build_p_js: ${{ steps.build-targets.outputs.platform-js }}
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Determine Build Targets
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
-        id: build-targets
-        with:
-          filters: |
-            compact-js:
-              - 'compact-js/**'
-            platform-js:
-              - 'platform-js/**'
-
-  ci-platformjs:
-    needs: ci
-    name: Build, Lint and Test Platform.js
+    name: Build, Lint and Test
+    uses: ./.github/workflows/ci-base.yaml
     with:
-      should_run: ${{ needs.ci.outputs.build_p_js }}
-    uses: ./.github/workflows/ci-platform-js.yaml
-    secrets: inherit
-
-  ci-compactjs:
-    needs: ci
-    name: Build, Lint and Test Compact.js
-    with:
-      should_run: ${{ needs.ci.outputs.build_c_js }}
-    uses: ./.github/workflows/ci-compact-js.yaml
+      coverage-files: |
+        compact-js, ./compact-js/coverage/coverage-summary.json
+        compact-js-command, ./compact-js-command/coverage/coverage-summary.json
+        compact-js-node, ./compact-js-node/coverage/coverage-summary.json
     secrets: inherit

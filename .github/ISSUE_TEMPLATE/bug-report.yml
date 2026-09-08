@@ -1,10 +1,10 @@
 name: Bug report
-description: Report a bug or incorrect behaviour in midnight-sdk
+description: Report a bug or incorrect behaviour in compact-js
 title: "[Bug] "
 type: Bug
 labels:
   - status:untriaged
-  - component:midnight-sdk
+  - component:compact-js
 body:
   - type: dropdown
     id: components
@@ -13,7 +13,6 @@ body:
       description: Which components does this affect?
       multiple: true
       options:
-        - component:midnight-sdk
         - component:compact-js
     validations:
       required: true
