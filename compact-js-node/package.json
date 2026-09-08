@@ -36,7 +36,7 @@
     "build-esm": "tsc -b tsconfig.build.json",
     "clean": "shx rm -rf ./build ./dist ./.tsbuildinfo ./reports ./coverage",
     "test": "vitest run --passWithNoTests",
-    "package": "shx rm -rf ./dist/src && node ../scripts/resolve-workspace-protocol.mjs ./dist/package.json && (cd ./dist; npm pack)"
+    "package": "shx rm -rf ./dist/src && node ../scripts/finalize-dist-manifest.mjs ./dist/package.json && (cd ./dist; npm pack)"
   },
   "files": [
     "dist/"
