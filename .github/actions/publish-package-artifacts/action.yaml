@@ -1,5 +1,5 @@
 name: 'Publish Package Artifacts'
-description: 'Publishes packages to a package registry'
+description: 'Publishes packages to npmjs using Trusted Publishing (OIDC)'
 
 inputs:
   working-directory:
@@ -8,9 +8,11 @@ inputs:
   package-archive-name:
     type: string
     required: true
-  auth-token:
-    type: string
-    required: true
+
+outputs:
+  published:
+    description: 'Newline-separated <name>@<version> for each package published by this run'
+    value: ${{ steps.publish.outputs.published }}
 
 runs:
   using: 'composite'
@@ -26,19 +28,19 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: find "./Packages ${{ inputs.package-archive-name }}" -type f -name '*.zip' -execdir unzip '{}' ';'
 
-    - name: Determine Tag
-      id: vars
+    # No token is passed: npmjs Trusted Publishing exchanges the job's OIDC
+    # token for a short-lived credential, and NODE_AUTH_TOKEN would shadow it.
+    # Versions already on the registry are skipped, so this is re-runnable.
+    - name: Publish packages
+      id: publish
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        tag=$(jq -r '.v_info.tag' version.json)
-
-        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-
-    - name: Publish packages
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: find "./Packages ${{ inputs.package-archive-name }}" -type f -name '*.tgz' -execdir npm publish '{}' --tag ${{ steps.vars.outputs.tag }} --access public ';'
-      env:
-        GITHUB_TOKEN: ${{ inputs.auth-token }}
-        NODE_AUTH_TOKEN: ${{ inputs.auth-token }}
+        set -euo pipefail
+        log=$(mktemp)
+        node scripts/release.mjs --from "./Packages ${{ inputs.package-archive-name }}" | tee "$log"
+        {
+          echo 'published<<PUBLISHED_EOF'
+          sed -n 's/^New tag: //p' "$log"
+          echo 'PUBLISHED_EOF'
+        } >> "$GITHUB_OUTPUT"

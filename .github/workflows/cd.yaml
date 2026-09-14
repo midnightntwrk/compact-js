@@ -1,38 +1,37 @@
 name: CD
-env:
-  MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
 on:
+  push:
+    branches:
+      - 'main'
   workflow_dispatch:
 
 permissions:
   contents: write
   issues: read
-  id-token: write
-  packages: write
+  id-token: write # npmjs Trusted Publishing exchanges this for a publish credential.
+  packages: read
   checks: write
   pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a run that may be mid-publish.
+  cancel-in-progress: false
 
 jobs:
-  ci:
-    name: Build, Lint and Test
-    uses: ./.github/workflows/ci-base.yaml
-    with:
-      create-package-artifacts: true
-    secrets: inherit
-
-  publish:
-    needs: ci
-    name: Publish Packages
+  # Pending changesets produce a "Version Packages" PR rather than a release.
+  # Merging that PR lands the new versions on main, and the next run finds no
+  # changesets and continues to the publish path below.
+  version:
+    name: Version Packages
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.extract_version.outputs.version }}
+      has-changesets: ${{ steps.changesets.outputs.has-changesets }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # ratchet:actions/setup-node@v4
@@ -44,49 +43,135 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+      - name: Enable corepack
+        run: corepack enable
+
+      # `changeset:version` refreshes the lockfile, which resolves upstream
+      # @midnight-ntwrk dependencies from GitHub Packages.
+      - name: Configure yarn
+        run: |
+          yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}"
+          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}"
+          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Create or update the Version Packages PR
+        id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # ratchet:changesets/action@v2.1.2
+        with:
+          version-script: yarn changeset:version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Decided before the environment gate so routine pushes to main never queue a
+  # deployment approval. Needs no build: versions come from the manifests.
+  check:
+    name: Check for Pending Releases
+    needs: version
+    if: needs.version.outputs.has-changesets == 'false'
+    runs-on: ubuntu-latest
+    outputs:
+      pending: ${{ steps.check.outputs.pending }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # ratchet:actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Determine whether anything is unpublished
+        id: check
+        run: |
+          set -euo pipefail
+          pending=$(node scripts/release.mjs --check)
+          if [ -n "$pending" ]; then
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+            echo "To publish:"
+            echo "$pending"
+          else
+            echo "pending=false" >> "$GITHUB_OUTPUT"
+            echo "Every workspace version is already on the registry; nothing to publish."
+          fi
+
+  ci:
+    name: Build, Lint and Test
+    needs: check
+    if: needs.check.outputs.pending == 'true'
+    uses: ./.github/workflows/ci-base.yaml
+    with:
+      create-package-artifacts: true
+    secrets: inherit
+
+  publish:
+    needs: ci
+    name: Publish Packages
+    runs-on: ubuntu-latest
+    # The Trusted Publisher config on each npmjs package names this environment;
+    # the OIDC claim will not match without it.
+    environment: npm-publish-stable
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
+
+      # `always-auth` and NODE_AUTH_TOKEN are deliberately absent: together they
+      # write an `_authToken` line into ~/.npmrc that suppresses the OIDC exchange.
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # ratchet:actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org
+          scope: '@midnight-ntwrk'
+          node-version-file: .nvmrc
+
+      - name: Verify npm supports Trusted Publishing
+        run: |
+          required=11.5.1
+          actual=$(npm --version)
+          if [ "$(printf '%s\n%s\n' "$required" "$actual" | sort -V | head -n1)" != "$required" ]; then
+            echo "npm $actual is older than $required; OIDC would be skipped silently." >&2
+            exit 1
+          fi
+          echo "npm $actual satisfies >= $required"
+
       - name: Publish Package Artifacts
+        id: publish
         uses: ./.github/actions/publish-package-artifacts
         with:
           package-archive-name: 'compact-js'
           working-directory: .
-          auth-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
-      - name: Extract version for release
-        id: extract_version
-        run: |
-          version=$(jq -r '.version' ./compact-js/package.json)
-          base_version=$(echo "$version" | sed 's/-alpha.*//')
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "base_version=${base_version}" >> "$GITHUB_OUTPUT"
-
-  release:
-    needs: publish
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
-
-      - name: Create git tag
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          base_version=$(echo "${{ needs.publish.outputs.version }}" | sed 's/-alpha.*//')
-          git tag -a "compact-js-v${base_version}" -m "Release compact-js-v${base_version}"
-          git push origin "compact-js-v${base_version}"
-
-      - name: Extract changelog
-        id: changelog
-        run: |
-          # Extract the latest release notes from CHANGELOG.md (between first and second ## heading)
-          changelog=$(sed -n '/^## \[/,/^## \[/{/^## \[/!p;}' ./CHANGELOG.md | head -n -1 | sed '/^$/d' | sed ':a;N;$!ba;s/\n/\\n/g')
-          echo "body=$changelog" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release
+      # Tags only what this run actually published, so a re-run after a partial
+      # failure cannot retag an earlier release.
+      - name: Tag and create GitHub releases
+        if: steps.publish.outputs.published != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          base_version=$(echo "${{ needs.publish.outputs.version }}" | sed 's/-alpha.*//')
-          gh release create "compact-js-v${base_version}" \
-            --title "compact-js v${base_version}" \
-            --notes "${{ steps.changelog.outputs.body }}" \
-            --repo "${{ github.repository }}"
+          set -euo pipefail
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          while IFS= read -r ref; do
+            [ -n "$ref" ] || continue
+            name="${ref%@*}"
+            version="${ref##*@}"
+            dir="${name##*/}"
+
+            if git rev-parse -q --verify "refs/tags/$ref" >/dev/null; then
+              echo "Tag $ref already exists; skipping."
+              continue
+            fi
+            git tag -a "$ref" -m "Release $ref"
+            git push origin "$ref"
+
+            # Changesets writes the newest entry first, under a `## <version>`
+            # heading; take everything up to the previous release's heading.
+            notes="Release $ref"
+            if [ -f "$dir/CHANGELOG.md" ]; then
+              extracted=$(awk '/^## /{n++; if (n==2) exit; if (n==1) next} n==1' "$dir/CHANGELOG.md")
+              [ -n "$(printf '%s' "$extracted" | tr -d '[:space:]')" ] && notes="$extracted"
+            fi
+
+            set -- --title "$ref" --notes "$notes" --repo "${{ github.repository }}"
+            case "$version" in *-*) set -- "$@" --prerelease;; esac
+            gh release create "$ref" "$@"
+          done <<< "${{ steps.publish.outputs.published }}"
