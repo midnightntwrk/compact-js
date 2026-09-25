@@ -41,6 +41,9 @@ const CONTRACT_EVENT_EXPORTS = [
   'validateEvents'
 ];
 
+const NETWORK_ID = 'undeployed';
+const TRANSACTION_TTL = new Date('2030-01-01T00:00:00Z');
+
 describe('Ledger era seam', () => {
   it('describes the ledger 9 era', () => {
     expect(Ledger.era.ledger).toBe(9);
@@ -169,22 +172,54 @@ describe('the ledger 8 entry', () => {
 });
 
 describe('transaction composition on the Ledger facade', () => {
-  // Object identity, not presence. `ContractCall`'s only use is `action instanceof ContractCall`,
-  // so a same-shaped re-export of a *second* copy of the ledger would satisfy a key check and
-  // then answer `false` for every action — the failure the facade exists to prevent
-  // (midnight-sdk#401).
-  it('binds ledger 9\'s own transaction classes on the `/v9/effect` entry', () => {
-    expect(v9EffectEntry.Ledger.Transaction).toBe(LedgerV9.Transaction);
-    expect(v9EffectEntry.Ledger.ZswapOffer).toBe(LedgerV9.ZswapOffer);
-    expect(v9EffectEntry.Ledger.ContractCall).toBe(LedgerV9.ContractCall);
-    expect(v9EffectEntry.Ledger.CostModel).toBe(LedgerV9.CostModel);
+  // Builds a transaction the way a composing framework does — every name off one era's facade,
+  // nothing imported from a ledger package — and takes it across the WASM boundary twice.
+  const composeAndRoundTrip = (eraLedger: typeof v9EffectEntry.Ledger | typeof v8EffectEntry.Ledger) => {
+    const intent = eraLedger.Intent.new(TRANSACTION_TTL);
+    const serialized = eraLedger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
+    return { serialized, restored: eraLedger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
+  };
+
+  it.each([
+    ['/v9/effect', v9EffectEntry.Ledger],
+    ['/v8/effect', v8EffectEntry.Ledger]
+  ])('composes and round-trips an unproven transaction from %s alone', (_entry, eraLedger) => {
+    const { serialized, restored } = composeAndRoundTrip(eraLedger);
+    expect(restored.serialize()).toEqual(serialized);
+    expect(eraLedger.CostModel.initialCostModel()).toBeDefined();
   });
 
-  it('binds ledger 8\'s own transaction classes on the `/v8/effect` entry', () => {
-    expect(v8EffectEntry.Ledger.Transaction).toBe(LedgerV8.Transaction);
-    expect(v8EffectEntry.Ledger.ZswapOffer).toBe(LedgerV8.ZswapOffer);
-    expect(v8EffectEntry.Ledger.ContractCall).toBe(LedgerV8.ContractCall);
-    expect(v8EffectEntry.Ledger.CostModel).toBe(LedgerV8.CostModel);
+  it('drops an intent built on the other era *silently*, which is why both must come from one facade', () => {
+    // The reason #401 is a correctness issue and not a convenience one. A consumer who reaches
+    // around the seam for `Transaction` gets it from a second copy of the ledger, and the mismatch
+    // does not throw: the foreign intent is discarded and the result is byte-identical to a
+    // transaction built with no intent at all. A contract call would leave the machine unsent with
+    // nothing to report it.
+    const foreign = LedgerV9.Transaction.fromParts(
+      NETWORK_ID,
+      undefined,
+      undefined,
+      LedgerV8.Intent.new(TRANSACTION_TTL) as never
+    ).serialize();
+    const empty = LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, undefined).serialize();
+    const own = composeAndRoundTrip(v9EffectEntry.Ledger).serialized;
+
+    expect(foreign).toEqual(empty);
+    expect(own).not.toEqual(empty);
+  });
+
+  // `ZswapOffer` and `ContractCall` cannot be exercised the same way: an offer needs real zswap
+  // input material, and `ContractCall` has a private constructor and is only ever reached off a
+  // *proven* transaction's actions. So they are pinned by object identity — which is the assertion
+  // that matters for `ContractCall` anyway, whose only use is `action instanceof ContractCall`: a
+  // same-shaped class from a second ledger copy would pass a presence check and then answer
+  // `false` for every action.
+  it.each([
+    ['/v9/effect', v9EffectEntry.Ledger, LedgerV9],
+    ['/v8/effect', v8EffectEntry.Ledger, LedgerV8]
+  ])('binds %s to its own era\'s zswap offer and contract call classes', (_entry, eraLedger, ledgerPackage) => {
+    expect(eraLedger.ZswapOffer).toBe(ledgerPackage.ZswapOffer);
+    expect(eraLedger.ContractCall).toBe(ledgerPackage.ContractCall);
   });
 
   it('takes the cost model from each era\'s ledger, not from its paired runtime', () => {

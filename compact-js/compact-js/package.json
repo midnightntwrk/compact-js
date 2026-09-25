@@ -21,7 +21,7 @@
     "@midnight-ntwrk/compact-runtime": "0.19.0-rc.0",
     "@midnight-ntwrk/platform-js": "^3.0.0",
     "@midnightntwrk/ledger-v8": "8.1.2",
-    "@midnightntwrk/ledger-v9": "^1.0.0-rc.4",
+    "@midnightntwrk/ledger-v9": "^1.0.0-rc.5",
     "@noble/hashes": "^2.4.0",
     "compact-runtime-ledger8": "npm:@midnight-ntwrk/compact-runtime@0.16.0",
     "effect": "^3.22.1",
