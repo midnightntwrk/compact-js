@@ -46,15 +46,19 @@ import {
 
 import { type Era } from '../era.js';
 
+// The transaction-composition names, identical to the v9 twin — see that file for why `CostModel`
+// has to come from the ledger rather than the paired runtime (midnight-sdk#401).
 export {
   ChargedState,
   communicationCommitmentRandomness,
+  ContractCall,
   ContractCallPrototype,
   ContractDeploy,
   type ContractOperation,
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
+  CostModel,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
@@ -66,9 +70,14 @@ export {
   type SigningKey,
   type SingleUpdate,
   StateValue,
+  Transaction,
   type Transcript,
+  type UnprovenIntent,
+  type UnprovenOffer,
+  type UnprovenTransaction,
   VerifierKeyInsert,
-  VerifierKeyRemove
+  VerifierKeyRemove,
+  ZswapOffer
 } from '@midnightntwrk/ledger-v8';
 
 /**

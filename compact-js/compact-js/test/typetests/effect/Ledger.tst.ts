@@ -14,13 +14,22 @@
  */
 
 import { type CompactRuntime, type ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
+import type * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import type * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
 import type { SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
+import type {
+  UnprovenIntent as LedgerV8UnprovenIntent,
+  UnprovenOffer as LedgerV8UnprovenOffer,
+  UnprovenTransaction as LedgerV8UnprovenTransaction
+} from '@midnightntwrk/ledger-v8';
 import type {
   ContractOperation as LedgerContractOperation,
   SigningKey as LedgerSigningKey,
   SingleUpdate as LedgerSingleUpdate,
-  Transcript as LedgerTranscript
+  Transcript as LedgerTranscript,
+  UnprovenIntent as LedgerV9UnprovenIntent,
+  UnprovenOffer as LedgerV9UnprovenOffer,
+  UnprovenTransaction as LedgerV9UnprovenTransaction
 } from '@midnightntwrk/ledger-v9';
 import type { Effect } from 'effect';
 import { describe, expect, it } from 'tstyche';
@@ -189,5 +198,20 @@ describe('era-pinned entry type surface', () => {
     // resolves a different era's types.
     expect<typeof v9EffectEntry.Ledger.era.ledger>().type.toBe<9>();
     expect<v9EffectEntry.Ledger.ContractOperation>().type.toBe<LedgerContractOperation>();
+  });
+
+  // The three aliases a consumer needs to *name* what the transaction constructors take and
+  // return. Without them `Transaction` is exported but its parts are unspellable, so the consumer
+  // imports the era package around the seam anyway — which is the whole of midnight-sdk#401.
+  it('`/v9/effect` names ledger 9\'s unproven transaction parts', () => {
+    expect<v9EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV9UnprovenTransaction>();
+    expect<v9EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV9UnprovenOffer>();
+    expect<v9EffectEntry.Ledger.UnprovenIntent>().type.toBe<LedgerV9UnprovenIntent>();
+  });
+
+  it('`/v8/effect` names ledger 8\'s unproven transaction parts', () => {
+    expect<v8EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV8UnprovenTransaction>();
+    expect<v8EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV8UnprovenOffer>();
+    expect<v8EffectEntry.Ledger.UnprovenIntent>().type.toBe<LedgerV8UnprovenIntent>();
   });
 });

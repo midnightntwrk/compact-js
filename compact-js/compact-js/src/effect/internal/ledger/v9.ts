@@ -32,9 +32,17 @@ import {
 
 import { type Era } from '../era.js';
 
+// `ContractCall`, `CostModel`, `Transaction` and `ZswapOffer`, plus the `Unproven*` aliases naming
+// what they take and return, let a consumer compose a transaction without importing the era
+// package around the seam (midnight-sdk#401). compact-js itself calls none of them.
+//
+// `CostModel` must be the ledger's, not onchain-runtime's: the two declarations are identical and
+// neither is branded, so TypeScript accepts the runtime's where `Transaction.prove` wants this one
+// and the rejection lands inside WASM. Do not move it to the runtime seam.
 export {
   ChargedState,
   communicationCommitmentRandomness,
+  ContractCall,
   ContractCallPrototype,
   ContractDeploy,
   ContractMaintenanceAuthority,
@@ -42,6 +50,7 @@ export {
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
+  CostModel,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
@@ -53,9 +62,14 @@ export {
   type SigningKey,
   type SingleUpdate,
   StateValue,
+  Transaction,
   type Transcript,
+  type UnprovenIntent,
+  type UnprovenOffer,
+  type UnprovenTransaction,
   VerifierKeyInsert,
-  VerifierKeyRemove
+  VerifierKeyRemove,
+  ZswapOffer
 } from '@midnightntwrk/ledger-v9';
 
 /**

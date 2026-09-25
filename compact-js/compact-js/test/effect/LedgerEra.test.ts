@@ -19,7 +19,11 @@ import { Ledger } from '@midnight-ntwrk/compact-js/effect';
 import * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import * as v9Entry from '@midnight-ntwrk/compact-js/v9';
 import * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
+import { CostModel as RuntimeV0_19CostModel } from '@midnight-ntwrk/compact-runtime';
+import * as LedgerV8 from '@midnightntwrk/ledger-v8';
+import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { ContractState, LedgerParameters } from '@midnightntwrk/ledger-v9';
+import { CostModel as RuntimeV0_16CostModel } from 'compact-runtime-ledger8';
 import { describe, expect, it } from 'vitest';
 
 import * as eraFreeSurface from '../../src/effect/internal/eraFreeSurface.js';
@@ -161,6 +165,35 @@ describe('the ledger 8 entry', () => {
     // application itself, so all three `make`s are distinct objects.
     const makes = [effectEntry, v9EffectEntry, v8EffectEntry].map((entry) => entry.ContractExecutable.make);
     expect(new Set(makes).size).toBe(3);
+  });
+});
+
+describe('transaction composition on the Ledger facade', () => {
+  // Object identity, not presence. `ContractCall`'s only use is `action instanceof ContractCall`,
+  // so a same-shaped re-export of a *second* copy of the ledger would satisfy a key check and
+  // then answer `false` for every action — the failure the facade exists to prevent
+  // (midnight-sdk#401).
+  it('binds ledger 9\'s own transaction classes on the `/v9/effect` entry', () => {
+    expect(v9EffectEntry.Ledger.Transaction).toBe(LedgerV9.Transaction);
+    expect(v9EffectEntry.Ledger.ZswapOffer).toBe(LedgerV9.ZswapOffer);
+    expect(v9EffectEntry.Ledger.ContractCall).toBe(LedgerV9.ContractCall);
+    expect(v9EffectEntry.Ledger.CostModel).toBe(LedgerV9.CostModel);
+  });
+
+  it('binds ledger 8\'s own transaction classes on the `/v8/effect` entry', () => {
+    expect(v8EffectEntry.Ledger.Transaction).toBe(LedgerV8.Transaction);
+    expect(v8EffectEntry.Ledger.ZswapOffer).toBe(LedgerV8.ZswapOffer);
+    expect(v8EffectEntry.Ledger.ContractCall).toBe(LedgerV8.ContractCall);
+    expect(v8EffectEntry.Ledger.CostModel).toBe(LedgerV8.CostModel);
+  });
+
+  it('takes the cost model from each era\'s ledger, not from its paired runtime', () => {
+    // Both packages export a `CostModel`, declared identically and neither branded, so TypeScript
+    // accepts the runtime's where `Transaction.prove` wants the ledger's and the rejection lands
+    // inside WASM. Compared against the runtime classes themselves — the facade does not re-export
+    // them, so comparing against `CompactRuntime` would pass on `undefined` and prove nothing.
+    expect(v9EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_19CostModel);
+    expect(v8EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_16CostModel);
   });
 });
 
