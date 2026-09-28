@@ -1,7 +1,7 @@
 {
   "v_info": {
     "version": "3.0.0",
-    "preRelease": "-rc.1",
+    "preRelease": "-rc.2",
     "tag": "rc",
     "releaseBranches": [
       "main",
