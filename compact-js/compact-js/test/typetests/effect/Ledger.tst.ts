@@ -18,14 +18,28 @@ import type * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import type * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
 import type { SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
 import type {
+  ContractAction as LedgerV8ContractAction,
+  PreBinding as LedgerV8PreBinding,
+  PreProof as LedgerV8PreProof,
+  Proof as LedgerV8Proof,
+  ProvingProvider as LedgerV8ProvingProvider,
+  SignatureEnabled as LedgerV8SignatureEnabled,
+  Transaction as LedgerV8Transaction,
   UnprovenIntent as LedgerV8UnprovenIntent,
   UnprovenOffer as LedgerV8UnprovenOffer,
   UnprovenTransaction as LedgerV8UnprovenTransaction
 } from '@midnightntwrk/ledger-v8';
 import type {
+  ContractAction as LedgerV9ContractAction,
   ContractOperation as LedgerContractOperation,
+  PreBinding as LedgerV9PreBinding,
+  PreProof as LedgerV9PreProof,
+  Proof as LedgerV9Proof,
+  ProvingProvider as LedgerV9ProvingProvider,
+  SignatureEnabled as LedgerV9SignatureEnabled,
   SigningKey as LedgerSigningKey,
   SingleUpdate as LedgerSingleUpdate,
+  Transaction as LedgerV9Transaction,
   Transcript as LedgerTranscript,
   UnprovenIntent as LedgerV9UnprovenIntent,
   UnprovenOffer as LedgerV9UnprovenOffer,
@@ -200,9 +214,8 @@ describe('era-pinned entry type surface', () => {
     expect<v9EffectEntry.Ledger.ContractOperation>().type.toBe<LedgerContractOperation>();
   });
 
-  // The three aliases a consumer needs to *name* what the transaction constructors take and
-  // return. Without them `Transaction` is exported but its parts are unspellable, so the consumer
-  // imports the era package around the seam anyway — which is the whole of midnight-sdk#401.
+  // Without these a consumer can call the transaction constructors but cannot name what they take
+  // or return, so it imports the era package around the seam anyway — which is midnight-sdk#401.
   it('`/v9/effect` names ledger 9\'s unproven transaction parts', () => {
     expect<v9EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV9UnprovenTransaction>();
     expect<v9EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV9UnprovenOffer>();
@@ -213,5 +226,34 @@ describe('era-pinned entry type surface', () => {
     expect<v8EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV8UnprovenTransaction>();
     expect<v8EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV8UnprovenOffer>();
     expect<v8EffectEntry.Ledger.UnprovenIntent>().type.toBe<LedgerV8UnprovenIntent>();
+  });
+
+  // `Transaction.deserialize` already returns `Transaction<Signaturish, Proofish, Bindingish>`, so
+  // those leak into the public surface named or not; exporting them makes the result usable.
+  it('`/v9/effect` names what `prove` takes and returns', () => {
+    expect<v9EffectEntry.Ledger.ProvingProvider>().type.toBe<LedgerV9ProvingProvider>();
+    expect<Awaited<ReturnType<v9EffectEntry.Ledger.UnprovenTransaction['prove']>>>().type.toBe<
+      LedgerV9Transaction<LedgerV9SignatureEnabled, LedgerV9Proof, LedgerV9PreBinding>
+    >();
+    expect<v9EffectEntry.Ledger.ContractAction<v9EffectEntry.Ledger.PreProof>>().type.toBe<
+      LedgerV9ContractAction<LedgerV9PreProof>
+    >();
+  });
+
+  it('`/v8/effect` names what `prove` takes and returns', () => {
+    expect<v8EffectEntry.Ledger.ProvingProvider>().type.toBe<LedgerV8ProvingProvider>();
+    expect<Awaited<ReturnType<v8EffectEntry.Ledger.UnprovenTransaction['prove']>>>().type.toBe<
+      LedgerV8Transaction<LedgerV8SignatureEnabled, LedgerV8Proof, LedgerV8PreBinding>
+    >();
+    expect<v8EffectEntry.Ledger.ContractAction<v8EffectEntry.Ledger.PreProof>>().type.toBe<
+      LedgerV8ContractAction<LedgerV8PreProof>
+    >();
+  });
+
+  // Upstream gives each marker a private `type_`, so cross-era mixing is a compile error and the
+  // runtime silent-drop in `LedgerDualInstantiation.test.ts` is reachable only by casting.
+  it('keeps the two eras\' proof markers nominally distinct', () => {
+    expect<LedgerV8Proof>().type.not.toBeAssignableTo<LedgerV9Proof>();
+    expect<LedgerV8UnprovenIntent>().type.not.toBeAssignableTo<LedgerV9UnprovenIntent>();
   });
 });

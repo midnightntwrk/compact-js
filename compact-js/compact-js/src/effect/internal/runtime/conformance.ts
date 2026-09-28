@@ -75,3 +75,9 @@ type _V0_19LogEventDecodable = Assert<Extends<V0_19.LogEvent, ContractLogEvent>>
 // thing that turns that silent collapse into a build failure.
 type _V0_16QueryContextHasPartitionInputs = Assert<Extends<V0_16.QueryContext, PartitionInputs>>;
 type _V0_19QueryContextHasPartitionInputs = Assert<Extends<V0_19.QueryContext, PartitionInputs>>;
+
+// Asserted FALSE deliberately: the ledger seam owns `CostModel`. Both packages declare one, the
+// declarations are identical and neither is branded, so listing it here too would put two
+// interchangeable `CostModel`s on one entry. Do not "fix" this to `true`.
+type _V0_16HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_16 ? true : false, false>>;
+type _V0_19HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_19 ? true : false, false>>;

@@ -13,89 +13,104 @@
  * limitations under the License.
  */
 
+// Pins *upstream* behaviour, not compact-js's: wasm-bindgen guards most entry points with
+// `_assertClass`, but a handful take `JsValue` and discard the failed downcast, so a foreign handle
+// reads back as absent. The condition is dual instantiation, not era mismatch — two copies of the
+// *same* version behave identically. When an `UNGUARDED` case starts throwing, move it to `GUARDED`.
+
 import * as LedgerV8 from '@midnightntwrk/ledger-v8';
 import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { describe, expect, it } from 'vitest';
 
-/**
- * **Where a ledger handle from a second instantiation is rejected, and where it is swallowed.**
- *
- * @remarks
- * This pins *upstream* behaviour, not compact-js's. It exists because the ledger's wasm-bindgen
- * surface is inconsistent: most entry points assert the argument's class and throw on a handle
- * from another instantiation, but a handful take `JsValue`, downcast inside Rust, and discard the
- * error — so a foreign handle is silently treated as absent. Nothing in the type system marks the
- * difference, because the `.d.ts` types both kinds concretely.
- *
- * The condition is **dual instantiation, not era mismatch**. Two physical copies of the *same*
- * ledger version behave identically; the two eras are used here only because both are already
- * installed, which makes a second instantiation free to obtain.
- *
- * compact-js is not exposed: it calls only the guarded builders (`addCall`, `addDeploy`,
- * `addMaintenanceUpdate`), and every handle a consumer passes *into* compact-js reaches a checked
- * parameter. The exposure is on consumers composing transactions from re-exported classes, which
- * is what widening the facade (midnight-sdk#401) removes the reason to do.
- *
- * **When the second suite goes red, upstream has fixed it.** That is the good outcome: move the
- * entry point into `GUARDED` and drop it from `UNGUARDED`.
- */
 const TTL = new Date('2030-01-01T00:00:00Z');
 const NETWORK_ID = 'undeployed';
 
 const foreignIntent = () => LedgerV8.Intent.new(TTL) as never;
 const foreignOffer = () => LedgerV8.UnshieldedOffer.new([], [], []) as never;
+const foreignDustActions = () => new LedgerV8.DustActions('signature', 'pre-proof', TTL) as never;
 const nativeIntent = () => LedgerV9.Intent.new(TTL);
 const nativeOffer = () => LedgerV9.UnshieldedOffer.new([], [], []);
-const transaction = () => LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, nativeIntent());
+const nativeDustActions = () => new LedgerV9.DustActions('signature', 'pre-proof', TTL);
 
 describe('a ledger handle from a second instantiation', () => {
-  // The majority case, and the one the rest of compact-js relies on: wasm-bindgen emits
-  // `_assertClass`, so the mismatch is loud. Listed so that losing a guard upstream is a failure
-  // here rather than a silent widening of the hazard below.
-  const GUARDED: readonly [string, () => unknown][] = [
-    ['Intent.addDeploy', () => nativeIntent().addDeploy(new LedgerV8.ContractDeploy(
-      LedgerV8.ContractState.deserialize(new LedgerV9.ContractState().serialize()) as never
-    ) as never)],
-    ['new ChargedState', () => new LedgerV9.ChargedState(LedgerV8.StateValue.newNull() as never)],
-    ['new ContractDeploy', () => new LedgerV9.ContractDeploy(LedgerV8.ContractState.deserialize(
-      new LedgerV8.ContractState().serialize()
-    ) as never)],
-    ['partitionTranscripts', () => LedgerV9.partitionTranscripts(
-      [new LedgerV8.PreTranscript(new LedgerV8.QueryContext(
-        new LedgerV8.ChargedState(LedgerV8.StateValue.newNull()), LedgerV8.sampleContractAddress()
-      ), []) as never],
-      LedgerV9.LedgerParameters.initialParameters()
-    )]
+  // Matched on the guard's own message, so a case that stops reaching the call it names fails here
+  // rather than passing on an unrelated throw from its own setup.
+  const GUARDED: readonly [string, () => unknown, RegExp][] = [
+    [
+      'Intent.addDeploy',
+      () => nativeIntent().addDeploy(new LedgerV8.ContractDeploy(new LedgerV8.ContractState()) as never),
+      /expected instance of ContractDeploy/
+    ],
+    ['new ChargedState', () => new LedgerV9.ChargedState(LedgerV8.StateValue.newNull() as never), /instance of StateValue/],
+    ['new ContractDeploy', () => new LedgerV9.ContractDeploy(new LedgerV8.ContractState() as never), /instance of ContractState/],
+    [
+      'partitionTranscripts',
+      () =>
+        LedgerV9.partitionTranscripts(
+          [
+            new LedgerV8.PreTranscript(
+              new LedgerV8.QueryContext(
+                new LedgerV8.ChargedState(LedgerV8.StateValue.newNull()),
+                LedgerV8.sampleContractAddress()
+              ),
+              []
+            ) as never
+          ],
+          LedgerV9.LedgerParameters.initialParameters()
+        ),
+      /Expected PreTranscript/
+    ]
   ];
 
-  it.each(GUARDED)('is rejected by %s', (_name, call) => {
-    expect(call).toThrow();
+  it.each(GUARDED)('is rejected by %s', (_name, call, message) => {
+    expect(call).toThrow(message);
   });
 
-  // Each case sets a value two ways — once with a native handle, once with a foreign one — and
-  // reads it back. The native read proves the setter works at all, so a case cannot pass vacuously
-  // on a member that is simply always absent.
-  //
-  // `Intent.dustActions` and `Transaction.guaranteedOffer` share the codegen pattern but are absent
-  // here: neither `DustActions` (five arguments) nor a `ZswapOffer` (real zswap input material) has
-  // a cheap construction, so neither can be given the native control that keeps a case honest.
+  // Each case sets a value twice — native, then foreign — and reads it back. The native read proves
+  // the setter works at all, so a case cannot pass vacuously on a member that is simply absent.
   const UNGUARDED: readonly [string, (which: 'native' | 'foreign') => unknown][] = [
-    ['Transaction.fromParts', (w) =>
-      LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined,
-        w === 'native' ? nativeIntent() : foreignIntent()).intents],
-    ['Transaction.fromPartsRandomized', (w) =>
-      LedgerV9.Transaction.fromPartsRandomized(NETWORK_ID, undefined, undefined,
-        w === 'native' ? nativeIntent() : foreignIntent()).intents],
-    ['Intent.guaranteedUnshieldedOffer', (w) => {
-      const intent = nativeIntent();
-      intent.guaranteedUnshieldedOffer = w === 'native' ? nativeOffer() : foreignOffer();
-      return intent.guaranteedUnshieldedOffer;
-    }],
-    ['Intent.fallibleUnshieldedOffer', (w) => {
-      const intent = nativeIntent();
-      intent.fallibleUnshieldedOffer = w === 'native' ? nativeOffer() : foreignOffer();
-      return intent.fallibleUnshieldedOffer;
-    }]
+    [
+      'Transaction.fromParts',
+      (w) =>
+        LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, w === 'native' ? nativeIntent() : foreignIntent())
+          .intents
+    ],
+    [
+      'Transaction.fromPartsRandomized',
+      (w) =>
+        LedgerV9.Transaction.fromPartsRandomized(
+          NETWORK_ID,
+          undefined,
+          undefined,
+          w === 'native' ? nativeIntent() : foreignIntent()
+        ).intents
+    ],
+    [
+      'Intent.guaranteedUnshieldedOffer',
+      (w) => {
+        const intent = nativeIntent();
+        intent.guaranteedUnshieldedOffer = w === 'native' ? nativeOffer() : foreignOffer();
+        return intent.guaranteedUnshieldedOffer;
+      }
+    ],
+    [
+      'Intent.fallibleUnshieldedOffer',
+      (w) => {
+        const intent = nativeIntent();
+        intent.fallibleUnshieldedOffer = w === 'native' ? nativeOffer() : foreignOffer();
+        return intent.fallibleUnshieldedOffer;
+      }
+    ],
+    [
+      // The consequential one: `dustActions` carries the intent's fee payment, so dropping it
+      // yields a transaction that looks composed and is unfunded.
+      'Intent.dustActions',
+      (w) => {
+        const intent = nativeIntent();
+        intent.dustActions = w === 'native' ? nativeDustActions() : foreignDustActions();
+        return intent.dustActions;
+      }
+    ]
   ];
 
   it.each(UNGUARDED)('is silently discarded by %s, which does not throw', (_name, set) => {
@@ -103,13 +118,13 @@ describe('a ledger handle from a second instantiation', () => {
     expect(set('foreign')).toBeUndefined();
   });
 
-  it('is not the only thing those setters swallow — a wrong class is ignored just as quietly', () => {
-    // `Transaction.guaranteedOffer` takes a `ZswapOffer`. Handing it an `UnshieldedOffer` from its
-    // *own* instantiation is accepted and discarded, which places the defect where it belongs: the
-    // parameter is unchecked, and a second instantiation is only the way a correctly-typed program
-    // reaches it. TypeScript rejects this line, hence the cast — the run-time silence is the point.
-    const tx = transaction();
-    tx.guaranteedOffer = nativeOffer() as never;
-    expect(tx.guaranteedOffer).toBeUndefined();
+  it('is not the only thing those setters swallow — a wrong class is accepted just as quietly', () => {
+    // The parameter is simply unchecked: `guaranteedOffer` takes a `ZswapOffer` and accepts an
+    // `UnshieldedOffer` from its *own* instantiation. Asserted as "does not throw" rather than on
+    // the read-back, which is `undefined` whether or not the setter ran.
+    const tx = LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, nativeIntent());
+    expect(() => {
+      tx.guaranteedOffer = nativeOffer() as never;
+    }).not.toThrow();
   });
 });

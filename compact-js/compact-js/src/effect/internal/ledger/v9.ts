@@ -32,16 +32,18 @@ import {
 
 import { type Era } from '../era.js';
 
-// `ContractCall`, `CostModel`, `Transaction` and `ZswapOffer`, plus the `Unproven*` aliases naming
-// what they take and return, let a consumer compose a transaction without importing the era
-// package around the seam (midnight-sdk#401). compact-js itself calls none of them.
+// The proof/binding/signature markers are type-only: erasing them keeps an era-suffixed entry free
+// of new WASM, which `EraLaziness.test.ts` guards.
 //
-// `CostModel` must be the ledger's, not onchain-runtime's: the two declarations are identical and
+// `CostModel` must be the ledger's, not onchain-runtime's — the two declarations are identical and
 // neither is branded, so TypeScript accepts the runtime's where `Transaction.prove` wants this one
-// and the rejection lands inside WASM. Do not move it to the runtime seam.
+// and the rejection lands inside WASM. `runtime/conformance.ts` keeps it off the runtime seam.
 export {
+  type Binding,
+  type Bindingish,
   ChargedState,
   communicationCommitmentRandomness,
+  type ContractAction,
   ContractCall,
   ContractCallPrototype,
   ContractDeploy,
@@ -54,10 +56,20 @@ export {
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
+  type NoBinding,
+  type NoProof,
   partitionTranscripts,
+  type PreBinding,
+  type PreProof,
   PreTranscript,
+  type Proof,
+  type Proofish,
+  type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
+  type SignatureEnabled,
+  type SignatureErased,
+  type Signaturish,
   signData,
   type SigningKey,
   type SingleUpdate,

@@ -61,6 +61,17 @@ type _V8SigningKeyIsBareHex = Assert<Extends<V8.SigningKey, string>>;
 type _V8HasContractOperation = Assert<Extends<V8.ContractOperation, { verifierKey: Uint8Array }>>;
 type _V8HasSingleUpdate = Assert<Extends<InstanceType<typeof V8.ReplaceAuthority>, V8.SingleUpdate>>;
 type _V8HasTranscript = Assert<Extends<V8.Transcript<string>, { program: readonly unknown[] }>>;
+type _V8ProveTakesProvingProvider = Assert<Extends<Parameters<V8.UnprovenTransaction['prove']>[0], V8.ProvingProvider>>;
+type _V8ProveTakesLedgerCostModel = Assert<
+  Extends<ReturnType<typeof V8.CostModel.initialCostModel>, Parameters<V8.UnprovenTransaction['prove']>[1]>
+>;
+type _V8ProvesToAProvenTransaction = Assert<
+  Extends<
+    Awaited<ReturnType<V8.UnprovenTransaction['prove']>>,
+    V8.Transaction<V8.SignatureEnabled, V8.Proof, V8.PreBinding>
+  >
+>;
+type _V8ContractCallIsAnAction = Assert<Extends<V8.ContractCall<V8.PreProof>, V8.ContractAction<V8.PreProof>>>;
 
 // --- ledger 9 (bound by `current.ts`) -----------------------------------------------------------
 type _V9Conforms = Assert<Extends<typeof V9, LedgerBinding>>;
@@ -70,3 +81,16 @@ type _V9SigningKeyIsTagged = Assert<Extends<V9.SigningKey, { tag: string; value:
 type _V9HasContractOperation = Assert<Extends<V9.ContractOperation, { verifierKey: Uint8Array }>>;
 type _V9HasSingleUpdate = Assert<Extends<InstanceType<typeof V9.ReplaceAuthority>, V9.SingleUpdate>>;
 type _V9HasTranscript = Assert<Extends<V9.Transcript<string>, { program: readonly unknown[] }>>;
+// The proving path (midnight-sdk#401): a binding that drops one of these leaves a consumer
+// importing the era package around the seam, which is what the facade exists to prevent.
+type _V9ProveTakesProvingProvider = Assert<Extends<Parameters<V9.UnprovenTransaction['prove']>[0], V9.ProvingProvider>>;
+type _V9ProveTakesLedgerCostModel = Assert<
+  Extends<ReturnType<typeof V9.CostModel.initialCostModel>, Parameters<V9.UnprovenTransaction['prove']>[1]>
+>;
+type _V9ProvesToAProvenTransaction = Assert<
+  Extends<
+    Awaited<ReturnType<V9.UnprovenTransaction['prove']>>,
+    V9.Transaction<V9.SignatureEnabled, V9.Proof, V9.PreBinding>
+  >
+>;
+type _V9ContractCallIsAnAction = Assert<Extends<V9.ContractCall<V9.PreProof>, V9.ContractAction<V9.PreProof>>>;

@@ -40,9 +40,9 @@ import { type Era } from '../era.js';
  * expected signatures out by hand — they do not duplicate the ledger package's declarations,
  * which remain authoritative for their own shapes.
  *
- * Type-only exports (`ContractOperation`, `SigningKey`, `SingleUpdate`, `Transcript`) are erased
- * from `typeof <module>` entirely and cannot be constrained by an interface; they are pinned in
- * `conformance.ts` and `test/typetests/effect/Ledger.tst.ts` instead.
+ * Type-only exports are erased from `typeof <module>` entirely and cannot be constrained by an
+ * interface; they are pinned in `conformance.ts` and `test/typetests/effect/Ledger.tst.ts`
+ * instead.
  *
  * @internal
  */
@@ -68,6 +68,22 @@ export interface LedgerBinding {
   readonly signData: (key: never, data: Uint8Array) => unknown;
 
   readonly ChargedState: new (state: never) => { readonly state: unknown };
+  // Transaction composition (midnight-sdk#401). compact-js calls none of these; they are here so an
+  // era that omits one fails the build rather than shipping an entry whose member is `undefined`.
+  // `ContractCall` is pinned by prototype because its constructor is private upstream.
+  readonly ContractCall: { readonly prototype: unknown };
+  readonly CostModel: { initialCostModel(): unknown };
+  readonly Transaction: {
+    fromParts(networkId: string, guaranteed: never, fallible: never, intent: never): { serialize(): Uint8Array };
+    fromPartsRandomized(
+      networkId: string,
+      guaranteed: never,
+      fallible: never,
+      intent: never
+    ): { serialize(): Uint8Array };
+    deserialize(...args: never[]): unknown;
+  };
+  readonly ZswapOffer: { deserialize(...args: never[]): unknown };
   readonly ContractCallPrototype: new (...args: never[]) => unknown;
   readonly ContractDeploy: new (initialState: never) => { readonly address: string };
   readonly ContractMaintenanceAuthority: {
@@ -215,4 +231,16 @@ export type LedgerBindingViolations<M extends LedgerBinding> =
       InstanceType<M['MaintenanceUpdate']>,
       Parameters<ReturnType<M['Intent']['new']>['addMaintenanceUpdate']>[0],
       'Intent.addMaintenanceUpdate must accept this era\'s MaintenanceUpdate'
+    >
+  // Mixing two eras here is silently discarded rather than rejected (see
+  // `LedgerDualInstantiation.test.ts`), so the pairing must hold at the build.
+  | Requires<
+      ReturnType<M['Intent']['new']>,
+      Parameters<M['Transaction']['fromParts']>[3],
+      'Transaction.fromParts must accept this era\'s Intent'
+    >
+  | Requires<
+      ReturnType<M['Intent']['new']>,
+      Parameters<M['Transaction']['fromPartsRandomized']>[3],
+      'Transaction.fromPartsRandomized must accept this era\'s Intent'
     >;

@@ -172,29 +172,25 @@ describe('the ledger 8 entry', () => {
 });
 
 describe('transaction composition on the Ledger facade', () => {
-  // Builds a transaction the way a composing framework does — every name off one era's facade,
-  // nothing imported from a ledger package — and takes it across the WASM boundary twice.
-  const composeAndRoundTrip = (eraLedger: typeof v9EffectEntry.Ledger | typeof v8EffectEntry.Ledger) => {
+  // Generic over a single era's facade rather than a union of both: a consumer composes against one
+  // era, and the union is a shape none can write (the two eras' markers are nominally distinct).
+  const composeAndRoundTrip = <L extends typeof v9EffectEntry.Ledger | typeof v8EffectEntry.Ledger>(eraLedger: L) => {
     const intent = eraLedger.Intent.new(TRANSACTION_TTL);
     const serialized = eraLedger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
     return { serialized, restored: eraLedger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
   };
 
-  it.each([
-    ['/v9/effect', v9EffectEntry.Ledger],
-    ['/v8/effect', v8EffectEntry.Ledger]
-  ])('composes and round-trips an unproven transaction from %s alone', (_entry, eraLedger) => {
-    const { serialized, restored } = composeAndRoundTrip(eraLedger);
+  it('composes and round-trips an unproven transaction from `/v9/effect` alone', () => {
+    const { serialized, restored } = composeAndRoundTrip(v9EffectEntry.Ledger);
     expect(restored.serialize()).toEqual(serialized);
-    expect(eraLedger.CostModel.initialCostModel()).toBeDefined();
+  });
+
+  it('composes and round-trips an unproven transaction from `/v8/effect` alone', () => {
+    const { serialized, restored } = composeAndRoundTrip(v8EffectEntry.Ledger);
+    expect(restored.serialize()).toEqual(serialized);
   });
 
   it('drops an intent built on the other era *silently*, which is why both must come from one facade', () => {
-    // The reason #401 is a correctness issue and not a convenience one. A consumer who reaches
-    // around the seam for `Transaction` gets it from a second copy of the ledger, and the mismatch
-    // does not throw: the foreign intent is discarded and the result is byte-identical to a
-    // transaction built with no intent at all. A contract call would leave the machine unsent with
-    // nothing to report it.
     const foreign = LedgerV9.Transaction.fromParts(
       NETWORK_ID,
       undefined,
@@ -208,25 +204,23 @@ describe('transaction composition on the Ledger facade', () => {
     expect(own).not.toEqual(empty);
   });
 
-  // `ZswapOffer` and `ContractCall` cannot be exercised the same way: an offer needs real zswap
-  // input material, and `ContractCall` has a private constructor and is only ever reached off a
-  // *proven* transaction's actions. So they are pinned by object identity — which is the assertion
-  // that matters for `ContractCall` anyway, whose only use is `action instanceof ContractCall`: a
-  // same-shaped class from a second ledger copy would pass a presence check and then answer
+  // Object identity, not presence. `ContractCall`'s only use is `action instanceof ContractCall`,
+  // so a same-shaped class from a second ledger copy would satisfy a presence check and then answer
   // `false` for every action.
   it.each([
     ['/v9/effect', v9EffectEntry.Ledger, LedgerV9],
     ['/v8/effect', v8EffectEntry.Ledger, LedgerV8]
-  ])('binds %s to its own era\'s zswap offer and contract call classes', (_entry, eraLedger, ledgerPackage) => {
+  ])('binds %s to its own era\'s composition classes', (_entry, eraLedger, ledgerPackage) => {
+    expect(eraLedger.Transaction).toBe(ledgerPackage.Transaction);
     expect(eraLedger.ZswapOffer).toBe(ledgerPackage.ZswapOffer);
     expect(eraLedger.ContractCall).toBe(ledgerPackage.ContractCall);
+    expect(eraLedger.CostModel).toBe(ledgerPackage.CostModel);
   });
 
   it('takes the cost model from each era\'s ledger, not from its paired runtime', () => {
-    // Both packages export a `CostModel`, declared identically and neither branded, so TypeScript
-    // accepts the runtime's where `Transaction.prove` wants the ledger's and the rejection lands
-    // inside WASM. Compared against the runtime classes themselves — the facade does not re-export
-    // them, so comparing against `CompactRuntime` would pass on `undefined` and prove nothing.
+    // The positive identity above is the real guard; these rule out the specific confusion the
+    // runtime seam invites, where both declarations are identical and neither is branded.
+    expect(v9EffectEntry.Ledger.CostModel.initialCostModel()).toBeDefined();
     expect(v9EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_19CostModel);
     expect(v8EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_16CostModel);
   });

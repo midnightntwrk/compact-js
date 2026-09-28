@@ -23,8 +23,8 @@
  * @remarks
  * How the v8 surface differs from v9, against `@midnightntwrk/ledger-v8@8.1.2`:
  *
- * - All 24 names the facade re-exports are present on v8; nothing was added between v8 and v9 that
- *   the facade depends on.
+ * - Every name the facade re-exports is present on v8; nothing was added between v8 and v9 that the
+ *   facade depends on.
  * - `SigningKey` is a bare `string` on v8, against `{ tag, value }` on v9, and `sampleSigningKey()`
  *   takes no argument (v9 takes an optional `SignatureKind`). v8 has no `SignatureKind` concept at
  *   all: its keys are BIP-340 only. This is the one difference that reaches the public API, via
@@ -46,11 +46,15 @@ import {
 
 import { type Era } from '../era.js';
 
-// The transaction-composition names, identical to the v9 twin — see that file for why `CostModel`
-// has to come from the ledger rather than the paired runtime (midnight-sdk#401).
+// Matches the v9 twin except for `ContractMaintenanceAuthority`, which is declared below rather
+// than re-exported here. See that file for why `CostModel` comes from the ledger and why the
+// proof/binding/signature markers are type-only.
 export {
+  type Binding,
+  type Bindingish,
   ChargedState,
   communicationCommitmentRandomness,
+  type ContractAction,
   ContractCall,
   ContractCallPrototype,
   ContractDeploy,
@@ -62,10 +66,20 @@ export {
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
+  type NoBinding,
+  type NoProof,
   partitionTranscripts,
+  type PreBinding,
+  type PreProof,
   PreTranscript,
+  type Proof,
+  type Proofish,
+  type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
+  type SignatureEnabled,
+  type SignatureErased,
+  type Signaturish,
   signData,
   type SigningKey,
   type SingleUpdate,
