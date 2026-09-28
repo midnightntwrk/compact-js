@@ -115,9 +115,10 @@ export interface LedgerBinding {
       addCall(call: never): unknown;
       addDeploy(deploy: never): unknown;
       addMaintenanceUpdate(update: never): unknown;
-      // Accessors, not methods: these are the unguarded setters, and the relational checks below
-      // pair them with the classes a consumer must construct to use them.
+      // The three unguarded setters, matching `LedgerDualInstantiation.test.ts`'s `UNGUARDED`
+      // table; `conformance.ts` pairs each with the class a consumer constructs to use it.
       dustActions: unknown;
+      fallibleUnshieldedOffer: unknown;
       guaranteedUnshieldedOffer: unknown;
     };
   };

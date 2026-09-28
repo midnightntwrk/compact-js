@@ -27,22 +27,20 @@ import {
 import {
   ContractOperationVersion,
   ContractOperationVersionedVerifierKey,
+  CostModel as LedgerCostModel,
   type SigningKey as LedgerSigningKey
 } from '@midnightntwrk/ledger-v9';
 
-import { type Era } from '../era.js';
+import { type Era, type EraBranded } from '../era.js';
 
 // The proof/binding/signature markers are type-only, for declaration-emit hygiene: nothing here
 // needs them at run time, and `runtime/conformance.ts` reaches this module with `import type`.
 //
-// `UnshieldedOffer` and `DustActions` must be *values*. A consumer has to construct them to fund an
-// intent, and a class fetched from the consumer's own resolution is a second instantiation — the
-// condition `LedgerDualInstantiation.test.ts` shows `Intent.dustActions` silently discards. Handing
-// out `Intent` while withholding these would manufacture that hazard rather than remove it.
+// `UnshieldedOffer` and `DustActions` must be *values*: a consumer constructs them to fund an
+// intent, and fetching those classes from its own resolution is the second instantiation that
+// `LedgerDualInstantiation.test.ts` shows `Intent.dustActions` silently discards.
 //
-// `CostModel` must be the ledger's, not onchain-runtime's — the two declarations are identical and
-// neither is branded, so TypeScript accepts the runtime's where `Transaction.prove` wants this one
-// and the rejection lands inside WASM. `runtime/conformance.ts` keeps it off the runtime seam.
+// `CostModel` is not in this list — it is branded below.
 export {
   type Binding,
   type Bindingish,
@@ -57,7 +55,6 @@ export {
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
-  CostModel,
   DustActions,
   Intent,
   LedgerParameters,
@@ -91,6 +88,23 @@ export {
   VerifierKeyRemove,
   ZswapOffer
 } from '@midnightntwrk/ledger-v9';
+
+/**
+ * This era's `CostModel`, branded with its ledger major.
+ *
+ * @remarks
+ * The one name here with no nominal separation of its own, so without a brand a consumer holding
+ * both entries can cross the eras. Branding is a *cast*, not a wrapper: the value stays the
+ * ledger's own class object, which `LedgerEra.test.ts` asserts by identity. It must also be the
+ * ledger's rather than onchain-runtime's identical one, kept off that seam by its conformance.
+ *
+ * @category era
+ */
+export type CostModel = EraBranded<LedgerCostModel, 9>;
+
+const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel };
+
+export { CostModel };
 
 /**
  * The contract operation (verifier key) version this era's ledger expects. Defined once so an era

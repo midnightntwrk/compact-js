@@ -25,6 +25,21 @@ import { type SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKe
  */
 export type LedgerMajor = 8 | 9;
 
+declare const eraBrand: unique symbol;
+
+/**
+ * Tags a ledger type with the era it came from, so two eras' copies stop being interchangeable.
+ *
+ * @remarks
+ * Only `CostModel` needs this — every other name is already nominally era-bound by an upstream
+ * private `type_`. The brand is **optional**, so raw ledger values still flow in unchanged; that is
+ * also its limit, since it means a branded value still satisfies `Transaction.prove`'s unbranded
+ * parameter (midnight-sdk#419). One shared symbol, declared here, is what makes two eras comparable.
+ *
+ * @category era
+ */
+export type EraBranded<T, E extends LedgerMajor> = T & { readonly [eraBrand]?: E };
+
 /**
  * Which `@midnight-ntwrk/compact-runtime` line each ledger major pairs with, as `'<major>.<minor>'`
  * — the granularity at which the runtime is era-paired, patch releases within a line being

@@ -40,15 +40,16 @@ import {
   ContractMaintenanceAuthority as LedgerContractMaintenanceAuthority,
   ContractOperationVersion,
   ContractOperationVersionedVerifierKey,
+  CostModel as LedgerCostModel,
   type SignatureVerifyingKey,
   type SigningKey as LedgerSigningKey
 } from '@midnightntwrk/ledger-v8';
 
-import { type Era } from '../era.js';
+import { type Era, type EraBranded } from '../era.js';
 
-// Matches the v9 twin except for `ContractMaintenanceAuthority`, which is declared below rather
-// than re-exported here. See that file for why `CostModel` comes from the ledger and why the
-// proof/binding/signature markers are type-only.
+// Matches the v9 twin except for `ContractMaintenanceAuthority` and `CostModel`, both declared
+// below rather than re-exported here. See that file for why the proof/binding/signature markers
+// are type-only.
 export {
   type Binding,
   type Bindingish,
@@ -62,7 +63,6 @@ export {
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
-  CostModel,
   DustActions,
   Intent,
   LedgerParameters,
@@ -121,6 +121,13 @@ export { ContractMaintenanceAuthority };
 
 /** Ledger 8's `ContractMaintenanceAuthority` instance type, unaffected by the repair above. */
 export type ContractMaintenanceAuthority = LedgerContractMaintenanceAuthority;
+
+/** Ledger 8's `CostModel`, era-branded. See the v9 twin for why. @category era */
+export type CostModel = EraBranded<LedgerCostModel, 8>;
+
+const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel };
+
+export { CostModel };
 
 /**
  * The contract operation (verifier key) version this era's ledger expects. Same literal as v9: v8

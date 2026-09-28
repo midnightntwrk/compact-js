@@ -123,10 +123,9 @@ describe('a ledger handle from a second instantiation', () => {
   });
 
   it('is not the only thing those setters swallow — a wrong class is accepted just as quietly', () => {
-    // The parameter is simply unchecked: `guaranteedOffer` takes a `ZswapOffer` and accepts an
-    // `UnshieldedOffer` from its *own* instantiation. The descriptor lookup is this case's vacuity
-    // control — assigning to a property a wasm-bindgen handle does not declare would silently
-    // create an own property, so without it an upstream rename would leave this test green.
+    // The parameter is simply unchecked. The descriptor lookup is this case's vacuity control:
+    // assigning to a property a wasm-bindgen handle does not declare silently creates an own
+    // property, so without it an upstream rename would leave this test green.
     const tx = LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, nativeIntent());
     const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(tx), 'guaranteedOffer')?.set;
     const before = tx.serialize();

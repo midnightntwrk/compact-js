@@ -90,6 +90,12 @@ type _V8UnshieldedOfferFundsItsIntent = Assert<
     NonNullable<ReturnType<typeof V8.Intent.new>['guaranteedUnshieldedOffer']>
   >
 >;
+type _V8UnshieldedOfferFundsItsFallibleSlot = Assert<
+  Extends<
+    ReturnType<typeof V8.UnshieldedOffer.new>,
+    NonNullable<ReturnType<typeof V8.Intent.new>['fallibleUnshieldedOffer']>
+  >
+>;
 
 // --- ledger 9 (bound by `current.ts`) -----------------------------------------------------------
 type _V9Conforms = Assert<Extends<typeof V9, LedgerBinding>>;
@@ -131,17 +137,19 @@ type _V9UnshieldedOfferFundsItsIntent = Assert<
     NonNullable<ReturnType<typeof V9.Intent.new>['guaranteedUnshieldedOffer']>
   >
 >;
+type _V9UnshieldedOfferFundsItsFallibleSlot = Assert<
+  Extends<
+    ReturnType<typeof V9.UnshieldedOffer.new>,
+    NonNullable<ReturnType<typeof V9.Intent.new>['fallibleUnshieldedOffer']>
+  >
+>;
 
-// --- the one type that is NOT era-distinct ------------------------------------------------------
-// Every other value crossing the seam is nominally era-bound: upstream gives `Proof`, `PreBinding`,
-// `Intent` and the rest a private `type_`, so a handle from another era is a compile error and the
-// run-time silent-drop is reachable only by casting. `CostModel` is the exception — its instance
-// type is `{ toString(compact?: boolean): string }` on both eras, so v8's satisfies v9's `prove`.
-//
-// Asserted TRUE deliberately, to record the exposure rather than imply it is guarded: a facade
-// cannot brand its way out, because `prove`'s parameter is the ledger's own unbranded type. Closing
-// it needs the facade to own the call (midnight-sdk#419). When this goes red, upstream has made the
-// two distinct and that workaround is no longer needed.
-type _CostModelIsNotEraDistinct = Assert<
-  Extends<ReturnType<typeof V8.CostModel.initialCostModel>, ReturnType<typeof V9.CostModel.initialCostModel>>
+// Asserted FALSE: `CostModel` is the only name with no nominal separation of its own, so dropping
+// either binding's brand — or giving both the same major — would silently make the two eras'
+// interchangeable again.
+type _CostModelIsEraDistinct = Assert<
+  Extends<
+    Extends<ReturnType<typeof V8.CostModel.initialCostModel>, ReturnType<typeof V9.CostModel.initialCostModel>>,
+    false
+  >
 >;
