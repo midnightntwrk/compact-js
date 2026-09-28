@@ -63,6 +63,7 @@ export {
   type ContractOperationVersionedVerifierKey,
   ContractState,
   CostModel,
+  DustActions,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
@@ -74,6 +75,7 @@ export {
   PreTranscript,
   type Proof,
   type Proofish,
+  type ProvingKeyMaterial,
   type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
@@ -89,6 +91,7 @@ export {
   type UnprovenIntent,
   type UnprovenOffer,
   type UnprovenTransaction,
+  UnshieldedOffer,
   VerifierKeyInsert,
   VerifierKeyRemove,
   ZswapOffer

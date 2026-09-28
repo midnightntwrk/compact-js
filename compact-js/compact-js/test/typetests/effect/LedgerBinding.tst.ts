@@ -120,6 +120,42 @@ describe('LedgerBinding — signature drift', () => {
     expect<Fake>().type.toBeAssignableTo<LedgerBinding>();
     expect<LedgerBindingViolations<Fake>>().type.not.toBe<never>();
   });
+
+  it('rejects a binding whose Transaction does not accept its own Intent', () => {
+    // The composition pairing added for midnight-sdk#401. Presence is satisfied — `fromParts` is
+    // still a static taking four arguments — and only the relation sees that the intent slot no
+    // longer matches what this era's `Intent.new` produces. That mismatch is silently discarded at
+    // run time (`LedgerDualInstantiation.test.ts`), so the build is the only place it can surface.
+    type ForeignIntent = { readonly notThisEra: true };
+    type Fake = Drifted<
+      'Transaction',
+      {
+        fromParts(n: string, g: never, f: never, intent: ForeignIntent): { serialize(): Uint8Array };
+        fromPartsRandomized(n: string, g: never, f: never, intent: never): { serialize(): Uint8Array };
+        deserialize(s: never, p: never, b: never, raw: Uint8Array): { serialize(): Uint8Array };
+      }
+    >;
+
+    expect<Fake>().type.toBeAssignableTo<LedgerBinding>();
+    expect<LedgerBindingViolations<Fake>>().type.not.toBe<never>();
+  });
+
+  it('rejects a binding whose Transaction does not accept its own ZswapOffer', () => {
+    // The offer slots, which the intent check above cannot see: `fromParts` takes three era-typed
+    // values and pinning only the intent left `guaranteed`/`fallible` unguarded.
+    type Fake = Drifted<
+      'Transaction',
+      {
+        fromParts(n: string, guaranteed: { readonly notAnOffer: true }, f: never, i: never): { serialize(): Uint8Array };
+        fromPartsRandomized(n: string, g: never, f: never, intent: never): { serialize(): Uint8Array };
+        deserialize(s: never, p: never, b: never, raw: Uint8Array): { serialize(): Uint8Array };
+      }
+    >;
+
+    expect<Fake>().type.toBeAssignableTo<LedgerBinding>();
+    expect<LedgerBindingViolations<Fake>>().type.not.toBe<never>();
+  });
+
 });
 
 describe('LedgerBinding — era signing-key shape', () => {

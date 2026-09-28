@@ -213,9 +213,8 @@ describe('transaction composition on the Ledger facade', () => {
     expect(own).not.toEqual(empty);
   });
 
-  // Object identity, not presence. `ContractCall`'s only use is `action instanceof ContractCall`,
-  // so a same-shaped class from a second ledger copy would satisfy a presence check and then answer
-  // `false` for every action.
+  // Object identity, not presence: a same-shaped class from a second ledger copy passes a presence
+  // check, and every cross-copy value then fails the runtime class check inside WASM.
   it.each([
     ['/v9/effect', v9EffectEntry.Ledger, LedgerV9],
     ['/v8/effect', v8EffectEntry.Ledger, LedgerV8]

@@ -32,8 +32,13 @@ import {
 
 import { type Era } from '../era.js';
 
-// The proof/binding/signature markers are type-only: erasing them keeps an era-suffixed entry free
-// of new WASM, which `EraLaziness.test.ts` guards.
+// The proof/binding/signature markers are type-only, for declaration-emit hygiene: nothing here
+// needs them at run time, and `runtime/conformance.ts` reaches this module with `import type`.
+//
+// `UnshieldedOffer` and `DustActions` must be *values*. A consumer has to construct them to fund an
+// intent, and a class fetched from the consumer's own resolution is a second instantiation — the
+// condition `LedgerDualInstantiation.test.ts` shows `Intent.dustActions` silently discards. Handing
+// out `Intent` while withholding these would manufacture that hazard rather than remove it.
 //
 // `CostModel` must be the ledger's, not onchain-runtime's — the two declarations are identical and
 // neither is branded, so TypeScript accepts the runtime's where `Transaction.prove` wants this one
@@ -53,6 +58,7 @@ export {
   type ContractOperationVersionedVerifierKey,
   ContractState,
   CostModel,
+  DustActions,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
@@ -64,6 +70,7 @@ export {
   PreTranscript,
   type Proof,
   type Proofish,
+  type ProvingKeyMaterial,
   type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
@@ -79,6 +86,7 @@ export {
   type UnprovenIntent,
   type UnprovenOffer,
   type UnprovenTransaction,
+  UnshieldedOffer,
   VerifierKeyInsert,
   VerifierKeyRemove,
   ZswapOffer

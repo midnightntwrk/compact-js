@@ -70,9 +70,14 @@ export interface LedgerBinding {
   readonly ChargedState: new (state: never) => { readonly state: unknown };
   // Transaction composition (midnight-sdk#401). compact-js calls none of these; they are here so an
   // era that omits one fails the build rather than shipping an entry whose member is `undefined`.
-  // `ContractCall` is pinned by prototype because its constructor is private upstream.
-  readonly ContractCall: { readonly prototype: unknown };
+  // Arity is pinned rather than spread as `...args: never[]`, which any function satisfies —
+  // including a zero-argument one — and so degrades these to presence checks.
+  // `ContractCall` is pinned through its prototype because its constructor is private upstream.
+  readonly ContractCall: {
+    readonly prototype: { readonly address: unknown; readonly entryPoint: unknown; readonly proof: unknown };
+  };
   readonly CostModel: { initialCostModel(): unknown };
+  readonly DustActions: new (markerS: never, markerP: never, ctime: Date) => { serialize(): Uint8Array };
   readonly Transaction: {
     fromParts(networkId: string, guaranteed: never, fallible: never, intent: never): { serialize(): Uint8Array };
     fromPartsRandomized(
@@ -81,9 +86,15 @@ export interface LedgerBinding {
       fallible: never,
       intent: never
     ): { serialize(): Uint8Array };
-    deserialize(...args: never[]): unknown;
+    deserialize(signature: never, proof: never, binding: never, raw: Uint8Array): { serialize(): Uint8Array };
   };
-  readonly ZswapOffer: { deserialize(...args: never[]): unknown };
+  readonly UnshieldedOffer: {
+    new: (inputs: never, outputs: never, signatures: never) => {
+      readonly inputs: readonly unknown[];
+      readonly outputs: readonly unknown[];
+    };
+  };
+  readonly ZswapOffer: { deserialize(proof: never, raw: Uint8Array): unknown; readonly prototype: unknown };
   readonly ContractCallPrototype: new (...args: never[]) => unknown;
   readonly ContractDeploy: new (initialState: never) => { readonly address: string };
   readonly ContractMaintenanceAuthority: {
@@ -99,6 +110,10 @@ export interface LedgerBinding {
       addCall(call: never): unknown;
       addDeploy(deploy: never): unknown;
       addMaintenanceUpdate(update: never): unknown;
+      // Accessors, not methods: these are the unguarded setters, and the relational checks below
+      // pair them with the classes a consumer must construct to use them.
+      dustActions: unknown;
+      guaranteedUnshieldedOffer: unknown;
     };
   };
   readonly LedgerParameters: {
@@ -243,4 +258,21 @@ export type LedgerBindingViolations<M extends LedgerBinding> =
       ReturnType<M['Intent']['new']>,
       Parameters<M['Transaction']['fromPartsRandomized']>[3],
       'Transaction.fromPartsRandomized must accept this era\'s Intent'
-    >;
+    >
+  // The offer slots, pinned through `ZswapOffer`'s prototype: `deserialize` is generic, so
+  // `ReturnType<>` widens to `ZswapOffer<Proofish>` and the naive pairing does not discriminate.
+  | Requires<
+      NonNullable<Parameters<M['Transaction']['fromParts']>[1]>,
+      M['ZswapOffer']['prototype'],
+      'Transaction.fromParts must accept this era\'s ZswapOffer as the guaranteed offer'
+    >
+  | Requires<
+      NonNullable<Parameters<M['Transaction']['fromParts']>[2]>,
+      M['ZswapOffer']['prototype'],
+      'Transaction.fromParts must accept this era\'s ZswapOffer as the fallible offer'
+    >
+  // The funding classes (`DustActions`, `UnshieldedOffer`) are pinned per era in `conformance.ts`
+  // rather than here. Both slots are generic in their markers, so projecting them through `M`
+  // widens past the concrete pair `Intent` accepts and the relation stops discriminating — a check
+  // that cannot fail is worse than none.
+  ;
