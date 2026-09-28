@@ -1,6 +1,13 @@
 {
   "extends": "../tsconfig.base.json",
   "include": ["test"],
+  // `test/typetests` is tstyche's, and its negative cases (`expect().type.not.toBe`, a deliberately
+  // misspelled circuit name) are *meant* to be type errors — tsc would read them as failures.
+  // `test/era8` is excluded on a different basis: it type-checks the era-8 fixtures through a
+  // dynamic import typed `new (witnesses) => never`, so every private state and circuit id
+  // collapses to `never`. That is pre-existing debt, not a property of this config — giving those
+  // fixtures real declarations is what removes the exclusion.
+  "exclude": ["test/typetests", "test/era8"],
   "references": [
     { "path": "tsconfig.src.json" },
   ],

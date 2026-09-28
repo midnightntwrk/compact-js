@@ -172,21 +172,30 @@ describe('the ledger 8 entry', () => {
 });
 
 describe('transaction composition on the Ledger facade', () => {
-  // Generic over a single era's facade rather than a union of both: a consumer composes against one
-  // era, and the union is a shape none can write (the two eras' markers are nominally distinct).
-  const composeAndRoundTrip = <L extends typeof v9EffectEntry.Ledger | typeof v8EffectEntry.Ledger>(eraLedger: L) => {
-    const intent = eraLedger.Intent.new(TRANSACTION_TTL);
-    const serialized = eraLedger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
-    return { serialized, restored: eraLedger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
+  // One helper per era, not one generic helper over both. A generic body is checked against its
+  // *constraint*, so a union constraint reintroduces the cross-era mixing the seam forbids and the
+  // two calls below stop type-checking. A consumer composes against one era; so does this.
+  const composeAndRoundTripV9 = () => {
+    const ledger = v9EffectEntry.Ledger;
+    const intent = ledger.Intent.new(TRANSACTION_TTL);
+    const serialized = ledger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
+    return { serialized, restored: ledger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
+  };
+
+  const composeAndRoundTripV8 = () => {
+    const ledger = v8EffectEntry.Ledger;
+    const intent = ledger.Intent.new(TRANSACTION_TTL);
+    const serialized = ledger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
+    return { serialized, restored: ledger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
   };
 
   it('composes and round-trips an unproven transaction from `/v9/effect` alone', () => {
-    const { serialized, restored } = composeAndRoundTrip(v9EffectEntry.Ledger);
+    const { serialized, restored } = composeAndRoundTripV9();
     expect(restored.serialize()).toEqual(serialized);
   });
 
   it('composes and round-trips an unproven transaction from `/v8/effect` alone', () => {
-    const { serialized, restored } = composeAndRoundTrip(v8EffectEntry.Ledger);
+    const { serialized, restored } = composeAndRoundTripV8();
     expect(restored.serialize()).toEqual(serialized);
   });
 
@@ -198,7 +207,7 @@ describe('transaction composition on the Ledger facade', () => {
       LedgerV8.Intent.new(TRANSACTION_TTL) as never
     ).serialize();
     const empty = LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, undefined).serialize();
-    const own = composeAndRoundTrip(v9EffectEntry.Ledger).serialized;
+    const own = composeAndRoundTripV9().serialized;
 
     expect(foreign).toEqual(empty);
     expect(own).not.toEqual(empty);

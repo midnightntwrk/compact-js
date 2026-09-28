@@ -27,10 +27,14 @@ const NETWORK_ID = 'undeployed';
 
 const foreignIntent = () => LedgerV8.Intent.new(TTL) as never;
 const foreignOffer = () => LedgerV8.UnshieldedOffer.new([], [], []) as never;
-const foreignDustActions = () => new LedgerV8.DustActions('signature', 'pre-proof', TTL) as never;
+const foreignDustActions = () =>
+  new LedgerV8.DustActions<LedgerV8.SignatureEnabled, LedgerV8.PreProof>('signature', 'pre-proof', TTL) as never;
 const nativeIntent = () => LedgerV9.Intent.new(TTL);
 const nativeOffer = () => LedgerV9.UnshieldedOffer.new([], [], []);
-const nativeDustActions = () => new LedgerV9.DustActions('signature', 'pre-proof', TTL);
+// Explicit type arguments: the marker strings are `S['instance']`, so inference lands on the
+// constraint (`Signaturish, Proofish`) rather than the pair `Intent.dustActions` accepts.
+const nativeDustActions = () =>
+  new LedgerV9.DustActions<LedgerV9.SignatureEnabled, LedgerV9.PreProof>('signature', 'pre-proof', TTL);
 
 describe('a ledger handle from a second instantiation', () => {
   // Matched on the guard's own message, so a case that stops reaching the call it names fails here
