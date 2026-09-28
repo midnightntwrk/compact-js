@@ -94,7 +94,12 @@ export interface LedgerBinding {
       readonly outputs: readonly unknown[];
     };
   };
-  readonly ZswapOffer: { deserialize(proof: never, raw: Uint8Array): unknown; readonly prototype: unknown };
+  // `prototype` is the offer-slot relation's target below, so it has to pin real members: typed
+  // `unknown` the relation would read as satisfied by anything and check nothing.
+  readonly ZswapOffer: {
+    deserialize(proof: never, raw: Uint8Array): unknown;
+    readonly prototype: { readonly deltas: unknown; readonly inputs: unknown; readonly outputs: unknown };
+  };
   readonly ContractCallPrototype: new (...args: never[]) => unknown;
   readonly ContractDeploy: new (initialState: never) => { readonly address: string };
   readonly ContractMaintenanceAuthority: {

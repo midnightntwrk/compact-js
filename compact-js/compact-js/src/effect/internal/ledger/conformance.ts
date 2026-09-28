@@ -131,3 +131,17 @@ type _V9UnshieldedOfferFundsItsIntent = Assert<
     NonNullable<ReturnType<typeof V9.Intent.new>['guaranteedUnshieldedOffer']>
   >
 >;
+
+// --- the one type that is NOT era-distinct ------------------------------------------------------
+// Every other value crossing the seam is nominally era-bound: upstream gives `Proof`, `PreBinding`,
+// `Intent` and the rest a private `type_`, so a handle from another era is a compile error and the
+// run-time silent-drop is reachable only by casting. `CostModel` is the exception — its instance
+// type is `{ toString(compact?: boolean): string }` on both eras, so v8's satisfies v9's `prove`.
+//
+// Asserted TRUE deliberately, to record the exposure rather than imply it is guarded: a facade
+// cannot brand its way out, because `prove`'s parameter is the ledger's own unbranded type. Closing
+// it needs the facade to own the call (midnight-sdk#419). When this goes red, upstream has made the
+// two distinct and that workaround is no longer needed.
+type _CostModelIsNotEraDistinct = Assert<
+  Extends<ReturnType<typeof V8.CostModel.initialCostModel>, ReturnType<typeof V9.CostModel.initialCostModel>>
+>;

@@ -117,9 +117,10 @@ Make the code explanatory first, and reach for a comment only for what a name ca
 - Prune as you go: a stale comment in code you are already touching is a defect, not a leftover.
 
 This is a budget, not a ban — one dense declaration may still deserve a real `@remarks` block, and
-`@category` tags on public API remain required (see the `tdd` skill's `code-standards.md`). It is
-the **prose-to-code ratio across the change** that has to land near 30%, so an expensive block on
-one declaration has to be paid for by restraint elsewhere.
+every exported declaration in a package's public API still carries a TSDoc block with a `@category`
+tag (`constructors`, `combinators`, `models`, `era`, …), which is what groups it in the generated
+documentation. It is the **prose-to-code ratio across the change** that has to land near 30%, so an
+expensive block on one declaration has to be paid for by restraint elsewhere.
 
 ### Formatting
 - Prettier (via eslint-plugin-prettier)
