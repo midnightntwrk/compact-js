@@ -23,8 +23,8 @@
  * @remarks
  * How the v8 surface differs from v9, against `@midnightntwrk/ledger-v8@8.1.2`:
  *
- * - All 24 names the facade re-exports are present on v8; nothing was added between v8 and v9 that
- *   the facade depends on.
+ * - Every name the facade re-exports is present on v8; nothing was added between v8 and v9 that the
+ *   facade depends on.
  * - `SigningKey` is a bare `string` on v8, against `{ tag, value }` on v9, and `sampleSigningKey()`
  *   takes no argument (v9 takes an optional `SignatureKind`). v8 has no `SignatureKind` concept at
  *   all: its keys are BIP-340 only. This is the one difference that reaches the public API, via
@@ -40,35 +40,61 @@ import {
   ContractMaintenanceAuthority as LedgerContractMaintenanceAuthority,
   ContractOperationVersion,
   ContractOperationVersionedVerifierKey,
+  CostModel as LedgerCostModel,
   type SignatureVerifyingKey,
   type SigningKey as LedgerSigningKey
 } from '@midnightntwrk/ledger-v8';
 
-import { type Era } from '../era.js';
+import { type Era, type EraBranded } from '../era.js';
 
+// Matches the v9 twin except for `ContractMaintenanceAuthority` and `CostModel`, both declared
+// below rather than re-exported here. See that file for why the proof/binding/signature markers
+// are type-only.
 export {
+  type Binding,
+  type Bindingish,
   ChargedState,
   communicationCommitmentRandomness,
+  type ContractAction,
+  ContractCall,
   ContractCallPrototype,
   ContractDeploy,
   type ContractOperation,
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
+  DustActions,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
+  type NoBinding,
+  type NoProof,
   partitionTranscripts,
+  type PreBinding,
+  type PreProof,
   PreTranscript,
+  type Proof,
+  type Proofish,
+  type ProvingKeyMaterial,
+  type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
+  type SignatureEnabled,
+  type SignatureErased,
+  type Signaturish,
   signData,
   type SigningKey,
   type SingleUpdate,
   StateValue,
+  Transaction,
   type Transcript,
+  type UnprovenIntent,
+  type UnprovenOffer,
+  type UnprovenTransaction,
+  UnshieldedOffer,
   VerifierKeyInsert,
-  VerifierKeyRemove
+  VerifierKeyRemove,
+  ZswapOffer
 } from '@midnightntwrk/ledger-v8';
 
 /**
@@ -95,6 +121,13 @@ export { ContractMaintenanceAuthority };
 
 /** Ledger 8's `ContractMaintenanceAuthority` instance type, unaffected by the repair above. */
 export type ContractMaintenanceAuthority = LedgerContractMaintenanceAuthority;
+
+/** Ledger 8's `CostModel`, era-branded. See the v9 twin for why. @category era */
+export type CostModel = EraBranded<LedgerCostModel, 8>;
+
+const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel };
+
+export { CostModel };
 
 /**
  * The contract operation (verifier key) version this era's ledger expects. Same literal as v9: v8

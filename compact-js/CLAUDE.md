@@ -94,6 +94,34 @@ Each package has:
 - Unused imports detection and removal
 - Import-x resolver with TypeScript support
 
+### Comment Budget
+
+> [!IMPORTANT]
+> **Comments must not exceed roughly 30% of the lines of code a change adds, and the code must
+> carry the explanation.** Measured per change, over the whole diff, counting **every** comment
+> line — JSDoc and `@remarks` included, not just inline `//`.
+
+A change that adds 30 lines of code has a budget of about 9 comment lines. 30% is a **ceiling, not
+a quota**: being well under it is a good sign, and no comment should ever be added to reach it.
+
+Make the code explanatory first, and reach for a comment only for what a name cannot carry:
+
+- Name the thing instead of captioning it. A named type, a named constant, or an extracted helper
+  with a precise name removes the comment that would have described it.
+- Spend the budget on **why** — the constraint, the upstream quirk, the "do not 'fix' this"
+  warning. Never on *what* the next line does; the code already says that.
+- Keep the design journal out of the source. "What this used to do", rejected alternatives,
+  investigation notes and issue narratives belong in the PR description or the commit message,
+  where they are dated and searchable. A type test pins a rejected spelling far better than a
+  comment asking the next reader not to retry it.
+- Prune as you go: a stale comment in code you are already touching is a defect, not a leftover.
+
+This is a budget, not a ban — one dense declaration may still deserve a real `@remarks` block, and
+every exported declaration in a package's public API still carries a TSDoc block with a `@category`
+tag (`constructors`, `combinators`, `models`, `era`, …), which is what groups it in the generated
+documentation. It is the **prose-to-code ratio across the change** that has to land near 30%, so an
+expensive block on one declaration has to be paid for by restraint elsewhere.
+
 ### Formatting
 - Prettier (via eslint-plugin-prettier)
 - Config in `.prettierrc.json`

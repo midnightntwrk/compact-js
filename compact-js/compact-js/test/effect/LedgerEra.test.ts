@@ -19,7 +19,11 @@ import { Ledger } from '@midnight-ntwrk/compact-js/effect';
 import * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import * as v9Entry from '@midnight-ntwrk/compact-js/v9';
 import * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
+import { CostModel as RuntimeV0_19CostModel } from '@midnight-ntwrk/compact-runtime';
+import * as LedgerV8 from '@midnightntwrk/ledger-v8';
+import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { ContractState, LedgerParameters } from '@midnightntwrk/ledger-v9';
+import { CostModel as RuntimeV0_16CostModel } from 'compact-runtime-ledger8';
 import { describe, expect, it } from 'vitest';
 
 import * as eraFreeSurface from '../../src/effect/internal/eraFreeSurface.js';
@@ -36,6 +40,9 @@ const CONTRACT_EVENT_EXPORTS = [
   // `ContractEventValidator` is star-exported rather than namespaced, so its member is named here.
   'validateEvents'
 ];
+
+const NETWORK_ID = 'undeployed';
+const TRANSACTION_TTL = new Date('2030-01-01T00:00:00Z');
 
 describe('Ledger era seam', () => {
   it('describes the ledger 9 era', () => {
@@ -161,6 +168,69 @@ describe('the ledger 8 entry', () => {
     // application itself, so all three `make`s are distinct objects.
     const makes = [effectEntry, v9EffectEntry, v8EffectEntry].map((entry) => entry.ContractExecutable.make);
     expect(new Set(makes).size).toBe(3);
+  });
+});
+
+describe('transaction composition on the Ledger facade', () => {
+  // One helper per era, not one generic helper over both. A generic body is checked against its
+  // *constraint*, so a union constraint reintroduces the cross-era mixing the seam forbids and the
+  // two calls below stop type-checking. A consumer composes against one era; so does this.
+  const composeAndRoundTripV9 = () => {
+    const ledger = v9EffectEntry.Ledger;
+    const intent = ledger.Intent.new(TRANSACTION_TTL);
+    const serialized = ledger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
+    return { serialized, restored: ledger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
+  };
+
+  const composeAndRoundTripV8 = () => {
+    const ledger = v8EffectEntry.Ledger;
+    const intent = ledger.Intent.new(TRANSACTION_TTL);
+    const serialized = ledger.Transaction.fromParts(NETWORK_ID, undefined, undefined, intent).serialize();
+    return { serialized, restored: ledger.Transaction.deserialize('signature', 'pre-proof', 'pre-binding', serialized) };
+  };
+
+  it('composes and round-trips an unproven transaction from `/v9/effect` alone', () => {
+    const { serialized, restored } = composeAndRoundTripV9();
+    expect(restored.serialize()).toEqual(serialized);
+  });
+
+  it('composes and round-trips an unproven transaction from `/v8/effect` alone', () => {
+    const { serialized, restored } = composeAndRoundTripV8();
+    expect(restored.serialize()).toEqual(serialized);
+  });
+
+  it('drops an intent built on the other era *silently*, which is why both must come from one facade', () => {
+    const foreign = LedgerV9.Transaction.fromParts(
+      NETWORK_ID,
+      undefined,
+      undefined,
+      LedgerV8.Intent.new(TRANSACTION_TTL) as never
+    ).serialize();
+    const empty = LedgerV9.Transaction.fromParts(NETWORK_ID, undefined, undefined, undefined).serialize();
+    const own = composeAndRoundTripV9().serialized;
+
+    expect(foreign).toEqual(empty);
+    expect(own).not.toEqual(empty);
+  });
+
+  // Object identity, not presence: a same-shaped class from a second ledger copy passes a presence
+  // check, and every cross-copy value then fails the runtime class check inside WASM.
+  it.each([
+    ['/v9/effect', v9EffectEntry.Ledger, LedgerV9],
+    ['/v8/effect', v8EffectEntry.Ledger, LedgerV8]
+  ])('binds %s to its own era\'s composition classes', (_entry, eraLedger, ledgerPackage) => {
+    expect(eraLedger.Transaction).toBe(ledgerPackage.Transaction);
+    expect(eraLedger.ZswapOffer).toBe(ledgerPackage.ZswapOffer);
+    expect(eraLedger.ContractCall).toBe(ledgerPackage.ContractCall);
+    expect(eraLedger.CostModel).toBe(ledgerPackage.CostModel);
+  });
+
+  it('takes the cost model from each era\'s ledger, not from its paired runtime', () => {
+    // The positive identity above is the real guard; these rule out the specific confusion the
+    // runtime seam invites, where both declarations are identical and neither is branded.
+    expect(v9EffectEntry.Ledger.CostModel.initialCostModel()).toBeDefined();
+    expect(v9EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_19CostModel);
+    expect(v8EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_16CostModel);
   });
 });
 

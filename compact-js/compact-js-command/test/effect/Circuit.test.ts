@@ -18,10 +18,10 @@ import { resolve } from 'node:path';
 import { Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
 import { describe, it } from '@effect/vitest';
+import { Ledger } from '@midnight-ntwrk/compact-js/effect';
 import { circuitCommand } from '@midnight-ntwrk/compact-js-command/effect';
 import { encodeZswapLocalState } from '@midnight-ntwrk/compact-runtime';
 import {
-  type ContractCall,
   Intent,
   LedgerParameters,
   type PreBinding,
@@ -388,7 +388,11 @@ describe('Circuit Command', () => {
       const intent = Intent.deserialize<SignatureEnabled, PreProof, PreBinding>(
         'signature', 'pre-proof', 'pre-binding', yield* fs.readFile(COUNTER_OUTPUT_FILEPATH)
       );
-      const calls = intent.actions as ContractCall<PreProof>[];
+      // Narrowed with the facade's own `ContractCall`, not cast: this is the one place a *real*
+      // contract call exists, so it is where the object identity `LedgerEra.test.ts` asserts gets
+      // exercised. A facade bound to a second ledger copy would answer `false` here for every
+      // action and leave `calls` empty.
+      const calls = intent.actions.filter((action) => action instanceof Ledger.ContractCall);
       expect(calls).toHaveLength(1);
       expect(calls[0].address).toBe(COUNTER_ADDRESS);
       const entryPoint = calls[0].entryPoint;
