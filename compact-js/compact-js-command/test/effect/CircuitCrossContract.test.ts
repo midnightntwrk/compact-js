@@ -417,6 +417,29 @@ describe('Circuit Command (cross-contract calls)', () => {
     60_000
   );
 
+  it.effect('a callee module the provider rejects is reported with its path', () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const w = yield* prepareWorkspace;
+
+      // Swap the symlinked callee for a module built before dynamic resolution: a `Contract` and
+      // none of the tables. It imports nothing, so it loads from the temp root.
+      const calleeDir = join(w.modulesIn, innerAddress);
+      yield* fs.remove(calleeDir);
+      yield* fs.makeDirectory(join(calleeDir, 'contract'), { recursive: true });
+      yield* fs.writeFileString(join(calleeDir, 'package.json'), JSON.stringify({ type: 'module' }));
+      const modulePath = join(calleeDir, 'contract', 'index.js');
+      yield* fs.writeFileString(modulePath, 'export class Contract {}\n');
+
+      yield* cli(circuitArgv(w, { statesIn: w.statesIn, modulesIn: w.modulesIn }, w.input, 'incrementInner', '1'));
+
+      const lines = yield* MockConsole.getLines({ stripAnsi: true });
+      expect(lines.join('\n')).toContain(`'${modulePath}' does not export circuitSignatures, expectedVk`);
+      yield* expectNoOutputsWritten(w);
+    }).pipe(Effect.provide(testLayer)),
+    60_000
+  );
+
   it.effect('a callee missing from --contract-states-dir fails with a reported error', () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;

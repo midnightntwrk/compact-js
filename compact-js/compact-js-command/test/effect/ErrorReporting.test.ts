@@ -20,6 +20,7 @@ import { Command } from '@effect/cli';
 import { afterAll, describe, expect, it } from '@effect/vitest';
 import { ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
 import { deployCommand } from '@midnight-ntwrk/compact-js-command/effect';
+import { ModuleResolutionError } from '@midnight-ntwrk/compact-runtime';
 import { Effect } from 'effect';
 
 import * as InternalCommand from '../../src/effect/internal/command.js';
@@ -91,6 +92,23 @@ describe('reportContractExecutionError', () => {
 
       expect(lines.join('\n')).toContain('Failed to execute circuit');
       expect(lines.join('\n')).toContain('circular boom');
+    })
+  );
+
+  it.effect('reports what loading a cross-contract callee rejected with', () =>
+    Effect.gen(function* () {
+      // The runtime keeps the rejection on `failure.cause` rather than `cause`, so a walk over
+      // `cause` alone stops at "loading the resolved module rejected" and drops the reason.
+      const address = 'ab'.repeat(32);
+      const unbound = new ModuleResolutionError(
+        { calleeAddress: address, calleeCircuitId: 'getV', interfaceName: 'cccInner', callerAddress: address },
+        { kind: 'ModuleLoadRejected', cause: new Error("'/modules/contract/index.js' does not export expectedVk") }
+      );
+
+      const lines = yield* report(ContractRuntimeError.make('Failed to invoke circuit', unbound));
+
+      expect(lines.join('\n')).toContain('loading the resolved module rejected');
+      expect(lines.join('\n')).toContain("'/modules/contract/index.js' does not export expectedVk");
     })
   );
 });
