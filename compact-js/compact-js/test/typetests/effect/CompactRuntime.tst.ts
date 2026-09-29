@@ -60,8 +60,8 @@ describe('CompactRuntime facade type surface', () => {
   });
 
   it('re-exports the type-only names its dependents name in their own public signatures', () => {
-    // `ContractStateProvider` and `ContractModuleProvider` are the return types of `compact-js-node`'s
-    // `FileSystemContractStateProvider.make` and `FileSystemContractModuleProvider.make`, and
+    // `ContractStateProvider` and `ContractModuleProvider` are what `compact-js-node`'s
+    // `FileSystemContractStateProvider` and `FileSystemContractModuleProvider` build, and
     // `CircuitContext`/`WitnessContext` are the shapes a contract's witnesses are written against —
     // a drift here is a breaking change downstream.
     expect<CompactRuntime.ContractStateProvider>().type.toBe<RuntimeContractStateProvider>();

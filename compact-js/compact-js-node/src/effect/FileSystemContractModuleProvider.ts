@@ -17,10 +17,10 @@ import { existsSync, lstatSync, statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { type CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
+import { CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
 
 /**
- * What resolution reads off a callee's module. A copy of the runtime's list, because the runtime
+ * What resolution reads off a callee's module. A copy of runtime 0.20's list, because the runtime
  * does not export it.
  */
 const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
@@ -33,11 +33,41 @@ const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
 const CONTRACT_ADDRESS = /^[0-9A-Fa-f]{64}$/;
 
 /**
+ * The part of an era's `CompactRuntime` this provider is typed from, which `/v9/effect`'s satisfies as
+ * well as the bound one. A module provider joins a state provider in one circuit context, therefore
+ * it is told its era as `FileSystemContractStateProvider` is told its ledger.
+ */
+export interface ProviderRuntime {
+  readonly line: string;
+  readonly createExecutionContext: (params: never) => unknown;
+}
+
+/**
+ * The module `R`'s cross-contract calls resolve to, as the executable reads it. On a line without
+ * them it is `unknown`, which no circuit context accepts.
+ */
+export type ModuleOf<R extends ProviderRuntime> = Parameters<R['createExecutionContext']>[0] extends {
+  readonly moduleProvider?: infer P;
+}
+  ? NonNullable<P> extends { resolve(address: never): (() => PromiseLike<infer M>) | undefined }
+    ? M
+    : never
+  : never;
+
+/** Options for {@link make}. */
+export interface Options<R extends ProviderRuntime> {
+  /** Maps a contract address to its module's path within the base folder. Defaults to `compactc`'s layout. */
+  readonly modulePathForAddress?: (address: string) => string;
+  /** The era whose circuit contexts the provider is for. Defaults to the era this build binds. */
+  readonly runtime?: R;
+}
+
+/**
  * Narrows an imported namespace to a {@link CompactRuntime.Module}, naming what is missing if it is
  * not one. A module compiled before dynamic resolution has a `Contract` and none of the tables. The
  * runtime rejects it too but names only the address, therefore this names the file.
  */
-const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module => {
+const asModule = <M>(namespace: unknown, modulePath: string, line: string): M => {
   const exports = namespace as Partial<Record<keyof CompactRuntime.Module, unknown>>;
   // Checked as the runtime checks: an inherited name is not an export, and one bound to `null` or
   // `undefined` gives resolution nothing to read.
@@ -46,14 +76,14 @@ const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module
   );
   if (missing.length !== 0) {
     throw new Error(
-      `'${modulePath}' does not export ${missing.join(', ')}, so it cannot be a cross-contract callee. ` +
+      `'${modulePath}' does not export ${missing.join(', ')}, so compact-runtime ${line} cannot call it. ` +
         'Recompile it with a compactc that emits these exports.'
     );
   }
   if (typeof exports.Contract !== 'function') {
     throw new Error(`'${modulePath}' exports a ${typeof exports.Contract} as \`Contract\`, not a class.`);
   }
-  return namespace as CompactRuntime.Module;
+  return namespace as M;
 };
 
 /** Why `modulePath` cannot be imported: `'absent'` if nothing is on disk for the address, `undefined` if it can be. */
@@ -107,32 +137,40 @@ const unloadable = (modulePath: string, address: string): Error | 'absent' | und
  * project, or fill it with symlinks to compiled directories there.
  *
  * @param baseFolderPath The folder holding one managed contract directory per address.
- * @param modulePathForAddress Maps a contract address to its module's path within `baseFolderPath`.
- * Override this if the on-disk layout differs from `compactc`'s.
- * @returns A {@link CompactRuntime.ContractModuleProvider} backed by `baseFolderPath`.
+ * @param options The on-disk layout and the era; see {@link Options}.
+ * @returns A {@link CompactRuntime.ContractModuleProvider} for `options.runtime`'s era, backed by `baseFolderPath`.
  *
  * @category constructors
  */
-export const make = (
+export const make = <R extends ProviderRuntime = typeof CompactRuntime>(
   baseFolderPath: string,
-  modulePathForAddress: (address: string) => string = (address) => join(address, 'contract', 'index.js')
-): CompactRuntime.ContractModuleProvider => ({
-  resolve: (address: string): CompactRuntime.ModuleThunk | undefined => {
-    // The runtime checks this before it calls `resolve`, but `resolve` is public and what it
-    // returns is run, therefore a string that is not an address reaches no path.
-    if (!CONTRACT_ADDRESS.test(address)) {
-      return undefined;
+  options: Options<R> = {}
+): { resolve: (address: string) => (() => Promise<ModuleOf<R>>) | undefined } => {
+  const {
+    modulePathForAddress = (address: string) => join(address, 'contract', 'index.js'),
+    runtime = CompactRuntime as unknown as R
+  } = options;
+  return {
+    resolve: (address) => {
+      // The runtime checks this before it calls `resolve`, but `resolve` is public and what it
+      // returns is run, therefore a string that is not an address reaches no path.
+      if (!CONTRACT_ADDRESS.test(address)) {
+        return undefined;
+      }
+      const modulePath = join(baseFolderPath, modulePathForAddress(address));
+      const problem = unloadable(modulePath, address);
+      if (problem === 'absent') {
+        return undefined;
+      }
+      if (problem !== undefined) {
+        return () => Promise.reject(problem);
+      }
+      // By URL, not path: a Windows path is not a valid specifier, and a bare relative path would be
+      // resolved against this file rather than the caller's directory.
+      return () =>
+        import(pathToFileURL(modulePath).href).then((namespace) =>
+          asModule<ModuleOf<R>>(namespace, modulePath, runtime.line)
+        );
     }
-    const modulePath = join(baseFolderPath, modulePathForAddress(address));
-    const problem = unloadable(modulePath, address);
-    if (problem === 'absent') {
-      return undefined;
-    }
-    if (problem !== undefined) {
-      return () => Promise.reject(problem);
-    }
-    // By URL, not path: a Windows path is not a valid specifier, and a bare relative path would be
-    // resolved against this file rather than the caller's directory.
-    return () => import(pathToFileURL(modulePath).href).then((namespace) => asModule(namespace, modulePath));
-  }
-});
+  };
+};

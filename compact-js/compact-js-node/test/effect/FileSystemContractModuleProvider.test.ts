@@ -112,7 +112,9 @@ describe('FileSystemContractModuleProvider', () => {
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, `${address(7)}.js`), COMPLETE);
 
-    const provider = FileSystemContractModuleProvider.make(baseDir, (addr) => join('flat', `${addr}.js`));
+    const provider = FileSystemContractModuleProvider.make(baseDir, {
+      modulePathForAddress: (addr) => join('flat', `${addr}.js`)
+    });
     const module = await provider.resolve(address(7))!();
 
     expect(module.Contract).toBeTypeOf('function');
@@ -120,7 +122,9 @@ describe('FileSystemContractModuleProvider', () => {
 
   it('resolves an address with nothing on disk to undefined when the layout shares a folder', () => {
     mkdirSync(join(baseDir, 'flat'), { recursive: true });
-    const provider = FileSystemContractModuleProvider.make(baseDir, (addr) => join('flat', `${addr}.js`));
+    const provider = FileSystemContractModuleProvider.make(baseDir, {
+      modulePathForAddress: (addr) => join('flat', `${addr}.js`)
+    });
 
     expect(provider.resolve(address(10))).toBeUndefined();
   });

@@ -49,16 +49,21 @@ import { type EraCommands } from './registry.js';
  * Ledger 9 has both of the capabilities the commands gate on.
  *
  * @remarks
- * The state provider is built against **this** era's `Ledger`, not the bound one: it decodes the
- * files in `--contract-states-dir` with the same conversions the handler uses for `--input`, so a
- * cross-contract callee cannot be decoded by one era and executed by another.
+ * Both providers are built against **this** era's facades, not the bound ones: the state provider
+ * decodes the files in `--contract-states-dir` with the same conversions the handler uses for
+ * `--input`, so a cross-contract callee cannot be decoded by one era and executed by another.
  */
 const capabilities = {
   makeContractStateProvider: (baseFolderPath: string) =>
     FileSystemContractStateProvider.make(baseFolderPath, { ledger: Ledger }),
-  makeContractModuleProvider: (baseFolderPath: string) => FileSystemContractModuleProvider.make(baseFolderPath),
+  makeContractModuleProvider: (baseFolderPath: string) =>
+    FileSystemContractModuleProvider.make(baseFolderPath, { runtime: CompactRuntime }),
   contractEvents: true
 } satisfies EraBinding.EraCapabilities;
+
+/** Build-time: the module provider is typed for this era's circuit contexts. */
+type ThisErasModuleProvider<P extends CompactRuntime.ContractModuleProvider> = P;
+type _ModuleProviderIsThisEras = ThisErasModuleProvider<ReturnType<typeof capabilities.makeContractModuleProvider>>;
 
 /**
  * Build-time conformance: the executable a `/v9/effect` configuration builds really does satisfy
