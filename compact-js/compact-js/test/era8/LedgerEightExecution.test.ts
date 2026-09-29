@@ -77,7 +77,7 @@ describeWithFixture('ledger 8 era execution', () => {
 
   it('loads an artifact compiled for runtime 0.16 without a version mismatch', async () => {
     // The whole point of the aliased project: this import is what throws
-    // `Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0-rc.0` in the default one.
+    // `Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0` in the default one.
     const module = await loadContract();
     expect(module.Contract).toBeTypeOf('function');
   });

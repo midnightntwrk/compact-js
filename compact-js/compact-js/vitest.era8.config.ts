@@ -31,7 +31,7 @@ import { defineConfig } from 'vitest/config';
  * That is a *bare specifier* in generated code compact-js does not own and cannot rewrite, and
  * `checkRuntimeVersion` hard-fails across minors while the major is 0. So a ledger-8 fixture
  * loaded in the default project — whose `@midnight-ntwrk/compact-runtime` is 0.20 — throws
- * `Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0-rc.0` before a single
+ * `Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0` before a single
  * assertion runs. The alias below is what points that specifier at the 0.16 line for these tests
  * only; the default project is untouched and still exercises ledger 9.
  *

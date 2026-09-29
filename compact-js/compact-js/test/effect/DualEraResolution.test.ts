@@ -147,7 +147,7 @@ describeWithFixtures('two ledger eras in one process', () => {
     scopes.push(scope);
 
     // In the default project this era 8 import throws `Version mismatch: compiled code expects
-    // 0.16.0, runtime is 0.20.0-rc.0`. Inside the scope it resolves 0.16 and loads.
+    // 0.16.0, runtime is 0.20.0`. Inside the scope it resolves 0.16 and loads.
     const era9 = (await import(resolve(ERA9_COUNTER, 'contract/index.js'))) as CounterModule;
     const era8 = (await import(join(scope, 'counter/contract/index.js'))) as CounterModule;
 
