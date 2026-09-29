@@ -20,17 +20,34 @@
  * by editing call sites (midnight-sdk#387). ESLint enforces this (`no-restricted-imports`); tests
  * are exempt by design, since some must compare ledger module identity.
  */
-import { type SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
+import {
+  type SignatureKind,
+  type SigningKey as PlatformSigningKey
+} from '@midnight-ntwrk/platform-js/effect/SigningKey';
 import {
   ContractOperationVersion,
-  ContractOperationVersionedVerifierKey
+  ContractOperationVersionedVerifierKey,
+  CostModel as LedgerCostModel,
+  type SigningKey as LedgerSigningKey
 } from '@midnightntwrk/ledger-v9';
 
-import { type Era } from '../era.js';
+import { type Era, type EraBranded } from '../era.js';
 
+// The proof/binding/signature markers are type-only, for declaration-emit hygiene: nothing here
+// needs them at run time, and `runtime/conformance.ts` reaches this module with `import type`.
+//
+// `UnshieldedOffer` and `DustActions` must be *values*: a consumer constructs them to fund an
+// intent, and fetching those classes from its own resolution is the second instantiation that
+// `LedgerDualInstantiation.test.ts` shows `Intent.dustActions` silently discards.
+//
+// `CostModel` is not in this list — it is branded below.
 export {
+  type Binding,
+  type Bindingish,
   ChargedState,
   communicationCommitmentRandomness,
+  type ContractAction,
+  ContractCall,
   ContractCallPrototype,
   ContractDeploy,
   ContractMaintenanceAuthority,
@@ -38,21 +55,56 @@ export {
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
+  DustActions,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
+  type NoBinding,
+  type NoProof,
   partitionTranscripts,
+  type PreBinding,
+  type PreProof,
   PreTranscript,
+  type Proof,
+  type Proofish,
+  type ProvingKeyMaterial,
+  type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
+  type SignatureEnabled,
+  type SignatureErased,
+  type Signaturish,
   signData,
   type SigningKey,
   type SingleUpdate,
   StateValue,
+  Transaction,
   type Transcript,
+  type UnprovenIntent,
+  type UnprovenOffer,
+  type UnprovenTransaction,
+  UnshieldedOffer,
   VerifierKeyInsert,
-  VerifierKeyRemove
+  VerifierKeyRemove,
+  ZswapOffer
 } from '@midnightntwrk/ledger-v9';
+
+/**
+ * This era's `CostModel`, branded with its ledger major.
+ *
+ * @remarks
+ * The one name here with no nominal separation of its own, so without a brand a consumer holding
+ * both entries can cross the eras. Branding is a *cast*, not a wrapper: the value stays the
+ * ledger's own class object, which `LedgerEra.test.ts` asserts by identity. It must also be the
+ * ledger's rather than onchain-runtime's identical one, kept off that seam by its conformance.
+ *
+ * @category era
+ */
+export type CostModel = EraBranded<LedgerCostModel, 9>;
+
+const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel };
+
+export { CostModel };
 
 /**
  * The contract operation (verifier key) version this era's ledger expects. Defined once so an era
@@ -105,3 +157,23 @@ export const makeContractOperationVersion = (): ContractOperationVersion =>
  */
 export const makeVersionedVerifierKey = (verifierKey: Uint8Array): ContractOperationVersionedVerifierKey =>
   new ContractOperationVersionedVerifierKey(CONTRACT_OPERATION_VERSION, verifierKey);
+
+/**
+ * Adapts a platform-js signing key to ledger 9's `SigningKey`.
+ *
+ * @remarks
+ * Ledger 9 keys are tagged (`{ tag, value }`) and, as of platform-js@3.0.0, structurally identical
+ * to platform-js's — so this is a field copy rather than a conversion. It is still the binding's
+ * job: ledger 8 represents the same key as a bare hex string, so an era-neutral facade cannot know
+ * the shape. The caller-supplied `tag` is preserved so an ECDSA-tagged key is never silently
+ * treated as Schnorr.
+ *
+ * Scheme admissibility is *not* checked here — that is era-neutral policy and stays in
+ * `Ledger.fromPlatformSigningKey`, which consults {@link era}'s allowlist before calling this.
+ *
+ * @category constructors
+ */
+export const makeSigningKey = (signingKey: PlatformSigningKey): LedgerSigningKey => ({
+  tag: signingKey.tag,
+  value: signingKey.value
+});
