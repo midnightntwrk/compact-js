@@ -235,6 +235,7 @@ export interface CommandContractCall {
     readonly input: unknown;
     readonly output: unknown;
     readonly privateTranscriptOutputs: readonly unknown[];
+    readonly zswapLocalState: unknown;
   };
   readonly communicationCommitment: Option.Option<{ readonly commCommRand: unknown }>;
 }

@@ -137,6 +137,17 @@ export const outputZswapLocalStateFilePath = Options.file('output-zswap', { exis
 );
 
 /** @internal */
+export const outputZswapCallsFilePath = Options.file('output-zswap-calls', { exists: 'either' }).pipe(
+  Options.withDescription(
+    "A file path where the 'ZswapLocalState' of every call should be written as JSON, callees first and " +
+    'the root last. A callee\'s shielded coins appear only here, because --output-zswap holds the root\'s. ' +
+    'A contract called more than once appears once per call, each time with all of its coins so far.'
+  ),
+  Options.mapEffect((filePath) => Path.Path.pipe(Effect.map((path) => path.resolve(filePath)))),
+  Options.optional
+);
+
+/** @internal */
 export const outputResultFilePath = Options.file('output-result', { exists: 'either' }).pipe(
   Options.withDescription('A file path of where the invoked circuit result data should be written.'),
   Options.withDefault('result.json'),

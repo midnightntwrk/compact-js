@@ -48,7 +48,7 @@
     "test-typecheck": "tsc -b tsconfig.test.json",
     "test-ledger-era-8": "yarn build-compact-v8 && vitest run --config vitest.era8.config.ts",
     "package": "shx rm -rf ./dist/src && node ../scripts/resolve-workspace-protocol.mjs ./dist/package.json && (cd ./dist; npm pack)",
-    "compact": "fetch-compactc && yarn compact-counter && yarn compact-unshielded && yarn compact-ccc-inner && yarn compact-ccc-middle && yarn compact-ccc-outer && yarn compact-ccc-self",
+    "compact": "fetch-compactc && yarn compact-counter && yarn compact-unshielded && yarn compact-ccc-inner && yarn compact-ccc-middle && yarn compact-ccc-outer && yarn compact-ccc-self && yarn compact-ccc-minter && yarn compact-ccc-mint-caller",
     "compact-v8": "COMPACTC_VERSION=0.31.1 fetch-compactc && yarn compact-v8-counter && yarn compact-v8-unshielded",
     "compact-v8-counter": "COMPACTC_VERSION=0.31.1 run-compactc ./test/contract/counter.compact ./test/contract/managed-v8/counter",
     "compact-v8-unshielded": "COMPACTC_VERSION=0.31.1 run-compactc ./test/contract/unshielded.compact ./test/contract/managed-v8/unshielded",
@@ -58,6 +58,8 @@
     "compact-ccc-middle": "run-compactc ./test/contract/cccMiddle.compact ./test/contract/managed/cccMiddle",
     "compact-ccc-outer": "run-compactc ./test/contract/cccOuter.compact ./test/contract/managed/cccOuter",
     "compact-ccc-self": "run-compactc ./test/contract/cccSelf.compact ./test/contract/managed/cccSelf",
+    "compact-ccc-minter": "run-compactc ./test/contract/cccMinter.compact ./test/contract/managed/cccMinter",
+    "compact-ccc-mint-caller": "run-compactc ./test/contract/cccMintCaller.compact ./test/contract/managed/cccMintCaller",
     "verify-exports": "node ../scripts/verify-exports.mjs ."
   },
   "files": [

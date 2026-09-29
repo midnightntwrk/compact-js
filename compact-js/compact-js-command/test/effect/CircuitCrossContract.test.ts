@@ -15,7 +15,7 @@
 
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
@@ -40,6 +40,7 @@ import { afterAll, beforeAll } from 'vitest';
 
 import { Contract as CCCInner_, ledger as innerLedger } from '../../../compact-js/test/contract/managed/cccInner/contract/index';
 import { Contract as CCCMiddle_ } from '../../../compact-js/test/contract/managed/cccMiddle/contract/index';
+import { decodeZswapLocalStateObject } from '../../src/effect/internal/encodedZswapLocalStateSchema.js';
 import { ensureRemovePath } from './cleanup.js';
 import * as MockConsole from './MockConsole.js';
 import { testLayer } from './testLayer.js';
@@ -189,7 +190,12 @@ const cli = Command.run(circuitCommand, { name: 'circuit', version: '0.0.0' });
 /** Builds the argv for the `circuit` command against a workspace, toggling the optional dir options. */
 const circuitArgv = (
   w: Workspace,
-  opts: { readonly statesIn?: string; readonly modulesIn?: string; readonly statesOut?: string },
+  opts: {
+    readonly statesIn?: string;
+    readonly modulesIn?: string;
+    readonly statesOut?: string;
+    readonly zswapCalls?: string;
+  },
   input: string,
   circuitId: string,
   ...args: string[]
@@ -201,6 +207,7 @@ const circuitArgv = (
   ...(opts.statesIn ? ['--contract-states-dir', opts.statesIn] : []),
   ...(opts.modulesIn ? ['--contract-modules-dir', opts.modulesIn] : []),
   ...(opts.statesOut ? ['--output-contract-states-dir', opts.statesOut] : []),
+  ...(opts.zswapCalls ? ['--output-zswap-calls', opts.zswapCalls] : []),
   '--output', w.output,
   '--output-oc', w.outputOc,
   '--output-ps', w.outputPs,
@@ -363,6 +370,34 @@ describe('Circuit Command (cross-contract calls)', () => {
       const zswap = JSON.parse(yield* fs.readFileString(w.outputZswap));
       expect(typeof zswap).toBe('object');
       expect(zswap).not.toBeNull();
+    }).pipe(Effect.provide(testLayer)),
+    60_000
+  );
+
+  it.effect('--output-zswap-calls writes every call\'s zswap state, callees first and the root last', () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const w = yield* prepareWorkspace;
+      const zswapCalls = join(dirname(w.output), 'zswap-calls.json');
+
+      yield* cli(circuitArgv(w, { statesIn: w.statesIn, modulesIn: w.modulesIn, zswapCalls }, w.input, 'incrementInner', '1'));
+
+      const entries = JSON.parse(yield* fs.readFileString(zswapCalls)) as readonly {
+        readonly contractAddress: string;
+        readonly circuitId: string;
+        readonly zswapLocalState: unknown;
+      }[];
+      // One entry per call in trace order: the two sub-calls into inner, then the root.
+      expect(entries.map(({ contractAddress, circuitId }) => [contractAddress, circuitId])).toEqual([
+        [innerAddress, 'getV'],
+        [innerAddress, 'setV'],
+        [middleAddress, 'incrementInner']
+      ]);
+      // Each state is in `--output-zswap`'s format, and the root's entry is that file.
+      for (const { zswapLocalState } of entries) {
+        yield* decodeZswapLocalStateObject(zswapLocalState);
+      }
+      expect(entries[2]!.zswapLocalState).toEqual(JSON.parse(yield* fs.readFileString(w.outputZswap)));
     }).pipe(Effect.provide(testLayer)),
     60_000
   );

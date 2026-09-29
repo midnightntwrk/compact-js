@@ -88,6 +88,7 @@ export const Options = {
   outputPublicFilePath: InternalOptions.outputPublicFilePath,
   outputPrivateStateFilePath: InternalOptions.outputPrivateStateFilePath,
   outputZswapLocalStateFilePath: InternalOptions.outputZswapLocalStateFilePath,
+  outputZswapCallsFilePath: InternalOptions.outputZswapCallsFilePath,
   outputResultFilePath: InternalOptions.outputResultFilePath,
   outputEventsFilePath: InternalOptions.outputEventsFilePath
 }
@@ -126,6 +127,7 @@ export const makeHandler: (
       outputPublicFilePath,
       outputPrivateStateFilePath,
       outputZswapLocalStateFilePath,
+      outputZswapCallsFilePath,
       outputResultFilePath,
       outputEventsFilePath
     },
@@ -344,6 +346,22 @@ export const makeHandler: (
       );
     }
     const rootCall = maybeRootCall.value;
+    // Encoded before the first write, so a failure here leaves no partial output behind.
+    const callZswapStates = yield* Effect.forEach(
+      Option.isSome(outputZswapCallsFilePath) ? result.calls : [],
+      (call) =>
+        runtime.tryRuntime(
+          `Failed to encode the zswap local state of the call to '${call.circuitId}' on '${call.contractAddress}'`,
+          () => runtime.encodeZswapLocalState(call.private.zswapLocalState as never)
+        ).pipe(
+          Effect.flatMap(encodeZswapLocalStateObject),
+          Effect.map((zswapLocalState) => ({
+            contractAddress: call.contractAddress,
+            circuitId: call.circuitId,
+            zswapLocalState
+          }))
+        )
+    );
 
     // If the output public file path is provided, write the on-chain (public state) data to the specified file.
     if (Option.isSome(outputPublicFilePath)) {
@@ -396,6 +414,9 @@ export const makeHandler: (
         )
       )
     );
+    if (Option.isSome(outputZswapCallsFilePath)) {
+      yield* fs.writeFileString(outputZswapCallsFilePath.value, JSON.stringify(callZswapStates));
+    }
     // Contract log events (MIP-0002) are non-consensus output; only write them when a destination
     // is requested. Unreachable on an era that cannot emit them — the gate at the top of this
     // handler has already failed the invocation.

@@ -130,6 +130,7 @@ const circuitInputs = (
     outputPublicFilePath: Option.none(),
     outputPrivateStateFilePath: '/nonexistent/out.ps.json',
     outputZswapLocalStateFilePath: '/nonexistent/out.zswap.json',
+    outputZswapCallsFilePath: Option.none(),
     outputResultFilePath: '/nonexistent/out.result.json',
     outputEventsFilePath: Option.none(),
     ...overrides
