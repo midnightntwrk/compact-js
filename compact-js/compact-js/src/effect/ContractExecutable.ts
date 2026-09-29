@@ -57,11 +57,14 @@ export declare namespace ContractExecutable {
 
   export type CircuitContext<PS> = Internal.CircuitContext<BoundLedger, BoundRuntime, PS>;
 
+  export type GasCost = Internal.GasCost;
+
   export type DeployResultPublic = Internal.DeployResultPublic<BoundLedger, BoundRuntime>;
   export type DeployResultPrivate<PS> = Internal.DeployResultPrivate<BoundLedger, BoundRuntime, PS>;
   export type DeployResult<PS> = Internal.DeployResult<BoundLedger, BoundRuntime, PS>;
 
   export type PartitionedTranscript = Internal.PartitionedTranscript<BoundLedger, BoundRuntime>;
+  export type CallPartitionInputs = Internal.CallPartitionInputs<BoundLedger, BoundRuntime>;
   export type ContractCallPublic = Internal.ContractCallPublic<BoundLedger, BoundRuntime>;
   export type ContractCallPrivate = Internal.ContractCallPrivate<BoundLedger, BoundRuntime>;
 

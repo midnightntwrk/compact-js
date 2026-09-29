@@ -14,13 +14,42 @@
  */
 
 import { type CompactRuntime, type ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
+import type * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import type * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
 import type { SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
 import type {
+  ContractAction as LedgerV8ContractAction,
+  DustActions as LedgerV8DustActions,
+  PreBinding as LedgerV8PreBinding,
+  PreProof as LedgerV8PreProof,
+  Proof as LedgerV8Proof,
+  ProvingKeyMaterial as LedgerV8ProvingKeyMaterial,
+  ProvingProvider as LedgerV8ProvingProvider,
+  SignatureEnabled as LedgerV8SignatureEnabled,
+  Transaction as LedgerV8Transaction,
+  UnprovenIntent as LedgerV8UnprovenIntent,
+  UnprovenOffer as LedgerV8UnprovenOffer,
+  UnprovenTransaction as LedgerV8UnprovenTransaction,
+  UnshieldedOffer as LedgerV8UnshieldedOffer
+} from '@midnightntwrk/ledger-v8';
+import type {
+  ContractAction as LedgerV9ContractAction,
   ContractOperation as LedgerContractOperation,
+  DustActions as LedgerV9DustActions,
+  PreBinding as LedgerV9PreBinding,
+  PreProof as LedgerV9PreProof,
+  Proof as LedgerV9Proof,
+  ProvingKeyMaterial as LedgerV9ProvingKeyMaterial,
+  ProvingProvider as LedgerV9ProvingProvider,
+  SignatureEnabled as LedgerV9SignatureEnabled,
   SigningKey as LedgerSigningKey,
   SingleUpdate as LedgerSingleUpdate,
-  Transcript as LedgerTranscript
+  Transaction as LedgerV9Transaction,
+  Transcript as LedgerTranscript,
+  UnprovenIntent as LedgerV9UnprovenIntent,
+  UnprovenOffer as LedgerV9UnprovenOffer,
+  UnprovenTransaction as LedgerV9UnprovenTransaction,
+  UnshieldedOffer as LedgerV9UnshieldedOffer
 } from '@midnightntwrk/ledger-v9';
 import type { Effect } from 'effect';
 import { describe, expect, it } from 'tstyche';
@@ -189,5 +218,64 @@ describe('era-pinned entry type surface', () => {
     // resolves a different era's types.
     expect<typeof v9EffectEntry.Ledger.era.ledger>().type.toBe<9>();
     expect<v9EffectEntry.Ledger.ContractOperation>().type.toBe<LedgerContractOperation>();
+  });
+
+  // Without these a consumer can call the transaction constructors but cannot name what they take
+  // or return, so it imports the era package around the seam anyway — which is midnight-sdk#401.
+  it('`/v9/effect` names ledger 9\'s unproven transaction parts', () => {
+    expect<v9EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV9UnprovenTransaction>();
+    expect<v9EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV9UnprovenOffer>();
+    expect<v9EffectEntry.Ledger.UnprovenIntent>().type.toBe<LedgerV9UnprovenIntent>();
+  });
+
+  it('`/v8/effect` names ledger 8\'s unproven transaction parts', () => {
+    expect<v8EffectEntry.Ledger.UnprovenTransaction>().type.toBe<LedgerV8UnprovenTransaction>();
+    expect<v8EffectEntry.Ledger.UnprovenOffer>().type.toBe<LedgerV8UnprovenOffer>();
+    expect<v8EffectEntry.Ledger.UnprovenIntent>().type.toBe<LedgerV8UnprovenIntent>();
+  });
+
+  // `Transaction.deserialize` already returns `Transaction<Signaturish, Proofish, Bindingish>`, so
+  // those leak into the public surface named or not; exporting them makes the result usable.
+  it('`/v9/effect` names what `prove` takes and returns', () => {
+    expect<v9EffectEntry.Ledger.ProvingProvider>().type.toBe<LedgerV9ProvingProvider>();
+    expect<Awaited<ReturnType<v9EffectEntry.Ledger.UnprovenTransaction['prove']>>>().type.toBe<
+      LedgerV9Transaction<LedgerV9SignatureEnabled, LedgerV9Proof, LedgerV9PreBinding>
+    >();
+    expect<v9EffectEntry.Ledger.ContractAction<v9EffectEntry.Ledger.PreProof>>().type.toBe<
+      LedgerV9ContractAction<LedgerV9PreProof>
+    >();
+  });
+
+  it('`/v8/effect` names what `prove` takes and returns', () => {
+    expect<v8EffectEntry.Ledger.ProvingProvider>().type.toBe<LedgerV8ProvingProvider>();
+    expect<Awaited<ReturnType<v8EffectEntry.Ledger.UnprovenTransaction['prove']>>>().type.toBe<
+      LedgerV8Transaction<LedgerV8SignatureEnabled, LedgerV8Proof, LedgerV8PreBinding>
+    >();
+    expect<v8EffectEntry.Ledger.ContractAction<v8EffectEntry.Ledger.PreProof>>().type.toBe<
+      LedgerV8ContractAction<LedgerV8PreProof>
+    >();
+  });
+
+  // What a consumer needs to implement a `ProvingProvider` and fund an intent without reaching for
+  // the era package. `DustActions` and `UnshieldedOffer` are values, not just types: fetching those
+  // classes from the consumer's own resolution is the second instantiation that makes
+  // `Intent.dustActions` discard in silence.
+  it('`/v9/effect` names the proving-key material and funding classes', () => {
+    expect<v9EffectEntry.Ledger.ProvingKeyMaterial>().type.toBe<LedgerV9ProvingKeyMaterial>();
+    expect<typeof v9EffectEntry.Ledger.DustActions>().type.toBe<typeof LedgerV9DustActions>();
+    expect<typeof v9EffectEntry.Ledger.UnshieldedOffer>().type.toBe<typeof LedgerV9UnshieldedOffer>();
+  });
+
+  it('`/v8/effect` names the proving-key material and funding classes', () => {
+    expect<v8EffectEntry.Ledger.ProvingKeyMaterial>().type.toBe<LedgerV8ProvingKeyMaterial>();
+    expect<typeof v8EffectEntry.Ledger.DustActions>().type.toBe<typeof LedgerV8DustActions>();
+    expect<typeof v8EffectEntry.Ledger.UnshieldedOffer>().type.toBe<typeof LedgerV8UnshieldedOffer>();
+  });
+
+  // Upstream gives each marker a private `type_`, so cross-era mixing is a compile error and the
+  // runtime silent-drop in `LedgerDualInstantiation.test.ts` is reachable only by casting.
+  it('keeps the two eras\' proof markers nominally distinct', () => {
+    expect<LedgerV8Proof>().type.not.toBeAssignableTo<LedgerV9Proof>();
+    expect<LedgerV8UnprovenIntent>().type.not.toBeAssignableTo<LedgerV9UnprovenIntent>();
   });
 });

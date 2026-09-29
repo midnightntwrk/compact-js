@@ -297,6 +297,24 @@ describe('cross-contract calls', () => {
     })
   );
 
+  it.effect('totals gas for the callee as well as the root', () =>
+    Effect.gen(function*() {
+      const result = yield* middle.circuit(
+        Contract.ProvableCircuitId<CCCMiddleContract>('incrementInner'),
+        middleContext(resolveFromChain),
+        1n
+      );
+
+      // Why `gasCosts` is read off the context rather than from `CircuitResults.gasCost`: that one
+      // is the root frame's own tally and would report nothing for `inner`, under-reporting exactly
+      // when a consumer is checking what a call tree cost. `inner` is called twice here and has a
+      // single entry, which is the other half of the shape — per contract, not per call.
+      expect(Object.keys(result.gasCosts).sort()).toEqual([innerDeploy.address, middleDeploy.address].sort());
+      expect(result.gasCosts[innerDeploy.address]!.computeTime).toBeGreaterThan(0n);
+      expect(result.gasCosts[middleDeploy.address]!.computeTime).toBeGreaterThan(0n);
+    })
+  );
+
   it.effect('uses the exact expected contract address for each returned call', () =>
     Effect.gen(function*() {
       const result = yield* middle.circuit(
@@ -399,6 +417,63 @@ describe('cross-contract calls', () => {
         const [guaranteed, fallible] = call.public.partitionedTranscript;
         expect([...(guaranteed?.program ?? []), ...(fallible?.program ?? [])]).toEqual(call.public.publicTranscript);
       }
+    })
+  );
+
+  it.effect('reports each call\'s own block context, effects, and commitment indices', () =>
+    Effect.gen(function*() {
+      const result = yield* middle.circuit(
+        Contract.ProvableCircuitId<CCCMiddleContract>('incrementInner'),
+        middleContext(resolveFromChain),
+        1n
+      );
+
+      for (const call of result.calls) {
+        // The block-level call context belongs to the contract the call ran against, not to the
+        // root — which is what makes these usable per call rather than per execution.
+        expect(call.public.partitionInputs.block.ownAddress).toBe(call.contractAddress);
+        expect(typeof call.public.partitionInputs.block.secondsSinceEpoch).toBe('bigint');
+        expect(Array.isArray(call.public.partitionInputs.effects.claimedNullifiers)).toBe(true);
+        expect(call.public.partitionInputs.comIndices).toBeInstanceOf(Map);
+        // Plain data, unlike `public.contractState` (a live WASM handle that `structuredClone`
+        // reduces to `{ __wbg_ptr }`). Being plain data is what lets these cross an era seam at
+        // all, which is the whole premise of midnight-sdk#400.
+        expect(() => structuredClone(call.public.partitionInputs.block)).not.toThrow();
+        expect(() => structuredClone(call.public.partitionInputs.effects)).not.toThrow();
+        expect(() => structuredClone(call.public.partitionInputs.comIndices)).not.toThrow();
+      }
+    })
+  );
+
+  it.effect('exposes the inputs each call\'s transcript was partitioned from', () =>
+    Effect.gen(function*() {
+      const result = yield* middle.circuit(
+        Contract.ProvableCircuitId<CCCMiddleContract>('incrementInner'),
+        middleContext(resolveFromChain),
+        1n
+      );
+
+      // The claim behind midnight-sdk#400 is not that the three values exist but that they are the
+      // ones *this* partition consumed — a consumer re-partitioning in another ledger era gets a
+      // different answer otherwise. So they are read back off the `PreTranscript`s the executable
+      // actually built; `PreTranscript` is a delegating mock in this suite, so its call arguments
+      // are the real query contexts.
+      const contexts = vi.mocked(PreTranscript).mock.calls.map(([context]) => context);
+      expect(contexts).toHaveLength(result.calls.length);
+
+      result.calls.forEach((call, i) => {
+        const context = contexts[i]!;
+        // `block` and `effects` are copied straight off the pre-execution query context, so they
+        // are exactly what the pre-transcript's context carries.
+        expect(call.public.partitionInputs.block).toEqual(context.block);
+        expect(call.public.partitionInputs.effects).toEqual(context.effects);
+        // `comIndices` is the *post*-execution context's, folded onto the pre-execution one by
+        // `insertCommitment` — so the exposed map is contained in the pre-transcript's context
+        // rather than equal to it.
+        for (const [commitment, index] of call.public.partitionInputs.comIndices) {
+          expect(context.comIndices.get(commitment)).toBe(index);
+        }
+      });
     })
   );
 

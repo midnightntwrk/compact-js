@@ -14,19 +14,17 @@
  */
 
 /**
- * The ledger 8 era binding — **spike status** (midnight-sdk#387 phase 3).
+ * The ledger 8 era binding. This module (together with its peers under `internal/ledger`) is the
+ * only place in `src/` that may import from a `@midnightntwrk/ledger-v<N>` package; everything else
+ * goes through the `Ledger` facade, or through the era-pinned `internal/era/v8Ledger.ts` that
+ * `/v8/effect` exports. ESLint enforces this (`no-restricted-imports`); tests are exempt by design,
+ * since some must compare ledger module identity.
  *
  * @remarks
- * This exists to answer the ledger-8 feasibility question on #388 by *building* rather than by
- * reading `.d.ts` diffs: written against the same {@link LedgerBinding} contract as `v9.ts`, so
- * every missing name or changed signature surfaces as a compile error here. It is NOT reachable
- * from any entry — `current.ts` still binds v9, and there is no `/v8` subpath — and it is not
- * paired with a compact-runtime 0.16 binding yet (that half needs GitHub Packages credentials).
+ * How the v8 surface differs from v9, against `@midnightntwrk/ledger-v8@8.1.2`:
  *
- * Findings so far, from the surface comparison against `@midnightntwrk/ledger-v8@8.1.2`:
- *
- * - All 24 names the facade re-exports are present on v8; nothing was added between v8 and v9 that
- *   the facade depends on.
+ * - Every name the facade re-exports is present on v8; nothing was added between v8 and v9 that the
+ *   facade depends on.
  * - `SigningKey` is a bare `string` on v8, against `{ tag, value }` on v9, and `sampleSigningKey()`
  *   takes no argument (v9 takes an optional `SignatureKind`). v8 has no `SignatureKind` concept at
  *   all: its keys are BIP-340 only. This is the one difference that reaches the public API, via
@@ -42,35 +40,61 @@ import {
   ContractMaintenanceAuthority as LedgerContractMaintenanceAuthority,
   ContractOperationVersion,
   ContractOperationVersionedVerifierKey,
+  CostModel as LedgerCostModel,
   type SignatureVerifyingKey,
   type SigningKey as LedgerSigningKey
 } from '@midnightntwrk/ledger-v8';
 
-import { type Era } from '../era.js';
+import { type Era, type EraBranded } from '../era.js';
 
+// Matches the v9 twin except for `ContractMaintenanceAuthority` and `CostModel`, both declared
+// below rather than re-exported here. See that file for why the proof/binding/signature markers
+// are type-only.
 export {
+  type Binding,
+  type Bindingish,
   ChargedState,
   communicationCommitmentRandomness,
+  type ContractAction,
+  ContractCall,
   ContractCallPrototype,
   ContractDeploy,
   type ContractOperation,
   type ContractOperationVersion,
   type ContractOperationVersionedVerifierKey,
   ContractState,
+  DustActions,
   Intent,
   LedgerParameters,
   MaintenanceUpdate,
+  type NoBinding,
+  type NoProof,
   partitionTranscripts,
+  type PreBinding,
+  type PreProof,
   PreTranscript,
+  type Proof,
+  type Proofish,
+  type ProvingKeyMaterial,
+  type ProvingProvider,
   QueryContext,
   ReplaceAuthority,
+  type SignatureEnabled,
+  type SignatureErased,
+  type Signaturish,
   signData,
   type SigningKey,
   type SingleUpdate,
   StateValue,
+  Transaction,
   type Transcript,
+  type UnprovenIntent,
+  type UnprovenOffer,
+  type UnprovenTransaction,
+  UnshieldedOffer,
   VerifierKeyInsert,
-  VerifierKeyRemove
+  VerifierKeyRemove,
+  ZswapOffer
 } from '@midnightntwrk/ledger-v8';
 
 /**
@@ -98,6 +122,13 @@ export { ContractMaintenanceAuthority };
 /** Ledger 8's `ContractMaintenanceAuthority` instance type, unaffected by the repair above. */
 export type ContractMaintenanceAuthority = LedgerContractMaintenanceAuthority;
 
+/** Ledger 8's `CostModel`, era-branded. See the v9 twin for why. @category era */
+export type CostModel = EraBranded<LedgerCostModel, 8>;
+
+const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel };
+
+export { CostModel };
+
 /**
  * The contract operation (verifier key) version this era's ledger expects. Same literal as v9: v8
  * accepts only `'v3'`, and v9 accepts `'v3' | 'v4'` but compact-js emits `'v3'`.
@@ -118,10 +149,11 @@ const CMA_SIGNATURE_KINDS: ReadonlySet<SignatureKind> = new Set(['schnorr']);
  * configured against a v8 build has no representation in this era's `SigningKey` at all, so it must
  * be rejected at the descriptor rather than coerced into a bare hex string.
  *
- * Not yet expressible: `Era` describes which *schemes* an era allows, but not the *shape* of its
- * `SigningKey`. `Ledger.fromPlatformSigningKey` returns `{ tag, value }` because v9 wants that;
- * against v8 it must return the bare `value`. Binding this era for real needs `Era` to gain a
- * signing-key-shape discriminant (or `fromPlatformSigningKey` to move into the binding).
+ * The key's *shape* is deliberately not expressed here: `Era` describes which *schemes* an era
+ * allows, not what its `SigningKey` looks like. That half lives in the binding instead —
+ * `fromPlatformSigningKey` splits, keeping the era-neutral allowlist check in `conversions.ts` and
+ * delegating construction to this module's {@link makeSigningKey}, which returns the bare `value`
+ * where v9 returns `{ tag, value }`.
  */
 export const era = {
   ledger: 8,

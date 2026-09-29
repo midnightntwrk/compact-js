@@ -15,7 +15,7 @@
 
 /**
  * The era-neutral shape of "execute one circuit", declared above both runtime bindings so each can
- * present the same view of a fundamentally different execution model (midnight-sdk#387 phase 3).
+ * present the same view of a fundamentally different execution model (midnight-sdk#387).
  *
  * @remarks
  * `ContractExecutable` used to speak compact-runtime 0.19's model directly: build a context with
@@ -78,6 +78,48 @@ export interface CallProofDataView<QueryContext, AlignedValue, Op, EncodedZswapL
 }
 
 /**
+ * The members of a line's query context that a call's transcript partition is built from.
+ *
+ * @remarks
+ * `ContractExecutable` republishes these four on every `ContractCallPublic` so a consumer can redo
+ * the partition itself — in a *different* ledger era, which is the case that matters. Across a
+ * hard-fork window a call executes on one era and composes on the next, so the partition that came
+ * out of the executing era is the wrong one, and the inputs needed to redo it in the right one were
+ * unreachable (midnight-sdk#400).
+ *
+ * Declared here structurally rather than taken from either line, and asserted against both by
+ * `conformance.ts`, because the public members are *derived* from {@link CallProofDataView}'s query
+ * context: a derivation that misses resolves to `never`, which is assignable to everything — so
+ * every call site would still compile and the member would simply be unusable. This is what turns
+ * that silent collapse into a build failure.
+ *
+ * `block`, `effects` and `comIndices` are plain data on every line compact-js binds, which is what
+ * lets them cross an era seam; {@link state} is not — it is a live handle, like the post-execution
+ * state `ContractCallPublic.contractState` already reports, and a consumer moving it across an era
+ * boundary has to encode it first.
+ */
+export interface PartitionInputs {
+  /**
+   * The ledger state the call ran against, one level in (`state.state` is the value itself). Read
+   * from the **pre**-execution context.
+   *
+   * @remarks
+   * Required rather than incidental: the partitioner *replays* the transcript against this state to
+   * decide where the guaranteed section ends and to charge the ops, so it rejects a state the
+   * transcript's reads do not fit and mis-charges one that merely differs. It is listed here for
+   * the same reason as the other three — the public member is derived from this context, and a
+   * derivation that misses collapses to `never` in silence.
+   */
+  readonly state: { readonly state: unknown };
+  /** The block-level call context. Read from the **pre**-execution context. */
+  readonly block: unknown;
+  /** The contract-external effects the call declared. Read from the **pre**-execution context. */
+  readonly effects: unknown;
+  /** The commitment indices the call discovered. Read from the **post**-execution context. */
+  readonly comIndices: unknown;
+}
+
+/**
  * The result of executing one root circuit, as `ContractExecutable` consumes it.
  *
  * @remarks
@@ -88,12 +130,25 @@ export interface CallProofDataView<QueryContext, AlignedValue, Op, EncodedZswapL
  * a `never[]` — statically empty rather than merely empty at run time. That is what lets the same
  * `CallResult` type serve both eras while keeping the impossible case unconstructable.
  */
-export interface ExecutionView<Result, PrivateState, Trace, EncodedZswapLocalState, LogEvent> {
+export interface ExecutionView<Result, PrivateState, Trace, EncodedZswapLocalState, LogEvent, GasCosts> {
   readonly result: Result;
   readonly trace: readonly Trace[];
   readonly privateState: PrivateState;
   readonly zswapLocalState: EncodedZswapLocalState;
   readonly events: readonly LogEvent[];
+  readonly gasCosts: GasCosts;
+}
+
+/**
+ * A gas figure in the four dimensions both lines model. The inward-facing twin of
+ * {@link PartitionInputs}: structural, so each binding's own call checks it against that line's
+ * `RunningCost`. Costs travelling *out* stay era-derived.
+ */
+export interface GasCost {
+  readonly readTime: bigint;
+  readonly computeTime: bigint;
+  readonly bytesWritten: bigint;
+  readonly bytesDeleted: bigint;
 }
 
 /**
@@ -124,4 +179,23 @@ export interface ExecutionContextParams<
   readonly stateProvider?: ContractStateProvider | undefined;
   readonly moduleProvider?: ContractModuleProvider | undefined;
   readonly parentBlockHash?: string | undefined;
+  /**
+   * The execution clock, in **seconds** since the Unix epoch — not milliseconds. Defaults to the
+   * wall clock (`Math.floor(Date.now() / 1_000)`) on both lines, so omitting it changes nothing.
+   *
+   * @remarks
+   * Lands in the query context's `block.secondsSinceEpoch`, which {@link PartitionInputs} puts on
+   * the public result — so without it every execution produces a `block` that differs on each run
+   * and no consumer can record a fixture (midnight-sdk#403).
+   *
+   * `ContractExecutable.circuit` supplies this from the effect's own `Clock`, converting from
+   * milliseconds at the call site. That is why there is no `time` on the public `CircuitContext`:
+   * `Clock` is a default Effect service, so a consumer pins the value with a layer and pays no new
+   * API for it, while the live clock reproduces the previous behaviour exactly. Add a per-call
+   * member only if something needs a *different* time per call — recording a fixture does not.
+   */
+  readonly time?: number | undefined;
+  // Per query and not per call because that is all either line enforces: both pass this same value
+  // to every `query` without decrementing it (midnight-sdk#403).
+  readonly queryGasLimit?: GasCost | undefined;
 }

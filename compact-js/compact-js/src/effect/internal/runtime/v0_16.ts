@@ -14,15 +14,21 @@
  */
 
 /**
- * The compact-runtime 0.16 binding — the runtime half of the ledger 8 era, and **spike status**
- * (midnight-sdk#387 phase 3).
+ * The compact-runtime 0.16 binding. This module (together with its peers under `internal/runtime`)
+ * is the only place in `src/` that may import the 0.16 line; everything else goes through the
+ * `CompactRuntime` facade, or through the era-pinned `internal/era/v8Runtime.ts` that `/v8/effect`
+ * exports. ESLint enforces this (`no-restricted-imports`); tests are exempt by design, since some
+ * must compare module identity.
+ *
+ * The runtime line is era-paired with the ledger — 0.16 with ledger 8, over onchain-runtime-v3 —
+ * so this binding and `internal/ledger/v8.ts` are selected together. Neither is meaningful alone.
+ *
+ * The package is reached through the `compact-runtime-ledger8` npm alias so that one dependency
+ * tree can hold both lines, and the alias resolves the public npmjs tarball rather than the
+ * GitHub Packages copy the `@midnight-ntwrk` scope routing in `.yarnrc.yml` would otherwise pick.
+ * Renaming the alias to the real package name breaks the install.
  *
  * @remarks
- * Paired with `internal/ledger/v8.ts`: ledger 8 ↔ compact-runtime 0.16 ↔ onchain-runtime-v3 ↔
- * compactc 0.31.x. Neither half is meaningful alone. Like its ledger twin this is not reachable
- * from any entry — `current.ts` still binds 0.19, and there is no `/v8` subpath — but
- * `conformance.ts` checks it on every build so it cannot rot before it is switched on.
- *
  * It satisfies {@link RuntimeBinding} (the era-neutral core) and deliberately **not**
  * {@link CallTreeRuntimeBinding}. That is not an omission to be filled in later: the 0.16
  * execution model is a single flat frame, and the call-tree members simply do not exist on this
@@ -46,14 +52,6 @@
  * `compact-types`, `casts`, `built-ins`, `utils`, `error`, `constants`, `witness`, `version` — is
  * identical to 0.19 apart from the onchain-runtime-v3 → v4 import swap, which is why the core
  * contract below is satisfiable at all.
- *
- * `checkRuntimeVersion` hard-fails across minors while the major is 0, so contracts compiled for
- * 0.19 can never run on this line: binding this era for real needs its own compiled fixtures
- * (compactc 0.31.1, Compact language 0.23.0), not a recompile of the current set.
- *
- * The package is reached through the `compact-runtime-ledger8` npm alias so that one dependency
- * tree can hold both lines, and the alias resolves the public npmjs tarball rather than the
- * GitHub Packages copy the `@midnight-ntwrk` scope routing would otherwise pick.
  */
 import { type SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
 import {
@@ -73,16 +71,19 @@ import {
 } from 'compact-runtime-ledger8';
 
 import { type RuntimeLine } from '../era.js';
-import {
-  type CallProofDataView,
-  type ExecutionContextParams,
-  type ExecutionView
-} from './execution.js';
+import { type CallProofDataView, type ExecutionContextParams, type ExecutionView } from './execution.js';
 
+// `CallContext`, `Effects` and `CoinCommitment` are the types of the partition inputs
+// `ContractCallPublic` exposes (midnight-sdk#400), and `EncodedStateValue` is listed for the
+// separate reason given on the 0.19 twin. This line reaches all four the same way — an explicit
+// re-export from onchain-runtime-v3 — but without the `CallContext` ambiguity: 0.16's
+// circuit-context declares no `CallContext` of its own, so there is only one to resolve to.
 export {
   type AlignedValue,
+  type CallContext,
   type CircuitContext,
   type CircuitResults,
+  type CoinCommitment,
   CompactError,
   type ConstructorContext,
   type ConstructorResult,
@@ -90,7 +91,9 @@ export {
   createCircuitContext,
   createConstructorContext,
   decodeZswapLocalState,
+  type Effects,
   emptyZswapLocalState,
+  type EncodedStateValue,
   type EncodedZswapLocalState,
   encodeZswapLocalState,
   type Op,
@@ -124,11 +127,7 @@ export {
  * can go. `RuntimeBinding.tst.ts` pins the relationship on both lines.
  */
 const ContractMaintenanceAuthority = RuntimeContractMaintenanceAuthority as unknown as {
-  new (
-    committee: SignatureVerifyingKey[],
-    threshold: number,
-    counter?: bigint
-  ): RuntimeContractMaintenanceAuthority;
+  new (committee: SignatureVerifyingKey[], threshold: number, counter?: bigint): RuntimeContractMaintenanceAuthority;
   deserialize(raw: Uint8Array): RuntimeContractMaintenanceAuthority;
 };
 
@@ -207,7 +206,10 @@ export type Execution<Result, PrivateState> = ExecutionView<
   PrivateState,
   CallTraceEntry,
   EncodedZswapLocalState,
-  LogEvent
+  LogEvent,
+  // Absent like `LogEvent`, but because this line's figure is *wrong*: `queryLedgerState` assigns
+  // `context.gasCost` per query instead of accumulating, so 0.16 reports the last query's cost.
+  undefined
 >;
 
 /**
@@ -265,11 +267,16 @@ export const createExecutionContext = <PS>(
     );
   }
 
+  // The gas limit is fifth and `time` seventh here; `costModel` sits between them and stays at
+  // the default, for the reason the 0.19 twin gives.
   const context = createCircuitContext(
     params.address,
     params.zswapLocalState,
     params.contractState,
-    params.privateState
+    params.privateState,
+    params.queryGasLimit,
+    undefined,
+    params.time
   );
 
   const meta: ExecutionMeta = {
@@ -333,6 +340,7 @@ export const readExecution = <Result, PS>(
     trace: [entry],
     privateState: results.context.currentPrivateState,
     zswapLocalState: results.context.currentZswapLocalState,
-    events: []
+    events: [],
+    gasCosts: undefined
   };
 };

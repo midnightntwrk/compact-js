@@ -14,9 +14,7 @@
  */
 
 /**
- * Compile-time conformance for **every** compact-runtime binding, bound or not — the twin of
- * `internal/ledger/conformance.ts`, and for the same reason: `current.ts` asserts only the line it
- * re-exports, so an unbound binding could rot until the day someone repoints it.
+ * Compile-time conformance for **every** compact-runtime binding.
  *
  * @remarks
  * Two things are checked per binding, plus one negative check that carries real policy:
@@ -35,6 +33,7 @@
  */
 import { type LogEvent as ContractLogEvent } from '../../ContractLog.js';
 import { type CallTreeRuntimeBinding, type RuntimeBinding, type RuntimeBindingViolations } from './binding.js';
+import { type PartitionInputs } from './execution.js';
 import type * as V0_16 from './v0_16.js';
 import type * as V0_19 from './v0_19.js';
 
@@ -47,7 +46,7 @@ type Assert<_T extends true> = void;
 // union of message literals and fails the build quoting the relationship that broke.
 type AssertNoViolations<_V extends never> = void;
 
-// --- compact-runtime 0.16 (ledger 8 era; spike, not bound by `current.ts`) ----------------------
+// --- compact-runtime 0.16 (ledger 8 era; bound by the `/v8` entry) ------------------------------
 type _V0_16Conforms = Assert<Extends<typeof V0_16, RuntimeBinding>>;
 type _V0_16NoViolations = AssertNoViolations<RuntimeBindingViolations<typeof V0_16>>;
 // Asserted FALSE deliberately — see the capability note above. Do not "fix" this to `true`.
@@ -66,3 +65,19 @@ type _V0_19HasCallTree = Assert<Extends<typeof V0_19, CallTreeRuntimeBinding>>;
 // at run time. Only the call-tree lines are checked, because a line with no events has no
 // `LogEvent` to compare (0.16's is `never`, which satisfies anything).
 type _V0_19LogEventDecodable = Assert<Extends<V0_19.LogEvent, ContractLogEvent>>;
+
+// `ContractCallPublic` exposes each call's pre-execution `state`, `block`, `effects` and
+// `comIndices` so a consumer can redo the transcript partition in another ledger era
+// (midnight-sdk#400). Those members are
+// *derived* from the trace entry's query context rather than declared, and a derivation that misses
+// resolves to `never` — which is assignable to everything, so the member would compile clean at
+// every call site and simply be unusable. Checked for every line, bound or not: this is the only
+// thing that turns that silent collapse into a build failure.
+type _V0_16QueryContextHasPartitionInputs = Assert<Extends<V0_16.QueryContext, PartitionInputs>>;
+type _V0_19QueryContextHasPartitionInputs = Assert<Extends<V0_19.QueryContext, PartitionInputs>>;
+
+// Asserted FALSE deliberately: the ledger seam owns `CostModel`. Both packages declare one, the
+// declarations are identical and neither is branded, so listing it here too would put two
+// interchangeable `CostModel`s on one entry. Do not "fix" this to `true`.
+type _V0_16HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_16 ? true : false, false>>;
+type _V0_19HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_19 ? true : false, false>>;
