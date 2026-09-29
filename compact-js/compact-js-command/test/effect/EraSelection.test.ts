@@ -159,7 +159,7 @@ describe('era selection', () => {
       // The era *pair*, not just the ledger major: a command set built from the unsuffixed entry
       // would report the bound era for both, which is the mislabelling the era work prevents.
       expect(forLedgerEra(8).era).toMatchObject({ ledger: 8, runtime: '0.16' });
-      expect(forLedgerEra(9).era).toMatchObject({ ledger: 9, runtime: '0.19' });
+      expect(forLedgerEra(9).era).toMatchObject({ ledger: 9, runtime: '0.20' });
     });
 
     it('applies the handler factories once per era', () => {

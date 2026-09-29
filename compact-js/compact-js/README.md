@@ -38,8 +38,8 @@ The bound era is inspectable at run time via `Ledger.era`, from any entry.
 
 | Entry | Ledger era | compact-runtime | Surface |
 | --- | --- | --- | --- |
-| `.` / `./effect` | the build's bound era (ledger 9 today) | 0.19 | Full |
-| `/v9` / `/v9/effect` | ledger 9 | 0.19 | Full |
+| `.` / `./effect` | the build's bound era (ledger 9 today) | 0.20 | Full |
+| `/v9` / `/v9/effect` | ledger 9 | 0.20 | Full |
 | `/v8` / `/v8/effect` | ledger 8 | 0.16 | `Ledger` and `CompactRuntime` seams only |
 
 `/v8/effect` binds ledger 8 directly rather than following the package's bound era, so the two

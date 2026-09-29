@@ -29,7 +29,7 @@
  *   instantiated for the ledger 8 / runtime 0.16 pair.
  * - `CompactRuntime` — the compact-runtime 0.16 seam, including the execution adapter
  *   (`createExecutionContext` / `readExecution`) that presents 0.16's flat, single-frame execution
- *   model in the same shape as 0.19's call tree.
+ *   model in the same shape as 0.20's call tree.
  * - The **era-free core** (`internal/eraFreeSurface.ts`) — contract and ZK-configuration modules
  *   whose module graph reaches neither facade, so the objects here are the *same instances* the
  *   ledger 9 entry exports. This is #388's "identical public API wherever the era permits": code

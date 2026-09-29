@@ -26,13 +26,13 @@ import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
  * runtime lines.
  *
  * @remarks
- * `ContractExecutable` is written against compact-runtime 0.19's call-tree model — it builds a
+ * `ContractExecutable` is written against compact-runtime 0.20's call-tree model — it builds a
  * context with `createCircuitContext({ circuitId, contractAddress, … })` and then reads
  * `context.callProofDataTrace`, `context.callContext` and `context.events`. None of that exists on
  * 0.16, which has a single flat frame and returns `results.proofData` instead.
  *
  * Rather than fork the executable, each binding supplies two functions —
- * `createExecutionContext` and `readExecution` — that present the same era-neutral view. On 0.19
+ * `createExecutionContext` and `readExecution` — that present the same era-neutral view. On 0.20
  * both are thin pass-throughs. On 0.16 the context is built flat and the trace is *synthesised* as
  * a single entry, which is faithful because a line without cross-contract calls can only ever
  * produce one call.
@@ -108,7 +108,7 @@ describeWithFixture('ledger 8 execution adapter', () => {
 
     const entry = V0_16.readExecution(results).trace[0]!;
 
-    // 0.19 puts these on each `CallProofData`; on 0.16 they live on `results.proofData`, so the
+    // 0.20 puts these on each `CallProofData`; on 0.16 they live on `results.proofData`, so the
     // adapter has to move them across or transaction assembly has nothing to prove.
     expect(entry.publicTranscript.length).toBeGreaterThan(0);
     expect(entry.input).toBeDefined();

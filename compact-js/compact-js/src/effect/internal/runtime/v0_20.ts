@@ -14,13 +14,13 @@
  */
 
 /**
- * The compact-runtime 0.19 binding. This module (together with its peers under `internal/runtime`)
+ * The compact-runtime 0.20 binding. This module (together with its peers under `internal/runtime`)
  * is the only place in `src/` that may import from `@midnight-ntwrk/compact-runtime`; everything
  * else goes through the `CompactRuntime` facade so that a future runtime line binds by swapping
  * `current.ts`, not by editing call sites (midnight-sdk#387). ESLint enforces this
  * (`no-restricted-imports`); tests are exempt by design, since some must compare module identity.
  *
- * The runtime line is era-paired with the ledger — 0.19 with ledger 9, over onchain-runtime-v4 —
+ * The runtime line is era-paired with the ledger — 0.20 with ledger 9, over onchain-runtime-v4 —
  * so this binding and `internal/ledger/v9.ts` are swapped together. Neither is meaningful alone.
  */
 import {
@@ -111,7 +111,7 @@ export {
  *
  * @category era
  */
-export const line = '0.19' as const satisfies RuntimeLine;
+export const line = '0.20' as const satisfies RuntimeLine;
 
 /**
  * Samples a fresh signing key for `kind`.
@@ -140,7 +140,7 @@ export type Execution<Result, PrivateState> = ExecutionView<
   Result,
   PrivateState,
   CallTraceEntry,
-  // Optional because 0.19 carries the root zswap state on `callContext`, where it may be absent;
+  // Optional because 0.20 carries the root zswap state on `callContext`, where it may be absent;
   // `ContractExecutable` owns the typed failure for that case.
   EncodedZswapLocalState | undefined,
   LogEvent,
@@ -151,7 +151,7 @@ export type Execution<Result, PrivateState> = ExecutionView<
  * Builds a circuit-execution context for this line.
  *
  * @remarks
- * A direct pass-through: 0.19 *is* the call-tree model the era-neutral view is modelled on, so this
+ * A direct pass-through: 0.20 *is* the call-tree model the era-neutral view is modelled on, so this
  * only renames parameters into `createCircuitContext`'s options and pairs the two providers into
  * its `crossContract`. The one gap, `costModel`, keeps the runtime's own default. `costModel` is not
  * one a caller could fill: `CostModel` has a private constructor and one static factory, whose
@@ -194,7 +194,7 @@ export const createExecutionContext = <PS>(
  *
  * @remarks
  * Also a pass-through: the trace, root private state, root zswap state and event list are all
- * already on the 0.19 context. `zswapLocalState` is asserted non-`undefined` by the caller, which
+ * already on the 0.20 context. `zswapLocalState` is asserted non-`undefined` by the caller, which
  * owns the typed failure — this function stays total.
  *
  * @category execution
@@ -213,7 +213,7 @@ export const readExecution = <Result, PS>(
 });
 
 // `CallProofData` is the type the trace cast above narrows to; asserted rather than assumed so a
-// 0.19 patch that reshapes it fails the build here instead of at a call site.
+// 0.20 patch that reshapes it fails the build here instead of at a call site.
 type _TraceEntryMatchesCallProofData = CallProofData extends CallTraceEntry ? true : never;
 const _traceEntryConforms: _TraceEntryMatchesCallProofData = true;
 void _traceEntryConforms;

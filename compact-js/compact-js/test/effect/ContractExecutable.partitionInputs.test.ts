@@ -119,7 +119,7 @@ const queryContexts = (address: string) => {
 };
 
 /**
- * A contract whose circuit returns a hand-built 0.19 execution result rather than running anything.
+ * A contract whose circuit returns a hand-built 0.20 execution result rather than running anything.
  * The same technique `CrossContractCall.test.ts` uses for its no-zswap stand-in: everything
  * downstream of `readExecution` — conversions, partitioning, assembly — is the real implementation.
  */
@@ -166,7 +166,7 @@ const executableOver = (contract: ReturnType<typeof standInContract>) =>
 const probe = (contract: ReturnType<typeof standInContract>, address: string) =>
   executableOver(contract).circuit(Contract.ProvableCircuitId<CounterContract>('probe' as never), {
     address: ContractAddress.ContractAddress(address),
-    // A real, empty contract state: `createExecutionContext` builds a genuine 0.19 circuit context
+    // A real, empty contract state: `createExecutionContext` builds a genuine 0.20 circuit context
     // before the stand-in circuit is called, and rejects anything else. Nothing reads it — the
     // fabricated trace below carries the contexts the assertions are about.
     contractState: new ContractState(),

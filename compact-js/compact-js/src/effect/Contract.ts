@@ -28,7 +28,7 @@ import { Brand } from 'effect';
  *
  * @remarks
  * Declared here rather than re-exported from the {@link CompactRuntime} seam, and stated exactly:
- * compact-runtime 0.16 and 0.19 declare this identically (`ContractAddress` is `string` on both
+ * compact-runtime 0.16 and 0.20 declare this identically (`ContractAddress` is `string` on both
  * onchain-runtime majors), so naming the shape costs no precision and keeps this module off the
  * seam — see the note on {@link Contract}.
  */
@@ -43,7 +43,7 @@ export interface WitnessContext<L, PS> {
  *
  * @remarks
  * This is the one shape that genuinely differs between runtime lines: 0.16 passes a flat, single
- * contract frame (`currentPrivateState`, `currentQueryContext`, `currentZswapLocalState`) and 0.19
+ * contract frame (`currentPrivateState`, `currentQueryContext`, `currentZswapLocalState`) and 0.20
  * passes a call tree (`callContext`, `queryContexts`, `callProofDataTrace`, `events`). Beyond
  * `costModel` and `gasLimit` they have nothing in common, so neither is assignable to the other and
  * naming either one pins the spine to an era.
@@ -89,9 +89,10 @@ export interface ConstructorResult<PS> {
  * @remarks
  * The second thing about a compiled contract that varies by era, alongside the circuit context.
  * compactc 0.31.1 (Compact 0.23, the ledger 8 / runtime 0.16 pairing) generates **synchronous**
- * circuits and `initialState`; 0.34 generates `Promise`-returning ones. Diff the two `.d.ts` files
- * a single `counter.compact` produces — `test/contract/managed-v8/counter/contract/index.d.ts`
- * against `test/contract/managed/counter/contract/index.d.ts` — and that is the entire difference.
+ * circuits and `initialState`; 0.34 generates `Promise`-returning ones. Diff the `Contract` classes
+ * in the two `.d.ts` files a single `counter.compact` produces —
+ * `test/contract/managed-v8/counter/contract/index.d.ts` against
+ * `test/contract/managed/counter/contract/index.d.ts` — and that is the entire difference.
  *
  * So the spine says "settles to", not "resolves to". Naming `Promise` here is what previously kept
  * a real ledger 8 artifact from satisfying `Contract<PS>` at all — `Witnesses<C>` collapsed to

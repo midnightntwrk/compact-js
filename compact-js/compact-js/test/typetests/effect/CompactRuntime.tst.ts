@@ -99,7 +99,7 @@ describe('CompactRuntime facade type surface', () => {
     // Note the two forms coincide while `RuntimeLine` is a singleton, so today this catches the
     // name being dropped or typed `string` but not yet the annotation itself; it separates them
     // the moment a second line is bound, which is the point at which it matters.
-    expect<typeof CompactRuntime.line>().type.toBe<'0.19'>();
+    expect<typeof CompactRuntime.line>().type.toBe<'0.20'>();
   });
 
   it('types the boundary wrapper as failing with ContractRuntimeError', () => {

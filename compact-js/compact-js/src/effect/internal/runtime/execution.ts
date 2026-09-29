@@ -27,7 +27,7 @@
  * here:
  *
  * - `createExecutionContext` — takes one set of named parameters, which each line maps onto its own
- *   entry point (0.19's options object, 0.16's positional arguments), and returns whatever context
+ *   entry point (0.20's options object, 0.16's positional arguments), and returns whatever context
  *   *that* line's generated contracts accept.
  * - `readExecution` — projects the line's results into {@link ExecutionView}.
  *
@@ -38,7 +38,7 @@
  *
  * This docblock carries no internal-marker JSDoc tag. A module docblock attaches to the file's
  * first declaration, so under `stripInternal` the marker deleted {@link CallProofDataView} from the
- * emitted typings while `v0_16.d.ts` and `v0_19.d.ts` went on importing it — `.d.ts` files that
+ * emitted typings while `v0_16.d.ts` and `v0_20.d.ts` went on importing it — `.d.ts` files that
  * only looked sound because most consumers build with `skipLibCheck`. Privacy comes from
  * `package.json` `exports` blocking `./effect/internal/*` instead. See `internal/boundary.ts` for
  * why this note does not spell the tag out.
@@ -49,7 +49,7 @@
  * partition its transcript.
  *
  * @remarks
- * Mirrors compact-runtime 0.19's `CallProofData` because that is the richer of the two models, so
+ * Mirrors compact-runtime 0.20's `CallProofData` because that is the richer of the two models, so
  * nothing is lost on the newer line. On 0.16 a single entry of this shape is *synthesised* from the
  * flat frame, which is faithful rather than lossy: a line with no `crossContractCall` can only
  * produce one call, so a one-element trace is complete by construction.
@@ -155,7 +155,7 @@ export interface GasCost {
  * Named parameters for building an execution context.
  *
  * @remarks
- * Named rather than positional because the two lines disagree on shape — 0.19 takes one options
+ * Named rather than positional because the two lines disagree on shape — 0.20 takes one options
  * object and 0.16 takes `(address, …)` positionally with no circuit id at all. A named object means
  * adding an era cannot silently shift an argument into the wrong slot.
  *

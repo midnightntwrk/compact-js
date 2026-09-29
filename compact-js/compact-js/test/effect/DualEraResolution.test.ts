@@ -43,7 +43,7 @@ import { afterAll, describe, expect, it } from 'vitest';
  * `node_modules` does it; a bundler alias scoped to a directory does the same job (that is exactly
  * how `vitest.era8.config.ts` runs the era 8 suite).
  *
- * This test runs in the **default** project, whose `@midnight-ntwrk/compact-runtime` is 0.19, and
+ * This test runs in the **default** project, whose `@midnight-ntwrk/compact-runtime` is 0.20, and
  * adds a ledger 8 scope beside it. So it demonstrates the real-world arrangement rather than a
  * single-era approximation: one process, one era 9 contract and one era 8 contract, both executing.
  *
@@ -51,7 +51,7 @@ import { afterAll, describe, expect, it } from 'vitest';
  *
  * - The era 8 artifact must be **copied** into the scope, not symlinked. Node resolves a module to
  *   its real path before resolving *its* imports, so a symlinked artifact would resolve its runtime
- *   from the original location — back to 0.19 — and throw.
+ *   from the original location — back to 0.20 — and throw.
  * - The scope needs its own `package.json` with `"type": "module"`, or the emitted ESM artifact is
  *   parsed as CommonJS.
  */
@@ -136,7 +136,7 @@ describeWithFixtures('two ledger eras in one process', () => {
       join(scope, 'node_modules/@midnight-ntwrk/compact-runtime/dist/index.js')
     )) as unknown as RuntimeModule;
 
-    expect(era9Runtime.versionString.startsWith('0.19')).toBe(true);
+    expect(era9Runtime.versionString.startsWith('0.20')).toBe(true);
     expect(era8Runtime.versionString).toBe('0.16.0');
     // Distinct module instances, not one shared copy — which is what makes the two eras independent.
     expect(era8Runtime).not.toBe(era9Runtime);
@@ -147,7 +147,7 @@ describeWithFixtures('two ledger eras in one process', () => {
     scopes.push(scope);
 
     // In the default project this era 8 import throws `Version mismatch: compiled code expects
-    // 0.16.0, runtime is 0.19.0-rc.0`. Inside the scope it resolves 0.16 and loads.
+    // 0.16.0, runtime is 0.20.0-rc.0`. Inside the scope it resolves 0.16 and loads.
     const era9 = (await import(resolve(ERA9_COUNTER, 'contract/index.js'))) as CounterModule;
     const era8 = (await import(join(scope, 'counter/contract/index.js'))) as CounterModule;
 
@@ -212,6 +212,6 @@ describeWithFixtures('two ledger eras in one process', () => {
     await import(join(scope, 'counter/contract/index.js'));
 
     const hostRuntime = (await import('@midnight-ntwrk/compact-runtime')) as unknown as RuntimeModule;
-    expect(hostRuntime.versionString.startsWith('0.19')).toBe(true);
+    expect(hostRuntime.versionString.startsWith('0.20')).toBe(true);
   });
 });

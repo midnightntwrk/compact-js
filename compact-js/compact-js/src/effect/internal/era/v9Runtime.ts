@@ -14,7 +14,7 @@
  */
 
 /**
- * The **compact-runtime 0.19** facade — the runtime half of the ledger 9 era, pinned rather than
+ * The **compact-runtime 0.20** facade — the runtime half of the ledger 9 era, pinned rather than
  * resolved through `current.ts`.
  *
  * @remarks
@@ -26,4 +26,4 @@
  */
 export { tryBoundary as tryRuntime } from '../boundary.js';
 export { type RuntimeLine } from '../era.js';
-export * from '../runtime/v0_19.js';
+export * from '../runtime/v0_20.js';

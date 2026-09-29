@@ -19,7 +19,7 @@ import type { ContractState as LedgerV8ContractState } from '@midnightntwrk/ledg
 import type { ContractState as LedgerV9ContractState } from '@midnightntwrk/ledger-v9';
 import { describe, expect, it } from 'tstyche';
 
-import type * as V0_19 from '../../../src/effect/internal/runtime/v0_19.js';
+import type * as V0_20 from '../../../src/effect/internal/runtime/v0_20.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -57,7 +57,7 @@ describe('the era-pinned executables', () => {
   it('offers cross-contract providers on ledger 9 only', () => {
     // The capability gate, expressed in the type rather than in a runtime check. On 0.16 the
     // provider types derive to `never`, so the branch of `CircuitContext` that carries them cannot
-    // be constructed at all; on 0.19 they are real types.
+    // be constructed at all; on 0.20 they are real types.
     // `CircuitContext` is a union: one branch carries no provider and at most a parent block hash,
     // the other carries both providers and a required one. The capability lives in the second
     // branch, so that is what to read — asserting against the whole union would pass on either era
@@ -101,7 +101,7 @@ describe('the era-pinned executables', () => {
     // `ContractLog` used to take `LogEvent` from `effect/CompactRuntime.ts`, which resolves
     // `internal/runtime/current.ts` — the one era-varying type on this entry that was not derived
     // from a binding argument. Repointing `current.ts` at a later line would have left
-    // `ContractExecutable.CallResult.events` correctly on 0.19 while `ContractLog` decoded against
+    // `ContractExecutable.CallResult.events` correctly on 0.20 while `ContractLog` decoded against
     // the new line: wrong precisely in a fork window, which is what an era-pinned entry is for.
     //
     // It is now era-*free* — the structural minimum the decoder reads — so it cannot follow a
@@ -109,11 +109,11 @@ describe('the era-pinned executables', () => {
 
     // This entry's own events still fit the decoder. (`internal/runtime/conformance.ts` asserts the
     // same for the binding; here it is stated at the entry a consumer actually imports.)
-    expect<V0_19.LogEvent>().type.toBeAssignableTo<V9Entry.ContractLog.LogEvent>();
+    expect<V0_20.LogEvent>().type.toBeAssignableTo<V9Entry.ContractLog.LogEvent>();
 
     // And era precision survives decoding: `decode` is generic in the event it is given, so `raw`
-    // comes back as the 0.19 event that went in rather than widened to the structural minimum.
-    expect<ReturnType<typeof V9Entry.ContractLog.decode<V0_19.LogEvent>>['raw']>().type.toBe<V0_19.LogEvent>();
+    // comes back as the 0.20 event that went in rather than widened to the structural minimum.
+    expect<ReturnType<typeof V9Entry.ContractLog.decode<V0_20.LogEvent>>['raw']>().type.toBe<V0_20.LogEvent>();
   });
 
   it('derives each call\'s partition inputs from its own era\'s query context', () => {

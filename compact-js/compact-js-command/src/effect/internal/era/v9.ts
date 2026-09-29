@@ -14,7 +14,7 @@
  */
 
 /**
- * The command handlers applied to the **ledger 9 / compact-runtime 0.19** era pair.
+ * The command handlers applied to the **ledger 9 / compact-runtime 0.20** era pair.
  *
  * @remarks
  * Nothing here is era logic: the era arrives as an argument, exactly as it does in `compact-js`'s

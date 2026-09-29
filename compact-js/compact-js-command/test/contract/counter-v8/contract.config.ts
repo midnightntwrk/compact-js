@@ -17,7 +17,7 @@
 // `../counter/contract.config.ts` — the one difference is the entry it imports. `/v8/effect`
 // pins the executable to ledger 8 / compact-runtime 0.16, which is the half of an invocation's
 // era the CLI does not choose; `--ledger-era 8` chooses the other half. The compiled assets are
-// the era 8 ones (`managed-v8`, built by `yarn compact-v8` in `compact-js`), because a 0.19
+// the era 8 ones (`managed-v8`, built by `yarn compact-v8` in `compact-js`), because a 0.20
 // artifact can never run on 0.16.
 
 import { CompiledContract, type Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/v8/effect';

@@ -43,7 +43,7 @@ import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
  *    onchain-runtime-v3 ↔ compactc 0.31.x.
  * 3. A circuit runs to completion on the 0.16 line and produces a public transcript.
  * 4. The shape difference that `ContractExecutable` must absorb is exactly this: 0.16 returns
- *    `results.proofData`, while 0.19 returns a `context.callProofDataTrace`. Asserted in both
+ *    `results.proofData`, while 0.20 returns a `context.callProofDataTrace`. Asserted in both
  *    directions below so the adapter has a pinned contract to build against.
  *
  * Runs only under `vitest.era8.config.ts`, whose alias points `@midnight-ntwrk/compact-runtime` at
@@ -77,7 +77,7 @@ describeWithFixture('ledger 8 era execution', () => {
 
   it('loads an artifact compiled for runtime 0.16 without a version mismatch', async () => {
     // The whole point of the aliased project: this import is what throws
-    // `Version mismatch: compiled code expects 0.16.0, runtime is 0.19.0-rc.0` in the default one.
+    // `Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0-rc.0` in the default one.
     const module = await loadContract();
     expect(module.Contract).toBeTypeOf('function');
   });
@@ -106,7 +106,7 @@ describeWithFixture('ledger 8 era execution', () => {
     const constructorContext = V0_16.createConstructorContext({ count: 0 }, '0'.repeat(64));
     const { currentContractState, currentPrivateState } = contract.initialState(constructorContext);
 
-    // The 0.16 signature: contract address FIRST and no circuit id, against 0.19's one options
+    // The 0.16 signature: contract address FIRST and no circuit id, against 0.20's one options
     // object. This shape difference is half of what the adapter absorbs.
     const circuitContext = V0_16.createCircuitContext(
       sampleContractAddress(),
@@ -121,7 +121,7 @@ describeWithFixture('ledger 8 era execution', () => {
   });
 
   it('returns proof data on the results, not a call-proof trace on the context', async () => {
-    // Pins the adapter's job from the 0.16 side. The mirror assertion for 0.19 lives in the type
+    // Pins the adapter's job from the 0.16 side. The mirror assertion for 0.20 lives in the type
     // tests (`RuntimeBinding.tst.ts`), which check `CircuitContext` carries `callProofDataTrace`
     // and `events` on that line and not on this one.
     const { Contract } = await loadContract();

@@ -75,7 +75,7 @@ import { type CallProofDataView, type ExecutionContextParams, type ExecutionView
 
 // `CallContext`, `Effects` and `CoinCommitment` are the types of the partition inputs
 // `ContractCallPublic` exposes (midnight-sdk#400), and `EncodedStateValue` is listed for the
-// separate reason given on the 0.19 twin. This line reaches all four the same way — an explicit
+// separate reason given on the 0.20 twin. This line reaches all four the same way — an explicit
 // re-export from onchain-runtime-v3 — but without the `CallContext` ambiguity: 0.16's
 // circuit-context declares no `CallContext` of its own, so there is only one to resolve to.
 export {
@@ -268,7 +268,7 @@ export const createExecutionContext = <PS>(
   }
 
   // The gas limit is fifth and `time` seventh here; `costModel` sits between them and stays at
-  // the default, for the reason the 0.19 twin gives.
+  // the default, for the reason the 0.20 twin gives.
   const context = createCircuitContext(
     params.address,
     params.zswapLocalState,
@@ -299,7 +299,7 @@ export const createExecutionContext = <PS>(
  * @remarks
  * The trace is **synthesised** as a single entry. That is faithful rather than lossy: without
  * `crossContractCall` this line can only ever produce one call, so a one-element trace is complete
- * by construction. The proof data 0.19 hangs off each `CallProofData` lives on `results.proofData`
+ * by construction. The proof data 0.20 hangs off each `CallProofData` lives on `results.proofData`
  * here, and is moved across.
  *
  * `events` is always empty, and typed `never[]` — see {@link LogEvent}.

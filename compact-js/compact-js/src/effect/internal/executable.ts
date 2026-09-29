@@ -518,7 +518,7 @@ export const makeExecutable = <
   // commitment rides on the *callee's* pre-transcript (`commCommData.commComm`); the root call has
   // no commitment and becomes the graph root. The returned array is in the same order as `trace`.
   const partitionAllTranscripts = (
-    // The era-neutral trace-entry type supplied by whichever runtime line is bound. On 0.19 it is
+    // The era-neutral trace-entry type supplied by whichever runtime line is bound. On 0.20 it is
     // the runtime's own `CallProofData`; on 0.16 it is synthesised by that binding's
     // `readExecution` from the flat frame.
     trace: readonly Types['TraceEntry'][],

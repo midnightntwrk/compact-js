@@ -998,7 +998,7 @@ __metadata:
     "@effect/workflow": "npm:^0.19.0"
     "@midnight-ntwrk/compact-js": "workspace:^"
     "@midnight-ntwrk/compact-js-node": "workspace:^"
-    "@midnight-ntwrk/compact-runtime": "npm:0.19.0-rc.0"
+    "@midnight-ntwrk/compact-runtime": "npm:0.20.0-rc.0"
     "@midnight-ntwrk/platform-js": "npm:^3.0.0"
     "@midnight-ntwrk/wallet-sdk-address-format": "npm:3.1.0"
     "@midnightntwrk/ledger-v9": "npm:^1.0.0-rc.5"
@@ -1021,7 +1021,7 @@ __metadata:
     "@effect/rpc": "npm:^0.76.2"
     "@effect/sql": "npm:^0.52.1"
     "@effect/workflow": "npm:^0.19.0"
-    "@midnight-ntwrk/compact-runtime": "npm:0.19.0-rc.0"
+    "@midnight-ntwrk/compact-runtime": "npm:0.20.0-rc.0"
     "@midnightntwrk/ledger-v9": "npm:^1.0.0-rc.5"
     effect: "npm:^3.22.1"
     tslib: "npm:^2.8.1"
@@ -1094,7 +1094,7 @@ __metadata:
   resolution: "@midnight-ntwrk/compact-js@workspace:compact-js"
   dependencies:
     "@effect/platform": "npm:^0.97.0"
-    "@midnight-ntwrk/compact-runtime": "npm:0.19.0-rc.0"
+    "@midnight-ntwrk/compact-runtime": "npm:0.20.0-rc.0"
     "@midnight-ntwrk/platform-js": "npm:^3.0.0"
     "@midnightntwrk/ledger-v8": "npm:8.1.2"
     "@midnightntwrk/ledger-v9": "npm:^1.0.0-rc.5"
@@ -1118,16 +1118,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midnight-ntwrk/compact-runtime@npm:0.19.0-rc.0":
-  version: 0.19.0-rc.0
-  resolution: "@midnight-ntwrk/compact-runtime@npm:0.19.0-rc.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40midnight-ntwrk%2Fcompact-runtime%2F0.19.0-rc.0%2F66c304bb9671ea74287112d39f7b26f14cc806a9"
+"@midnight-ntwrk/compact-runtime@npm:0.20.0-rc.0":
+  version: 0.20.0-rc.0
+  resolution: "@midnight-ntwrk/compact-runtime@npm:0.20.0-rc.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40midnight-ntwrk%2Fcompact-runtime%2F0.20.0-rc.0%2F114fd2a4219954dae123d0cdb80e75667fd77b50"
   dependencies:
     "@midnightntwrk/onchain-runtime-v4": "npm:^4.0.0-rc.3"
     "@noble/curves": "npm:^2.2.0"
     "@noble/hashes": "npm:^2.0.1"
     "@types/object-inspect": "npm:^1.8.1"
     object-inspect: "npm:^1.12.3"
-  checksum: 10/316be241e39a2f6f0e7628a19757ad98b9963b602162dab2774df905ce444f61ea527c4e8867359a104ac531f7cbf03b4f22d55a06970f18759a8e9c40900344
+  checksum: 10/d0c1aafc8fa5eb5713790756e815add6a24c2b89e28e0ea4688d3ab28616b905d6a654f2178785cc301e2a8b4073d9e29d5fe13cbebc3d5b9e0ebcfd719e583d
   languageName: node
   linkType: hard
 

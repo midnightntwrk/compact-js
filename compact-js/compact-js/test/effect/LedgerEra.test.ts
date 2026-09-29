@@ -19,7 +19,7 @@ import { Ledger } from '@midnight-ntwrk/compact-js/effect';
 import * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
 import * as v9Entry from '@midnight-ntwrk/compact-js/v9';
 import * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
-import { CostModel as RuntimeV0_19CostModel } from '@midnight-ntwrk/compact-runtime';
+import { CostModel as RuntimeV0_20CostModel } from '@midnight-ntwrk/compact-runtime';
 import * as LedgerV8 from '@midnightntwrk/ledger-v8';
 import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { ContractState, LedgerParameters } from '@midnightntwrk/ledger-v9';
@@ -103,7 +103,7 @@ describe('era-pinned entries', () => {
     // identity asserted below shows the two still agree on the era today.
     expect((v9EffectEntry as typeof effectEntry).Ledger).not.toBe(effectEntry.Ledger);
     expect((v9EffectEntry as typeof effectEntry).Ledger.era.ledger).toBe(9);
-    expect((v9EffectEntry as typeof effectEntry).Ledger.era.runtime).toBe('0.19');
+    expect((v9EffectEntry as typeof effectEntry).Ledger.era.runtime).toBe('0.20');
   });
 
   it('`/v9/effect` resolves the ledger 9 package', () => {
@@ -229,7 +229,7 @@ describe('transaction composition on the Ledger facade', () => {
     // The positive identity above is the real guard; these rule out the specific confusion the
     // runtime seam invites, where both declarations are identical and neither is branded.
     expect(v9EffectEntry.Ledger.CostModel.initialCostModel()).toBeDefined();
-    expect(v9EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_19CostModel);
+    expect(v9EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_20CostModel);
     expect(v8EffectEntry.Ledger.CostModel).not.toBe(RuntimeV0_16CostModel);
   });
 });
