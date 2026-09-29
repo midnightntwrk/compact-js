@@ -452,6 +452,19 @@ describe('Circuit Command (cross-contract calls)', () => {
     60_000
   );
 
+  it.effect('the modules directory without the states directory is rejected the same way', () =>
+    Effect.gen(function* () {
+      const w = yield* prepareWorkspace;
+
+      yield* cli(circuitArgv(w, { modulesIn: w.modulesIn }, w.input, 'incrementInner', '1'));
+
+      const lines = yield* MockConsole.getLines({ stripAnsi: true });
+      expect(lines.join('\n')).toMatch(/--contract-states-dir and --contract-modules-dir must be given together/);
+      yield* expectNoOutputsWritten(w);
+    }).pipe(Effect.provide(testLayer)),
+    60_000
+  );
+
   it.effect('a callee module the provider rejects is reported with its path', () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
