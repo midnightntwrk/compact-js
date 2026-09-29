@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 import { FileSystemContractModuleProvider } from '@midnight-ntwrk/compact-js-node/effect';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -116,5 +116,41 @@ describe('FileSystemContractModuleProvider', () => {
     const module = await provider.resolve(address(7))!();
 
     expect(module.Contract).toBeTypeOf('function');
+  });
+
+  it('resolves an address with nothing on disk to undefined when the layout shares a folder', () => {
+    mkdirSync(join(baseDir, 'flat'), { recursive: true });
+    const provider = FileSystemContractModuleProvider.make(baseDir, (addr) => join('flat', `${addr}.js`));
+
+    expect(provider.resolve(address(10))).toBeUndefined();
+  });
+
+  it('resolves a string that is not an address to undefined, even where it would reach a module', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'fs-contract-module-outside-'));
+    try {
+      mkdirSync(join(outside, 'contract'));
+      writeFileSync(join(outside, 'contract', 'index.js'), COMPLETE);
+
+      expect(FileSystemContractModuleProvider.make(baseDir).resolve(relative(baseDir, outside))).toBeUndefined();
+    } finally {
+      rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  it('fails the load, naming the link, when the address links to nothing', async () => {
+    const link = join(baseDir, address(8));
+    symlinkSync(join(baseDir, 'removed'), link);
+
+    await expect(thunkFor(address(8))()).rejects.toThrow(
+      `Cannot load the module at '${join(link, 'contract', 'index.js')}': '${link}' links to nothing.`
+    );
+  });
+
+  it('fails the load, naming the file, when the address has a directory but no module', async () => {
+    mkdirSync(join(baseDir, address(9)));
+
+    await expect(thunkFor(address(9))()).rejects.toThrow(
+      `Cannot load the module at '${join(baseDir, address(9), 'contract', 'index.js')}'.`
+    );
   });
 });

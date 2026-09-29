@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, lstatSync, statSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { type CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
@@ -28,6 +28,9 @@ const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
   'circuitSignatures',
   'expectedVk'
 ];
+
+/** The runtime's own test of a contract address. */
+const CONTRACT_ADDRESS = /^[0-9A-Fa-f]{64}$/;
 
 /**
  * Narrows an imported namespace to a {@link CompactRuntime.Module}, naming what is missing if it is
@@ -53,6 +56,37 @@ const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module
   return namespace as CompactRuntime.Module;
 };
 
+/** Why `modulePath` cannot be imported: `'absent'` if nothing is on disk for the address, `undefined` if it can be. */
+const unloadable = (modulePath: string, address: string): Error | 'absent' | undefined => {
+  let error: unknown;
+  try {
+    return statSync(modulePath).isFile()
+      ? undefined
+      : new Error(`Cannot load the module at '${modulePath}': not a file.`);
+  } catch (cause) {
+    error = cause;
+  }
+  // `stat` follows links, so a link whose target was removed fails like a path that was never there.
+  // Anything from the address's own entry down to the module tells them apart; above it, a layout
+  // may share folders between addresses.
+  for (let path = modulePath; ; path = dirname(path)) {
+    try {
+      const dangling = lstatSync(path).isSymbolicLink() && !existsSync(path);
+      return new Error(
+        `Cannot load the module at '${modulePath}'` + (dangling ? `: '${path}' links to nothing.` : '.'),
+        { cause: error }
+      );
+    } catch (cause) {
+      if ((cause as NodeJS.ErrnoException).code !== 'ENOENT') {
+        return new Error(`Cannot load the module at '${modulePath}'.`, { cause });
+      }
+    }
+    if (basename(path).toLowerCase().includes(address.toLowerCase()) || dirname(path) === path) {
+      return 'absent';
+    }
+  }
+};
+
 /**
  * A {@link CompactRuntime.ContractModuleProvider} that resolves generated contract modules lazily
  * from the file system.
@@ -63,8 +97,9 @@ const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module
  * address, so a directory may hold more contracts than any one execution reaches, and none is paid
  * for until it is called.
  *
- * An address with no module resolves to `undefined`, which the runtime reports as an unsupported
- * implementation rather than a load failure.
+ * An address with nothing on disk resolves to `undefined`, which the runtime reports as an
+ * unsupported implementation. A module that is there but cannot be loaded, such as a link whose
+ * target was removed, fails the load instead, naming the path.
  *
  * A generated module imports `@midnight-ntwrk/compact-runtime` by bare specifier, and Node resolves
  * that from the module's real path. A module copied outside the project therefore cannot load, and
@@ -83,12 +118,18 @@ export const make = (
   modulePathForAddress: (address: string) => string = (address) => join(address, 'contract', 'index.js')
 ): CompactRuntime.ContractModuleProvider => ({
   resolve: (address: string): CompactRuntime.ModuleThunk | undefined => {
-    const modulePath = join(baseFolderPath, modulePathForAddress(address));
-    // `resolve` is synchronous and total, so whether this address is bound at all has to be decided
-    // here: a module that is not on disk is an address this provider does not serve, which reads
-    // differently from one whose load failed.
-    if (!existsSync(modulePath)) {
+    // The runtime checks this before it calls `resolve`, but `resolve` is public and what it
+    // returns is run, therefore a string that is not an address reaches no path.
+    if (!CONTRACT_ADDRESS.test(address)) {
       return undefined;
+    }
+    const modulePath = join(baseFolderPath, modulePathForAddress(address));
+    const problem = unloadable(modulePath, address);
+    if (problem === 'absent') {
+      return undefined;
+    }
+    if (problem !== undefined) {
+      return () => Promise.reject(problem);
     }
     // By URL, not path: a Windows path is not a valid specifier, and a bare relative path would be
     // resolved against this file rather than the caller's directory.
