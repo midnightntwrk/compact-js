@@ -19,7 +19,10 @@ import { pathToFileURL } from 'node:url';
 
 import { type CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
 
-/** What resolution reads off a callee's module — the same three the runtime checks for. */
+/**
+ * What resolution reads off a callee's module. A copy of the runtime's list, because the runtime
+ * does not export it.
+ */
 const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
   'Contract',
   'circuitSignatures',
@@ -28,14 +31,16 @@ const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
 
 /**
  * Narrows an imported namespace to a {@link CompactRuntime.Module}, naming what is missing if it is
- * not one. A module compiled before dynamic resolution has a `Contract` and none of the tables; the
- * runtime rejects one too, but only this side knows which file it came from.
+ * not one. A module compiled before dynamic resolution has a `Contract` and none of the tables. The
+ * runtime rejects it too but names only the address, therefore this names the file.
  */
 const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module => {
   const exports = namespace as Partial<Record<keyof CompactRuntime.Module, unknown>>;
-  // By own property, not by value, matching the runtime: an export bound to `undefined` is still an
-  // export, and a name inherited from `Object.prototype` is not one.
-  const missing = RESOLVED_MODULE_EXPORTS.filter((name) => !Object.hasOwn(exports, name));
+  // Checked as the runtime checks: an inherited name is not an export, and one bound to `null` or
+  // `undefined` gives resolution nothing to read.
+  const missing = RESOLVED_MODULE_EXPORTS.filter(
+    (name) => !Object.hasOwn(exports, name) || exports[name] === null || exports[name] === undefined
+  );
   if (missing.length !== 0) {
     throw new Error(
       `'${modulePath}' does not export ${missing.join(', ')}, so it cannot be a cross-contract callee. ` +
