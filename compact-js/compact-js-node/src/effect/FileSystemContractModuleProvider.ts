@@ -66,6 +66,11 @@ const asModule = (namespace: unknown, modulePath: string): CompactRuntime.Module
  * An address with no module resolves to `undefined`, which the runtime reports as an unsupported
  * implementation rather than a load failure.
  *
+ * A generated module imports `@midnight-ntwrk/compact-runtime` by bare specifier, and Node resolves
+ * that from the module's real path. A module copied outside the project therefore cannot load, and
+ * one inside another project loads a second copy of the runtime. Keep `baseFolderPath` inside the
+ * project, or fill it with symlinks to compiled directories there.
+ *
  * @param baseFolderPath The folder holding one managed contract directory per address.
  * @param modulePathForAddress Maps a contract address to its module's path within `baseFolderPath`.
  * Override this if the on-disk layout differs from `compactc`'s.

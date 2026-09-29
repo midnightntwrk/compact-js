@@ -206,7 +206,9 @@ export const inputContractStatesDirPath = Options.directory('contract-states-dir
 export const inputContractModulesDirPath = Options.directory('contract-modules-dir', { exists: 'yes' }).pipe(
   Options.withDescription(
     'A directory of compiled contract directories, each named by its contract address, used to resolve the ' +
-    'code of cross-contract call targets. Give this with --contract-states-dir.'
+    'code of cross-contract call targets. Give this with --contract-states-dir. Node resolves each module\'s ' +
+    'imports from its real location, so keep the directory inside the project, or fill it with symlinks to ' +
+    'compiled directories there.'
   ),
   Options.optional,
   Options.mapEffect(resolveOptionalPath)
