@@ -82,11 +82,13 @@ export const Options = {
   inputZswapLocalStateFilePath: InternalOptions.inputZswapLocalStateFilePath,
   inputLedgerParamsFilePath: InternalOptions.inputLedgerParamsFilePath,
   inputContractStatesDirPath: InternalOptions.inputContractStatesDirPath,
+  inputContractModulesDirPath: InternalOptions.inputContractModulesDirPath,
   outputContractStatesDirPath: InternalOptions.outputContractStatesDirPath,
   outputFilePath: InternalOptions.outputFilePath,
   outputPublicFilePath: InternalOptions.outputPublicFilePath,
   outputPrivateStateFilePath: InternalOptions.outputPrivateStateFilePath,
   outputZswapLocalStateFilePath: InternalOptions.outputZswapLocalStateFilePath,
+  outputZswapCallsFilePath: InternalOptions.outputZswapCallsFilePath,
   outputResultFilePath: InternalOptions.outputResultFilePath,
   outputEventsFilePath: InternalOptions.outputEventsFilePath
 }
@@ -107,7 +109,7 @@ export const makeHandler: (
   capabilities: EraBinding.EraCapabilities
 ) => InternalCommand.CommandHandler<Args & Options> = (ledger, runtime, capabilities) => {
   const { tryLedger, newIntent, serializeIntent } = InternalCommand.makeIntents(ledger);
-  const { makeContractStateProvider } = capabilities;
+  const { makeContractStateProvider, makeContractModuleProvider } = capabilities;
 
   return (
     {
@@ -119,11 +121,13 @@ export const makeHandler: (
       inputZswapLocalStateFilePath,
       inputLedgerParamsFilePath,
       inputContractStatesDirPath,
+      inputContractModulesDirPath,
       outputContractStatesDirPath,
       outputFilePath,
       outputPublicFilePath,
       outputPrivateStateFilePath,
       outputZswapLocalStateFilePath,
+      outputZswapCallsFilePath,
       outputResultFilePath,
       outputEventsFilePath
     },
@@ -132,22 +136,32 @@ export const makeHandler: (
     // Both gates are checked before any input is read: an era that cannot honour the option should
     // say so, not read files and then hand back an empty result that reads as "nothing happened".
     // These are the CLI's half of #388's "absent, not present and failing"; the library's half is
-    // that such an era's `createExecutionContext` rejects a state provider outright and types its
-    // event list `never[]`.
+    // that such an era's `createExecutionContext` rejects the providers outright and types its event
+    // list `never[]`.
     if (
-      makeContractStateProvider === undefined &&
-      (Option.isSome(inputContractStatesDirPath) || Option.isSome(outputContractStatesDirPath))
+      (makeContractStateProvider === undefined || makeContractModuleProvider === undefined) &&
+      (Option.isSome(inputContractStatesDirPath) ||
+        Option.isSome(inputContractModulesDirPath) ||
+        Option.isSome(outputContractStatesDirPath))
     ) {
       return yield* ContractRuntimeError.make(
-        `Ledger era ${ledger.era.ledger} has no cross-contract calls, so --contract-states-dir and ` +
-          '--output-contract-states-dir cannot be honoured. Select a later era with --ledger-era, ' +
-          'or drop the option.'
+        `Ledger era ${ledger.era.ledger} has no cross-contract calls, so --contract-states-dir, ` +
+          '--contract-modules-dir and --output-contract-states-dir cannot be honoured. Select a later ' +
+          'era with --ledger-era, or drop the option.'
       );
     }
     if (!capabilities.contractEvents && Option.isSome(outputEventsFilePath)) {
       return yield* ContractRuntimeError.make(
         `Ledger era ${ledger.era.ledger} cannot emit contract log events, so --output-events would ` +
           'always write an empty list. Select a later era with --ledger-era, or drop the option.'
+      );
+    }
+    // A cross-contract call needs both the callee's state and the module implementing it, so the two
+    // directories are supplied together or not at all. Either one alone would surface much later, as
+    // a resolution failure that does not name the option that was left out.
+    if (Option.isSome(inputContractStatesDirPath) !== Option.isSome(inputContractModulesDirPath)) {
+      return yield* ContractRuntimeError.make(
+        '--contract-states-dir and --contract-modules-dir must be given together.'
       );
     }
 
@@ -207,13 +221,17 @@ export const makeHandler: (
       )
     );
 
-    // When a contract-states directory is supplied, the circuit may make cross-contract calls:
-    // their target states are resolved lazily, on demand, from the directory. The provider is built
-    // by the *era*, so the states it hands the runtime are decoded by the same conversions this
+    // When both directories are supplied, the circuit may make cross-contract calls: each target's
+    // state and module are resolved lazily, on demand, from the directories. The providers are built
+    // by the *era*, so the states handed to the runtime are decoded by the same conversions this
     // handler uses for `--input`.
-    const contractStateProvider = makeContractStateProvider === undefined
-      ? Option.none<unknown>()
-      : Option.map(inputContractStatesDirPath, makeContractStateProvider);
+    const crossContract =
+      makeContractStateProvider === undefined || makeContractModuleProvider === undefined
+        ? Option.none<{ readonly stateProvider: unknown; readonly moduleProvider: unknown }>()
+        : Option.zipWith(inputContractStatesDirPath, inputContractModulesDirPath, (statesDir, modulesDir) => ({
+            stateProvider: makeContractStateProvider(statesDir),
+            moduleProvider: makeContractModuleProvider(modulesDir)
+          }));
 
     const baseCircuitContext = {
       address,
@@ -229,8 +247,8 @@ export const makeHandler: (
 
     const result = yield* contractModule.contractExecutable.circuit(
       Contract.ProvableCircuitId(circuitId),
-      Option.match(contractStateProvider, {
-        onSome: (stateProvider) => ({ ...baseCircuitContext, stateProvider, parentBlockHash: PLACEHOLDER_BLOCK_HASH }),
+      Option.match(crossContract, {
+        onSome: (providers) => ({ ...baseCircuitContext, ...providers, parentBlockHash: PLACEHOLDER_BLOCK_HASH }),
         onNone: () => baseCircuitContext
       }) as never,
       ...(yield* argsParser.parseCircuitArgs(Contract.ProvableCircuitId(circuitId), args))
@@ -328,6 +346,22 @@ export const makeHandler: (
       );
     }
     const rootCall = maybeRootCall.value;
+    // Encoded before the first write, so a failure here leaves no partial output behind.
+    const callZswapStates = yield* Effect.forEach(
+      Option.isSome(outputZswapCallsFilePath) ? result.calls : [],
+      (call) =>
+        runtime.tryRuntime(
+          `Failed to encode the zswap local state of the call to '${call.circuitId}' on '${call.contractAddress}'`,
+          () => runtime.encodeZswapLocalState(call.private.zswapLocalState as never)
+        ).pipe(
+          Effect.flatMap(encodeZswapLocalStateObject),
+          Effect.map((zswapLocalState) => ({
+            contractAddress: call.contractAddress,
+            circuitId: call.circuitId,
+            zswapLocalState
+          }))
+        )
+    );
 
     // If the output public file path is provided, write the on-chain (public state) data to the specified file.
     if (Option.isSome(outputPublicFilePath)) {
@@ -380,6 +414,9 @@ export const makeHandler: (
         )
       )
     );
+    if (Option.isSome(outputZswapCallsFilePath)) {
+      yield* fs.writeFileString(outputZswapCallsFilePath.value, JSON.stringify(callZswapStates));
+    }
     // Contract log events (MIP-0002) are non-consensus output; only write them when a destination
     // is requested. Unreachable on an era that cannot emit them — the gate at the top of this
     // handler has already failed the invocation.

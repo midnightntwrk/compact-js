@@ -78,7 +78,7 @@ describe('Ledger facade type surface', () => {
         }
       | {
           readonly ledger: 9;
-          readonly runtime: '0.19';
+          readonly runtime: '0.20';
           readonly supportsCmaSignatureKind: (kind: SignatureKind) => boolean;
           readonly cmaSignatureKindsDescription: string;
           readonly defaultCmaSignatureKind: SignatureKind;
@@ -90,7 +90,7 @@ describe('Ledger facade type surface', () => {
     // `Era` is the union of per-major descriptors and `runtime` is an `EraPairing` lookup on the
     // major, so a binding cannot declare ledger 9 alongside another era's line. With two eras bound
     // the union is no longer a singleton, which is what makes the negative case below able to fail.
-    expect<Ledger.Era['runtime']>().type.toBe<'0.16' | '0.19'>();
+    expect<Ledger.Era['runtime']>().type.toBe<'0.16' | '0.20'>();
   });
 
   it('rejects a descriptor pairing a ledger major with another era\'s runtime line', () => {
@@ -109,7 +109,7 @@ describe('Ledger facade type surface', () => {
 
     expect<{
       readonly ledger: 8;
-      readonly runtime: '0.19';
+      readonly runtime: '0.20';
       readonly supportsCmaSignatureKind: (kind: SignatureKind) => boolean;
       readonly cmaSignatureKindsDescription: string;
       readonly defaultCmaSignatureKind: SignatureKind;
@@ -135,7 +135,7 @@ describe('Ledger facade type surface', () => {
   it('exposes the paired compact-runtime line as a literal too', () => {
     // Same reason as the era major above: the pairing is a compile-time fact, so a binding that
     // declares a line with no corresponding runtime binding fails the build.
-    expect(Ledger.era.runtime).type.toBe<'0.19'>();
+    expect(Ledger.era.runtime).type.toBe<'0.20'>();
   });
 
   it('re-exports ledger type-only names as the ledger package\'s own types', () => {

@@ -137,6 +137,17 @@ export const outputZswapLocalStateFilePath = Options.file('output-zswap', { exis
 );
 
 /** @internal */
+export const outputZswapCallsFilePath = Options.file('output-zswap-calls', { exists: 'either' }).pipe(
+  Options.withDescription(
+    "A file path where the 'ZswapLocalState' of every call should be written as JSON, callees first and " +
+    'the root last. A callee\'s shielded coins appear only here, because --output-zswap holds the root\'s. ' +
+    'A contract called more than once appears once per call, each time with all of its coins so far.'
+  ),
+  Options.mapEffect((filePath) => Path.Path.pipe(Effect.map((path) => path.resolve(filePath)))),
+  Options.optional
+);
+
+/** @internal */
 export const outputResultFilePath = Options.file('output-result', { exists: 'either' }).pipe(
   Options.withDescription('A file path of where the invoked circuit result data should be written.'),
   Options.withDefault('result.json'),
@@ -195,8 +206,20 @@ export const outputContractStatesDirPath = Options.directory('output-contract-st
 export const inputContractStatesDirPath = Options.directory('contract-states-dir', { exists: 'yes' }).pipe(
   Options.withDescription(
     'A directory of ledger-serialized contract-state files, each named by its contract address, used to ' +
-    'resolve the targets of cross-contract calls. When provided, the invoked circuit may call into other ' +
-    'contracts and the resulting intent will include a call for each.'
+    'resolve the state of cross-contract call targets. Give this with --contract-modules-dir to let the ' +
+    'invoked circuit call into other contracts; the resulting intent will include a call for each.'
+  ),
+  Options.optional,
+  Options.mapEffect(resolveOptionalPath)
+);
+
+/** @internal */
+export const inputContractModulesDirPath = Options.directory('contract-modules-dir', { exists: 'yes' }).pipe(
+  Options.withDescription(
+    'A directory of compiled contract directories, each named by its contract address, used to resolve the ' +
+    'code of cross-contract call targets. Give this with --contract-states-dir. Node resolves each module\'s ' +
+    'imports from its real location, so keep the directory inside the project, or fill it with symlinks to ' +
+    'compiled directories there.'
   ),
   Options.optional,
   Options.mapEffect(resolveOptionalPath)

@@ -270,7 +270,7 @@ describeWithFixture('a ledger 8 contract through the `/v8/effect` executable', (
     );
 
     // The limit is the one execution parameter both lines accept in the same form, so it is threaded
-    // on both rather than gated — 0.16 takes it fifth positionally, 0.19 seventh.
+    // on both rather than gated — 0.16 takes it fifth positionally, 0.20 as its `gasLimit` option.
     expect(Exit.isFailure(exit)).toBe(true);
   });
 });

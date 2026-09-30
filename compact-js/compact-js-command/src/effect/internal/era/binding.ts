@@ -213,6 +213,12 @@ export interface EraCapabilities {
    * through would fail loudly rather than execute against stale state.
    */
   readonly makeContractStateProvider?: (baseFolderPath: string) => unknown;
+  /**
+   * Builds this era's cross-contract module provider over a directory of compiled contracts, or is
+   * absent on an era with no cross-contract calls. A callee needs its code as well as its state,
+   * therefore an era that has one of these two members has both.
+   */
+  readonly makeContractModuleProvider?: (baseFolderPath: string) => unknown;
   /** Whether circuits on this era can emit contract log events (MIP-0002). */
   readonly contractEvents: boolean;
 }
@@ -229,6 +235,7 @@ export interface CommandContractCall {
     readonly input: unknown;
     readonly output: unknown;
     readonly privateTranscriptOutputs: readonly unknown[];
+    readonly zswapLocalState: unknown;
   };
   readonly communicationCommitment: Option.Option<{ readonly commCommRand: unknown }>;
 }
@@ -350,5 +357,6 @@ export interface CommandCircuitContext<PS> extends CommandContractContext {
   readonly zswapLocalState: unknown;
   readonly ledgerParameters: unknown;
   readonly stateProvider?: unknown;
+  readonly moduleProvider?: unknown;
   readonly parentBlockHash?: string;
 }

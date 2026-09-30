@@ -124,11 +124,13 @@ const circuitInputs = (
     inputZswapLocalStateFilePath: Option.none(),
     inputLedgerParamsFilePath: Option.none(),
     inputContractStatesDirPath: Option.none(),
+    inputContractModulesDirPath: Option.none(),
     outputContractStatesDirPath: Option.none(),
     outputFilePath: '/nonexistent/out.bin',
     outputPublicFilePath: Option.none(),
     outputPrivateStateFilePath: '/nonexistent/out.ps.json',
     outputZswapLocalStateFilePath: '/nonexistent/out.zswap.json',
+    outputZswapCallsFilePath: Option.none(),
     outputResultFilePath: '/nonexistent/out.result.json',
     outputEventsFilePath: Option.none(),
     ...overrides
@@ -158,7 +160,7 @@ describe('era selection', () => {
       // The era *pair*, not just the ledger major: a command set built from the unsuffixed entry
       // would report the bound era for both, which is the mislabelling the era work prevents.
       expect(forLedgerEra(8).era).toMatchObject({ ledger: 8, runtime: '0.16' });
-      expect(forLedgerEra(9).era).toMatchObject({ ledger: 9, runtime: '0.19' });
+      expect(forLedgerEra(9).era).toMatchObject({ ledger: 9, runtime: '0.20' });
     });
 
     it('applies the handler factories once per era', () => {
@@ -242,6 +244,7 @@ describe('era selection', () => {
     const withoutCapabilities = CircuitCommand.makeHandler(stubLedger, stubRuntime, { contractEvents: false });
     const withCapabilities = CircuitCommand.makeHandler(stubLedger, stubRuntime, {
       makeContractStateProvider: () => ({ getContractState: () => Promise.resolve(undefined) }),
+      makeContractModuleProvider: () => ({ resolve: () => undefined }),
       contractEvents: true
     });
 
@@ -293,6 +296,7 @@ describe('era selection', () => {
           withCapabilities(
             circuitInputs({
               inputContractStatesDirPath: Option.some('/states'),
+              inputContractModulesDirPath: Option.some('/modules'),
               outputContractStatesDirPath: Option.some('/states-out'),
               outputEventsFilePath: Option.some('/events.json')
             }),
@@ -303,7 +307,7 @@ describe('era selection', () => {
         // It still fails — there is no `FileSystem` in this test's context and the input paths do
         // not exist — but on the *inputs*, not on a capability gate.
         expect(Exit.isFailure(exit)).toBe(true);
-        expect(String(exit)).not.toMatch(/cross-contract calls|cannot emit contract log events/);
+        expect(String(exit)).not.toMatch(/cross-contract calls|cannot emit contract log events|must be given together/);
       })
     );
   });

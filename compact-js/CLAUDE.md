@@ -191,7 +191,7 @@ Compact.js commands operate on contracts compiled by `compactc`. The workflow re
 ## Era Seams (Ledger + Compact Runtime)
 
 An era is a ledger generation *and* the compact-runtime line paired with it — they bump together
-(ledger 9 ↔ runtime 0.19 ↔ onchain-runtime-v4). Each half has its own seam, and a swap always
+(ledger 9 ↔ runtime 0.20 ↔ onchain-runtime-v4). Each half has its own seam, and a swap always
 touches both:
 
 - **Ledger**: all ledger API is reached through the `Ledger` facade
@@ -247,20 +247,20 @@ from that entry (`internal/contractEventsSurface.ts`). The CLI gates the same wa
 era lacks is *absent* from its `EraCapabilities`, and the handler reads the absence to reject the
 options that depend on it.
 
-To add a new era (e.g. ledger 10 paired with runtime 0.20):
+To add a new era (e.g. ledger 10 paired with runtime 0.21):
 
 1. Extend the `LedgerMajor` and `RuntimeLine` unions in `internal/era.ts`.
 2. Create `internal/ledger/v10.ts` mirroring `v9.ts`: the curated re-export list, its own
    `CONTRACT_OPERATION_VERSION`, and an `Era` descriptor — declaring the paired
-   `runtime: '0.20'` — with a **re-verified** CMA signature-scheme allowlist (verify each scheme
+   `runtime: '0.21'` — with a **re-verified** CMA signature-scheme allowlist (verify each scheme
    end-to-end before listing it).
-3. Create `internal/runtime/v0_20.ts` mirroring `v0_19.ts`: the curated re-export list and its
+3. Create `internal/runtime/v0_21.ts` mirroring `v0_20.ts`: the curated re-export list and its
    `line`.
 4. Register both bindings in `internal/ledger/conformance.ts` and `internal/runtime/conformance.ts`.
    Presence and the relational checks (`LedgerBindingViolations` / `RuntimeBindingViolations`) then
    fail the build for the new era whether or not anything points at it yet.
 5. Create the era's three facades: `internal/era/v10Ledger.ts` and `internal/era/v10Runtime.ts`
-   (mirroring the v9 pair — a curated type re-export list, `makeConversions(V10, V0_20)`, and
+   (mirroring the v9 pair — a curated type re-export list, `makeConversions(V10, V0_21)`, and
    `tryConvert`/`tryRuntime`), then `internal/era/v10Executable.ts`, which is
    `makeExecutable(Ledger, Runtime)` plus the type aliases that instantiate `internal/executable.ts`
    for the pair. Nothing in these is era logic: they are the era arriving as an argument.

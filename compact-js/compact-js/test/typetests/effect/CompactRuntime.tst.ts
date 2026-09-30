@@ -20,6 +20,7 @@ import type {
   CallProofData as RuntimeCallProofData,
   CircuitContext as RuntimeCircuitContext,
   CoinCommitment as RuntimeCoinCommitment,
+  ContractModuleProvider as RuntimeContractModuleProvider,
   ContractStateProvider as RuntimeContractStateProvider,
   Effects as RuntimeEffects,
   EncodedStateValue as RuntimeEncodedStateValue,
@@ -59,10 +60,12 @@ describe('CompactRuntime facade type surface', () => {
   });
 
   it('re-exports the type-only names its dependents name in their own public signatures', () => {
-    // `ContractStateProvider` is the return type of `compact-js-node`'s
-    // `FileSystemContractStateProvider.make`, and `CircuitContext`/`WitnessContext` are the shapes
-    // a contract's witnesses are written against — a drift here is a breaking change downstream.
+    // `ContractStateProvider` and `ContractModuleProvider` are what `compact-js-node`'s
+    // `FileSystemContractStateProvider` and `FileSystemContractModuleProvider` build, and
+    // `CircuitContext`/`WitnessContext` are the shapes a contract's witnesses are written against —
+    // a drift here is a breaking change downstream.
     expect<CompactRuntime.ContractStateProvider>().type.toBe<RuntimeContractStateProvider>();
+    expect<CompactRuntime.ContractModuleProvider>().type.toBe<RuntimeContractModuleProvider>();
     expect<CompactRuntime.CircuitContext<{ readonly count: number }>>().type.toBe<
       RuntimeCircuitContext<{ readonly count: number }>
     >();
@@ -96,7 +99,7 @@ describe('CompactRuntime facade type surface', () => {
     // Note the two forms coincide while `RuntimeLine` is a singleton, so today this catches the
     // name being dropped or typed `string` but not yet the annotation itself; it separates them
     // the moment a second line is bound, which is the point at which it matters.
-    expect<typeof CompactRuntime.line>().type.toBe<'0.19'>();
+    expect<typeof CompactRuntime.line>().type.toBe<'0.20'>();
   });
 
   it('types the boundary wrapper as failing with ContractRuntimeError', () => {

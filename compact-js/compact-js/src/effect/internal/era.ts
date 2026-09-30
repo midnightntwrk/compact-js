@@ -43,13 +43,13 @@ export type EraBranded<T, E extends LedgerMajor> = T & { readonly [eraBrand]?: E
 /**
  * Which `@midnight-ntwrk/compact-runtime` line each ledger major pairs with, as `'<major>.<minor>'`
  * — the granularity at which the runtime is era-paired, patch releases within a line being
- * interchangeable. Add an entry alongside every {@link LedgerMajor} you add (e.g. `10: '0.20'`):
+ * interchangeable. Add an entry alongside every {@link LedgerMajor} you add (e.g. `10: '0.21'`):
  * {@link RuntimeLine} indexes this by `LedgerMajor`, so a major with no entry fails the build here
  * rather than producing a binding that silently pairs with nothing.
  *
  * The pairing is expressed as a lookup rather than as two independent fields on {@link Era} so
  * that a descriptor claiming a line its ledger major does not pair with is *unrepresentable*.
- * With two eras bound this is load-bearing rather than theoretical: `{ ledger: 8, runtime: '0.19' }`
+ * With two eras bound this is load-bearing rather than theoretical: `{ ledger: 8, runtime: '0.20' }`
  * does not compile. `CompactRuntime.test.ts` cannot stand in for it — that test compares the two
  * bound `current.ts` files and can never see a mismatch *inside* a binding they do not name.
  *
@@ -57,7 +57,7 @@ export type EraBranded<T, E extends LedgerMajor> = T & { readonly [eraBrand]?: E
  */
 export interface EraPairing {
   readonly 8: '0.16';
-  readonly 9: '0.19';
+  readonly 9: '0.20';
 }
 
 /**

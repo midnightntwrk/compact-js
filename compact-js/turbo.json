@@ -11,7 +11,8 @@
         "src/**/*.compact",
         "package.json",
         "../scripts/fix-esm-only-exports.mjs",
-        "../scripts/verify-exports.mjs"
+        "../scripts/verify-exports.mjs",
+        "../scripts/compact-if-stale.mjs"
       ],
       "outputs": ["dist/**", "build/**", "src/**/managed/**"]
     },
@@ -37,7 +38,8 @@
         "vitest.era8.config.ts",
         "tsconfig*.json",
         "package.json",
-        "../scripts/run-all.mjs"
+        "../scripts/run-all.mjs",
+        "../scripts/compact-if-stale.mjs"
       ],
       "outputs": ["reports/**", "coverage/**", "logs/**"]
     },
@@ -52,7 +54,8 @@
         "vitest.config.ts",
         "tsconfig*.json",
         "package.json",
-        "../scripts/run-all.mjs"
+        "../scripts/run-all.mjs",
+        "../scripts/compact-if-stale.mjs"
       ],
       "outputs": ["reports/**", "coverage/**", "logs/**"]
     },
@@ -64,7 +67,8 @@
         "test/**/*.ts",
         "vitest.era8.config.ts",
         "tsconfig*.json",
-        "package.json"
+        "package.json",
+        "../scripts/compact-if-stale.mjs"
       ],
       "outputs": ["reports/**", "logs/**"]
     },

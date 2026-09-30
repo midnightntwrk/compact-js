@@ -39,7 +39,7 @@
  * era's events, which is the opposite of a gate.
  *
  * `CallTreeRuntimeBinding` (`internal/runtime/binding.ts`) is the type-level gate that backs the
- * omission up: `internal/runtime/conformance.ts` asserts 0.19 satisfies it and **0.16 does not**, so
+ * omission up: `internal/runtime/conformance.ts` asserts 0.20 satisfies it and **0.16 does not**, so
  * a line that cannot accumulate events cannot claim it.
  *
  * These modules are era-free in their own right. `ContractLog` used to take `LogEvent` from the

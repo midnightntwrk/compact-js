@@ -32,7 +32,7 @@ const LEDGER_SEAM_PATTERN = {
 };
 
 const RUNTIME_SEAM_PATTERN = {
-  // The compact-runtime line is era-paired with the ledger (0.19 with ledger 9, over
+  // The compact-runtime line is era-paired with the ledger (0.20 with ledger 9, over
   // onchain-runtime-v4), so it needs the same seam: a second era entry has to resolve a different
   // runtime line, which it cannot do while call sites name the package. Only the hyphenated scope
   // is listed because, unlike the ledger packages above, no `@midnightntwrk/compact-runtime` is

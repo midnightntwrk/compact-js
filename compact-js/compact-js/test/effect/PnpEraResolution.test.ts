@@ -64,7 +64,7 @@ const PACKAGE_ROOT = resolve(import.meta.dirname, '../..');
 const MONOREPO_ROOT = resolve(PACKAGE_ROOT, '..');
 const WORKSPACES = ['compact-js', 'compact-js-node', 'compact-js-command'];
 
-/** The 0.16 line's npm alias, and the canonical 0.19 name, as this repo declares them. */
+/** The 0.16 line's npm alias, and the canonical 0.20 name, as this repo declares them. */
 const ERA8_RUNTIME_PACKAGE = 'compact-runtime-ledger8';
 const ERA9_RUNTIME_PACKAGE = '@midnight-ntwrk/compact-runtime';
 
@@ -168,7 +168,7 @@ describe('two ledger eras under the yarn PnP linker', () => {
       distinctContractState: boolean;
     };
 
-    expect(resolved.era9.startsWith('0.19')).toBe(true);
+    expect(resolved.era9.startsWith('0.20')).toBe(true);
     expect(resolved.era8).toBe('0.16.0');
     // The criterion's wording: co-installed *without the resolver collapsing them into a single
     // instance*. Both the namespace object and a class off it, so this cannot pass on two live

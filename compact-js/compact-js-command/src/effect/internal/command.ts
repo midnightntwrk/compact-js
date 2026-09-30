@@ -159,6 +159,19 @@ const messageOf = (errOrCause: any): string => {
   }
 };
 
+/**
+ * The next link of a cause chain.
+ *
+ * @remarks
+ * compact-runtime's `ModuleResolutionError` keeps what a provider threw, or what loading a callee's
+ * module rejected with, on `failure.cause` rather than `cause`, therefore the walk reads it there
+ * too. It is recognised by the flag `ModuleResolutionError.is` reads, because the error may come
+ * from another copy of the runtime.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const causeOf = (err: any): unknown =>
+  err?.cause || (err?.isModuleResolutionError === true ? err.failure?.cause : undefined);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const reportCausableError: (err: any) => Effect.Effect<void, never> =
   (err) => Effect.gen(function* () {
@@ -182,22 +195,23 @@ const reportCausableError: (err: any) => Effect.Effect<void, never> =
           seen.add(errOrDoc);
         }
         docs.push(Doc.text(messageOf(errOrDoc)));
-        if (errOrDoc?.cause) {
+        const next = causeOf(errOrDoc);
+        if (next) {
           if (depth >= MAX_CAUSE_DEPTH) {
             docs.push(Doc.text(`(cause chain truncated at ${MAX_CAUSE_DEPTH} entries)`));
             return;
           }
-          buildCauseDoc(errOrDoc.cause, depth + 1);
+          buildCauseDoc(next, depth + 1);
         }
       }
       if (err !== null && typeof err === 'object') {
         seen.add(err);
       }
-      buildCauseDoc(err.cause, 1);
+      buildCauseDoc(causeOf(err), 1);
       return docs;
     }
     let errorDoc: Doc.AnsiDoc = Doc.text(messageOf(err));
-    if (err.cause) {
+    if (causeOf(err)) {
       errorDoc = errorDoc.pipe(
         Doc.catWithLineBreak(Doc.annotate(Doc.text('(cause)'), Ansi.italicized)),
         Doc.catWithLineBreak(Doc.hsep([
