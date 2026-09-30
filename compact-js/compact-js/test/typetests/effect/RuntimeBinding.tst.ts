@@ -21,7 +21,7 @@ import type {
   RuntimeBindingViolations
 } from '../../../src/effect/internal/runtime/binding.js';
 import type * as V0_16 from '../../../src/effect/internal/runtime/v0_16.js';
-import type * as V0_19 from '../../../src/effect/internal/runtime/v0_19.js';
+import type * as V0_20 from '../../../src/effect/internal/runtime/v0_20.js';
 
 /**
  * Type-level coverage for the compact-runtime binding **contract**.
@@ -38,17 +38,17 @@ import type * as V0_19 from '../../../src/effect/internal/runtime/v0_19.js';
  *
  * - {@link RuntimeBinding} is the era-neutral core — the members whose signatures really are
  *   identical on both lines.
- * - {@link CallTreeRuntimeBinding} is the 0.19+ capability: the call-tree execution model, contract
+ * - {@link CallTreeRuntimeBinding} is the 0.20+ capability: the call-tree execution model, contract
  *   events, and cross-contract calls. Ledger 8's runtime cannot satisfy it, and the test below
  *   asserts that it does not, which is what keeps those features off the older era's entry.
  */
 
-/** Replaces one member of the 0.19 binding, keeping every other member intact. */
-type Drifted<K extends keyof typeof V0_19, T> = Omit<typeof V0_19, K> & Readonly<Record<K, T>>;
+/** Replaces one member of the 0.20 binding, keeping every other member intact. */
+type Drifted<K extends keyof typeof V0_20, T> = Omit<typeof V0_20, K> & Readonly<Record<K, T>>;
 
 describe('RuntimeBinding — real bindings', () => {
-  it('reports no violations for the compact-runtime 0.19 binding', () => {
-    expect<RuntimeBindingViolations<typeof V0_19>>().type.toBe<never>();
+  it('reports no violations for the compact-runtime 0.20 binding', () => {
+    expect<RuntimeBindingViolations<typeof V0_20>>().type.toBe<never>();
   });
 
   it('reports no violations for the compact-runtime 0.16 binding', () => {
@@ -56,7 +56,7 @@ describe('RuntimeBinding — real bindings', () => {
   });
 
   it('has both bindings satisfy the era-neutral core', () => {
-    expect<typeof V0_19>().type.toBeAssignableTo<RuntimeBinding>();
+    expect<typeof V0_20>().type.toBeAssignableTo<RuntimeBinding>();
     expect<typeof V0_16>().type.toBeAssignableTo<RuntimeBinding>();
   });
 
@@ -71,15 +71,15 @@ describe('RuntimeBinding — real bindings', () => {
     expect<ReturnType<(typeof V0_16)['ContractMaintenanceAuthority']['deserialize']>>().type.toBe<
       V0_16.ContractMaintenanceAuthority
     >();
-    expect<ReturnType<(typeof V0_19)['ContractMaintenanceAuthority']['deserialize']>>().type.toBe<
-      V0_19.ContractMaintenanceAuthority
+    expect<ReturnType<(typeof V0_20)['ContractMaintenanceAuthority']['deserialize']>>().type.toBe<
+      V0_20.ContractMaintenanceAuthority
     >();
   });
 });
 
 describe('CallTreeRuntimeBinding — the ledger 9+ capability', () => {
-  it('is satisfied by compact-runtime 0.19', () => {
-    expect<typeof V0_19>().type.toBeAssignableTo<CallTreeRuntimeBinding>();
+  it('is satisfied by compact-runtime 0.20', () => {
+    expect<typeof V0_20>().type.toBeAssignableTo<CallTreeRuntimeBinding>();
   });
 
   it('is NOT satisfied by compact-runtime 0.16', () => {
@@ -92,10 +92,10 @@ describe('CallTreeRuntimeBinding — the ledger 9+ capability', () => {
   });
 
   it('separates the two eras on the circuit context shape, not on a version check', () => {
-    // The three members that make the 0.19 context a call *tree* instead of a single frame, and
+    // The three members that make the 0.20 context a call *tree* instead of a single frame, and
     // that `ContractExecutable` walks. Asserted on each line's own `CircuitContext` so the
     // difference is visible as a type fact rather than only as a failed capability check.
-    expect<V0_19.CircuitContext<unknown>>().type.toBeAssignableTo<{
+    expect<V0_20.CircuitContext<unknown>>().type.toBeAssignableTo<{
       readonly callProofDataTrace: readonly unknown[];
       readonly events: readonly unknown[];
     }>();
@@ -142,7 +142,7 @@ describe('RuntimeBinding — era-varying signing key', () => {
     // and `sampleSigningKey` gained a `kind` parameter. The keys themselves stay native — they
     // have to remain assignable to each line's own `signatureVerifyingKey` — so `signingKeyHex` is
     // where the difference is absorbed, letting `ContractExecutable` read hex era-neutrally.
-    expect<ReturnType<typeof V0_19.signingKeyHex>>().type.toBe<string>();
+    expect<ReturnType<typeof V0_20.signingKeyHex>>().type.toBe<string>();
     expect<ReturnType<typeof V0_16.signingKeyHex>>().type.toBe<string>();
   });
 
@@ -150,14 +150,14 @@ describe('RuntimeBinding — era-varying signing key', () => {
     // Deliberately different: normalising these to one shape is what broke the first draft, by
     // making the key unassignable to the line's native `signatureVerifyingKey`.
     expect<ReturnType<typeof V0_16.makeSampleSigningKey>>().type.toBe<string>();
-    expect<ReturnType<typeof V0_19.makeSampleSigningKey>>().type.toBeAssignableTo<{
+    expect<ReturnType<typeof V0_20.makeSampleSigningKey>>().type.toBeAssignableTo<{
       readonly tag: string;
       readonly value: string;
     }>();
   });
 
   it('names the runtime line each binding targets as a literal', () => {
-    expect<typeof V0_19.line>().type.toBe<'0.19'>();
+    expect<typeof V0_20.line>().type.toBe<'0.20'>();
     expect<typeof V0_16.line>().type.toBe<'0.16'>();
   });
 });

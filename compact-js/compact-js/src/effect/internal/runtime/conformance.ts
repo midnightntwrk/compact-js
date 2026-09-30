@@ -35,7 +35,7 @@ import { type LogEvent as ContractLogEvent } from '../../ContractLog.js';
 import { type CallTreeRuntimeBinding, type RuntimeBinding, type RuntimeBindingViolations } from './binding.js';
 import { type PartitionInputs } from './execution.js';
 import type * as V0_16 from './v0_16.js';
-import type * as V0_19 from './v0_19.js';
+import type * as V0_20 from './v0_20.js';
 
 // Routed through a constrained generic because a bare `A extends B ? true : never` conditional
 // resolves silently and never fails a build.
@@ -52,10 +52,10 @@ type _V0_16NoViolations = AssertNoViolations<RuntimeBindingViolations<typeof V0_
 // Asserted FALSE deliberately — see the capability note above. Do not "fix" this to `true`.
 type _V0_16HasNoCallTree = Assert<Extends<Extends<typeof V0_16, CallTreeRuntimeBinding>, false>>;
 
-// --- compact-runtime 0.19 (ledger 9 era; bound by `current.ts`) ---------------------------------
-type _V0_19Conforms = Assert<Extends<typeof V0_19, RuntimeBinding>>;
-type _V0_19NoViolations = AssertNoViolations<RuntimeBindingViolations<typeof V0_19>>;
-type _V0_19HasCallTree = Assert<Extends<typeof V0_19, CallTreeRuntimeBinding>>;
+// --- compact-runtime 0.20 (ledger 9 era; bound by `current.ts`) ---------------------------------
+type _V0_20Conforms = Assert<Extends<typeof V0_20, RuntimeBinding>>;
+type _V0_20NoViolations = AssertNoViolations<RuntimeBindingViolations<typeof V0_20>>;
+type _V0_20HasCallTree = Assert<Extends<typeof V0_20, CallTreeRuntimeBinding>>;
 
 // `ContractLog` decodes events era-free, against the structural minimum it reads rather than
 // against a line's own `LogEvent` — which is what stops an era-pinned entry's decoder from
@@ -64,7 +64,7 @@ type _V0_19HasCallTree = Assert<Extends<typeof V0_19, CallTreeRuntimeBinding>>;
 // changes the `EncodedStateValue` arms fails here rather than silently decoding to degraded events
 // at run time. Only the call-tree lines are checked, because a line with no events has no
 // `LogEvent` to compare (0.16's is `never`, which satisfies anything).
-type _V0_19LogEventDecodable = Assert<Extends<V0_19.LogEvent, ContractLogEvent>>;
+type _V0_20LogEventDecodable = Assert<Extends<V0_20.LogEvent, ContractLogEvent>>;
 
 // `ContractCallPublic` exposes each call's pre-execution `state`, `block`, `effects` and
 // `comIndices` so a consumer can redo the transcript partition in another ledger era
@@ -74,10 +74,10 @@ type _V0_19LogEventDecodable = Assert<Extends<V0_19.LogEvent, ContractLogEvent>>
 // every call site and simply be unusable. Checked for every line, bound or not: this is the only
 // thing that turns that silent collapse into a build failure.
 type _V0_16QueryContextHasPartitionInputs = Assert<Extends<V0_16.QueryContext, PartitionInputs>>;
-type _V0_19QueryContextHasPartitionInputs = Assert<Extends<V0_19.QueryContext, PartitionInputs>>;
+type _V0_20QueryContextHasPartitionInputs = Assert<Extends<V0_20.QueryContext, PartitionInputs>>;
 
 // Asserted FALSE deliberately: the ledger seam owns `CostModel`. Both packages declare one, the
 // declarations are identical and neither is branded, so listing it here too would put two
 // interchangeable `CostModel`s on one entry. Do not "fix" this to `true`.
 type _V0_16HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_16 ? true : false, false>>;
-type _V0_19HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_19 ? true : false, false>>;
+type _V0_20HasNoCostModel = Assert<Extends<'CostModel' extends keyof typeof V0_20 ? true : false, false>>;

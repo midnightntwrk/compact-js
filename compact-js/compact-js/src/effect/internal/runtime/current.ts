@@ -22,11 +22,11 @@
  * Swap this together with `internal/ledger/current.ts`: the two are era-paired, and
  * `test/effect/CompactRuntime.test.ts` fails if only one of them moves.
  */
-export * from './v0_19.js';
+export * from './v0_20.js';
 
 import type { Assert, Extends } from '../typeAssertions.js';
 import { type RuntimeBinding } from './binding.js';
-import type * as Bound from './v0_19.js';
+import type * as Bound from './v0_20.js';
 
 // Compile-time proof that the bound module satisfies the binding contract, so a runtime swap that
 // misses a facade name fails the build HERE, naming the binding. `import type` keeps this file

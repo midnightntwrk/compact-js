@@ -75,7 +75,7 @@ import { type CallProofDataView, type ExecutionContextParams, type ExecutionView
 
 // `CallContext`, `Effects` and `CoinCommitment` are the types of the partition inputs
 // `ContractCallPublic` exposes (midnight-sdk#400), and `EncodedStateValue` is listed for the
-// separate reason given on the 0.19 twin. This line reaches all four the same way — an explicit
+// separate reason given on the 0.20 twin. This line reaches all four the same way — an explicit
 // re-export from onchain-runtime-v3 — but without the `CallContext` ambiguity: 0.16's
 // circuit-context declares no `CallContext` of its own, so there is only one to resolve to.
 export {
@@ -245,25 +245,30 @@ type AnnotatedContext<PS> = CircuitContext<PS> & { readonly [EXECUTION_META]?: E
  * mutated in place during execution, so reading it afterwards would report the final state as the
  * initial one and silently corrupt transcript partitioning.
  *
- * @throws If `stateProvider` or `parentBlockHash` is supplied. This line has no `crossContractCall`
- * and no `ContractStateProvider`, so honouring a cross-contract call is impossible; ignoring the
- * provider would instead make such a call appear to succeed against stale state.
+ * @throws If `stateProvider`, `moduleProvider` or `parentBlockHash` is supplied. This line has no
+ * `crossContractCall`, `ContractStateProvider` or `ContractModuleProvider`, so honouring a
+ * cross-contract call is impossible; ignoring a provider would instead make such a call appear to
+ * succeed against stale state.
  *
  * @category execution
  */
 export const createExecutionContext = <PS>(
-  params: ExecutionContextParams<PS, ContractState, EncodedZswapLocalState, never>
+  params: ExecutionContextParams<PS, ContractState, EncodedZswapLocalState, never, never>
 ): CircuitContext<PS> => {
-  if (params.stateProvider !== undefined || params.parentBlockHash !== undefined) {
+  if (
+    params.stateProvider !== undefined ||
+    params.moduleProvider !== undefined ||
+    params.parentBlockHash !== undefined
+  ) {
     throw new Error(
       `compact-runtime ${line} (ledger 8 era) cannot execute cross-contract calls: ` +
-        'this line has no crossContractCall or ContractStateProvider. ' +
+        'this line has no crossContractCall, ContractStateProvider or ContractModuleProvider. ' +
         'Use a build pinned to a later era to call across contracts.'
     );
   }
 
-  // The gas limit is fifth here and seventh on 0.19; `costModel` sits between them on both lines
-  // and stays at the default, for the reason the 0.19 twin gives.
+  // The gas limit is fifth and `time` seventh here; `costModel` sits between them and stays at
+  // the default, for the reason the 0.20 twin gives.
   const context = createCircuitContext(
     params.address,
     params.zswapLocalState,
@@ -294,7 +299,7 @@ export const createExecutionContext = <PS>(
  * @remarks
  * The trace is **synthesised** as a single entry. That is faithful rather than lossy: without
  * `crossContractCall` this line can only ever produce one call, so a one-element trace is complete
- * by construction. The proof data 0.19 hangs off each `CallProofData` lives on `results.proofData`
+ * by construction. The proof data 0.20 hangs off each `CallProofData` lives on `results.proofData`
  * here, and is moved across.
  *
  * `events` is always empty, and typed `never[]` — see {@link LogEvent}.

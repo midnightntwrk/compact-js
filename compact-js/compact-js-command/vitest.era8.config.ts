@@ -23,14 +23,14 @@ import { defineConfig } from 'vitest/config';
  * A separate project for the same reason `compact-js/vitest.era8.config.ts` is one: a contract
  * compiled by `compactc` opens with the bare specifier
  * `import * as __compactRuntime from '@midnight-ntwrk/compact-runtime'` followed by
- * `checkRuntimeVersion('0.16.0')`, which hard-fails against the 0.19 line. Generated code
+ * `checkRuntimeVersion('0.16.0')`, which hard-fails against the 0.20 line. Generated code
  * compact-js does not own and cannot rewrite, so the only lever is module resolution.
  *
  * The alias is **scoped to the importer**, which the library's era 8 project does not need to do.
  * The CLI holds *both* eras in one process — `internal/era/registry.ts` imports `/v8/effect` and
  * `/v9/effect` — so redirecting `@midnight-ntwrk/compact-runtime` globally would hand the 0.16 line
- * to `internal/runtime/v0_19.ts` as well, leaving the ledger 9 half of the registry silently
- * running the wrong line. Every value name 0.19 re-exports also exists on 0.16, so that would not
+ * to `internal/runtime/v0_20.ts` as well, leaving the ledger 9 half of the registry silently
+ * running the wrong line. Every value name 0.20 re-exports also exists on 0.16, so that would not
  * even fail to link: it would just be wrong. Redirecting only for importers under `managed-v8`
  * gives each era its own line, which is what the two named dependencies
  * (`@midnight-ntwrk/compact-runtime` and the `compact-runtime-ledger8` alias) achieve in a real

@@ -18,7 +18,7 @@
  * ledger era this entry targets — ledger 9 — not this package's own version. Same API as
  * `@midnight-ntwrk/compact-js/effect`.
  *
- * This entry **binds ledger 9 itself** (`internal/era/v9Ledger.ts` and `internal/runtime/v0_19.ts`),
+ * This entry **binds ledger 9 itself** (`internal/era/v9Ledger.ts` and `internal/runtime/v0_20.ts`),
  * rather than re-exporting the facades. It used to do the latter, which made it an alias for
  * whatever `internal/ledger/current.ts` bound: advancing that turned `/v9` into an entry for a
  * different era, with nothing to catch it — the `/v9`-versus-root parity tests were comparing an

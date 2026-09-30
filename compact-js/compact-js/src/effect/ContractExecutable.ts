@@ -82,7 +82,8 @@ export declare namespace ContractExecutable {
    * `callProofDataTrace` order — callees first, the root call last. The application-facing
    * `result`, `privateState`, and `zswapLocalState` belong to the root contract and are
    * statically typed for it; sub-calls expose only proof data (other contracts' types are not
-   * known here, and only the root holds private/zswap state).
+   * known here, and only the root holds private state). Each call carries its own Zswap local
+   * state on `calls[i].private.zswapLocalState` — the root's is repeated here for convenience.
    *
    * `events` is the single execution-wide log-event list across the whole call tree, in emission
    * order; each event is tagged with its emitting contract's address, so a per-contract view is a

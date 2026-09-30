@@ -160,6 +160,7 @@ export interface ExecutableTypes<L extends ExecutableLedger, R extends Executabl
   readonly MaintenanceUpdate: InstanceType<L['MaintenanceUpdate']>;
   readonly PartitionedTranscript: ReturnType<L['partitionTranscripts']>[number];
   readonly ContractStateProvider: StateProviderOf<R>;
+  readonly ContractModuleProvider: ModuleProviderOf<R>;
   readonly TraceEntry: ReturnType<R['readExecution']>['trace'][number];
   readonly AlignedValue: ExecutableTypes<L, R>['TraceEntry']['input'];
   readonly Op: ExecutableTypes<L, R>['TraceEntry']['publicTranscript'][number];
@@ -191,6 +192,23 @@ type StateProviderOf<R extends ExecutableRuntime> = Parameters<R['createExecutio
   : never;
 
 /**
+ * The cross-contract module provider this line accepts, read off the same parameter object as
+ * {@link StateProviderOf} — `never` on ledger 8 for the same reason.
+ */
+type ModuleProviderOf<R extends ExecutableRuntime> = Parameters<R['createExecutionContext']>[0] extends {
+  moduleProvider?: infer P;
+}
+  ? NonNullable<P>
+  : never;
+
+/**
+ * The parent block hash a provider-less {@link CircuitContext} may carry. A call-tree line hands it
+ * to the VM's block context, therefore it is a `string` there; 0.16 takes neither a provider nor a
+ * block hash, therefore the two are gated together and it is `undefined` there.
+ */
+type LoneParentBlockHashOf<R extends ExecutableRuntime> = [StateProviderOf<R>] extends [never] ? undefined : string;
+
+/**
  * A query context's inner ledger state — the **post**-execution context's as
  * `ContractCallPublic.contractState` reports it, the **pre**-execution context's as
  * `ContractCallPublic.partitionInputs.state` does. One conditional for both because the two contexts
@@ -214,6 +232,12 @@ export type ContractContext<L extends ExecutableLedger, R extends ExecutableRunt
   readonly contractState: ExecutableTypes<L, R>['ContractState'];
 };
 
+/**
+ * Resolving a cross-contract callee needs its state, the module implementing it, and a block to
+ * read that state at, so the two providers arrive together and pin a block. A block hash on its own
+ * is still meaningful on a call-tree line — it reaches the VM's block context whether or not
+ * anything is called.
+ */
 export type CircuitContext<L extends ExecutableLedger, R extends ExecutableRuntime, PS> = ContractContext<L, R> & {
   readonly privateState: PS;
   readonly zswapLocalState?: ExecutableTypes<L, R>['ZswapLocalState'];
@@ -221,9 +245,14 @@ export type CircuitContext<L extends ExecutableLedger, R extends ExecutableRunti
   /** A ceiling on each ledger query the call makes — per query, not per call. See `execution.ts`. */
   readonly queryGasLimit?: GasCost;
 } & (
-    | { readonly stateProvider?: undefined; readonly parentBlockHash?: undefined }
+    | {
+        readonly stateProvider?: undefined;
+        readonly moduleProvider?: undefined;
+        readonly parentBlockHash?: LoneParentBlockHashOf<R>;
+      }
     | {
         readonly stateProvider: ExecutableTypes<L, R>['ContractStateProvider'];
+        readonly moduleProvider: ExecutableTypes<L, R>['ContractModuleProvider'];
         readonly parentBlockHash: string;
       }
   );
@@ -322,6 +351,14 @@ export type ContractCallPrivate<L extends ExecutableLedger, R extends Executable
   readonly input: ExecutableTypes<L, R>['AlignedValue'];
   readonly output: ExecutableTypes<L, R>['AlignedValue'];
   readonly privateTranscriptOutputs: ExecutableTypes<L, R>['AlignedValue'][];
+  /**
+   * The shielded coins this call consumed and produced. Recorded per call rather than only for
+   * the root, because a cross-contract callee can perform Zswap operations too — and must, since
+   * a coin addressed to a contract is only credited if that contract claims the receive in the
+   * same transaction. Transaction assembly uses the per-call address to bind each contract-owned
+   * input and output to the contract that actually made it.
+   */
+  readonly zswapLocalState: ExecutableTypes<L, R>['ZswapLocalState'];
 };
 
 export type ContractCall<L extends ExecutableLedger, R extends ExecutableRuntime> = {
@@ -481,7 +518,7 @@ export const makeExecutable = <
   // commitment rides on the *callee's* pre-transcript (`commCommData.commComm`); the root call has
   // no commitment and becomes the graph root. The returned array is in the same order as `trace`.
   const partitionAllTranscripts = (
-    // The era-neutral trace-entry type supplied by whichever runtime line is bound. On 0.19 it is
+    // The era-neutral trace-entry type supplied by whichever runtime line is bound. On 0.20 it is
     // the runtime's own `CallProofData`; on 0.16 it is synthesised by that binding's
     // `readExecution` from the flat frame.
     trace: readonly Types['TraceEntry'][],
@@ -746,6 +783,7 @@ export const makeExecutable = <
                 contractState: circuitContext.contractState,
                 privateState: circuitContext.privateState,
                 stateProvider: circuitContext.stateProvider,
+                moduleProvider: circuitContext.moduleProvider,
                 parentBlockHash: circuitContext.parentBlockHash,
                 // Seconds, not milliseconds — the unit both lines' `time` parameter takes.
                 time: Math.floor(nowMillis / 1_000),
@@ -827,6 +865,13 @@ export const makeExecutable = <
                         return { state: final.state.state, comIndices: final.comIndices };
                       }
                     );
+                    // Wrapped for the same reason as the root's decode below: a throw here is a
+                    // defect, not a `ContractExecutionError`.
+                    const callZswapLocalState = yield* tryBoundary(
+                      `Failed to decode the zswap local state of the call to '${entry.circuitId}' ` +
+                        `on '${entry.contractAddress}'`,
+                      () => runtime.decodeZswapLocalState(entry.zswapLocalState as never) as Types['ZswapLocalState']
+                    );
                     return {
                       contractAddress: ContractAddress.ContractAddress(entry.contractAddress),
                       circuitId: entry.circuitId,
@@ -847,7 +892,8 @@ export const makeExecutable = <
                       private: {
                         input: entry.input,
                         output: entry.output,
-                        privateTranscriptOutputs: [...entry.privateTranscriptOutputs]
+                        privateTranscriptOutputs: [...entry.privateTranscriptOutputs],
+                        zswapLocalState: callZswapLocalState
                       },
                       communicationCommitment: Option.fromNullable(entry.commCommData)
                     };

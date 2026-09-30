@@ -14,16 +14,16 @@
  */
 
 /**
- * Contract execution pinned to the **ledger 9 / compact-runtime 0.19** era pair.
+ * Contract execution pinned to the **ledger 9 / compact-runtime 0.20** era pair.
  *
  * @remarks
  * `internal/executable.ts` applied to this era's two facades, exactly as `effect/ContractExecutable.ts`
  * applies it to the bound era's. Every era-varying type below therefore resolves to ledger 9's and
- * 0.19's shapes as a consequence of the two arguments — `CircuitContext.contractState` is the 0.19
+ * 0.20's shapes as a consequence of the two arguments — `CircuitContext.contractState` is the 0.20
  * contract state, `MaintenanceResult.maintenanceUpdate` is ledger 9's — with no second declaration
  * to keep in step (midnight-sdk#387/#388).
  *
- * The era's *capabilities* come from the same place, and here they are the full set: 0.19's
+ * The era's *capabilities* come from the same place, and here they are the full set: 0.20's
  * `createExecutionContext` accepts a cross-contract state provider, and its `readExecution` returns
  * a real `LogEvent` list, so `CallResult.events` and multi-entry `calls` are reachable from this
  * entry and statically absent from the ledger 8 one.

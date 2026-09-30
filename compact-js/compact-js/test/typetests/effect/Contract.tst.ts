@@ -26,7 +26,7 @@ import { describe, expect, it } from 'tstyche';
  * signatures are written in terms of the compact-runtime types — and two of them, `CircuitContext`
  * and `CircuitResults`, are exactly the ones that change between runtime lines. 0.16 hands a
  * circuit a flat context (`currentPrivateState`, `currentQueryContext`, `currentZswapLocalState`)
- * and returns `proofData` alongside the result; 0.19 hands it a call tree (`callContext`,
+ * and returns `proofData` alongside the result; 0.20 hands it a call tree (`callContext`,
  * `queryContexts`, `callProofDataTrace`, `events`) and keeps the proof data on the context. The two
  * share nothing beyond `costModel` and `gasLimit`, so neither is assignable to the other in either
  * direction.
@@ -40,14 +40,14 @@ import { describe, expect, it } from 'tstyche';
  *
  * The era 8 shapes are taken from `compact-runtime-ledger8` directly rather than from the compiled
  * `managed-v8/` fixture, because a generated artifact's own `.d.ts` imports
- * `@midnight-ntwrk/compact-runtime` by bare specifier: in this test program that resolves to 0.19,
+ * `@midnight-ntwrk/compact-runtime` by bare specifier: in this test program that resolves to 0.20,
  * so the fixture would be typed against the wrong line and prove nothing. Tests are exempt from the
  * seam's `no-restricted-imports` rule for this reason.
  */
 
 type PrivateState = { readonly count: bigint };
 
-/** A contract as `compactc` generates it for the ledger 9 / runtime 0.19 pair. */
+/** A contract as `compactc` generates it for the ledger 9 / runtime 0.20 pair. */
 type Era9Contract = {
   witnesses: {
     localSecretKey(context: Era9Runtime.WitnessContext<unknown, PrivateState>): [PrivateState, Uint8Array];
@@ -117,9 +117,9 @@ type Era9MultiCircuitContract = {
  * @remarks
  * **Synchronous**, and that is not a simplification — it is what compactc 0.31.1 emits. Compare
  * `test/contract/managed-v8/counter/contract/index.d.ts` against its `managed/` twin: the whole
- * difference between the two generated declarations is that 0.19's circuits and `initialState`
- * return `Promise<…>` and 0.16's return the value. Wrap these in `Promise` and the suite agrees
- * with the spine about a contract nobody compiles.
+ * difference between the two generated `Contract` classes is that 0.20's circuits and
+ * `initialState` return `Promise<…>` and 0.16's return the value. Wrap these in `Promise` and the
+ * suite agrees with the spine about a contract nobody compiles.
  */
 type Era8Contract = {
   witnesses: {
@@ -149,8 +149,8 @@ describe('the contract spine', () => {
   });
 
   it('accepts a contract compiled for the ledger 8 era', () => {
-    // 0.16's flat `CircuitContext` is not assignable to 0.19's call-tree one in either direction,
-    // `CircuitResults.context` carries the same split, and the line is synchronous where 0.19 is
+    // 0.16's flat `CircuitContext` is not assignable to 0.20's call-tree one in either direction,
+    // `CircuitResults.context` carries the same split, and the line is synchronous where 0.20 is
     // not — so a spine naming either era's types rejects this.
     expect<Era8Contract>().type.toBeAssignableTo<Contract.Contract<PrivateState>>();
   });

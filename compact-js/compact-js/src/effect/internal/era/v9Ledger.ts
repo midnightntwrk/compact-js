@@ -45,14 +45,14 @@ import { Effect } from 'effect';
 import * as ContractRuntimeError from '../../ContractRuntimeError.js';
 import { makeConversions, tryConvert } from '../ledger/conversions.js';
 import * as V9 from '../ledger/v9.js';
-import * as V0_19 from '../runtime/v0_19.js';
+import * as V0_20 from '../runtime/v0_20.js';
 
 export { type Era } from '../era.js';
 export { tryConvert } from '../ledger/conversions.js';
 export * from '../ledger/v9.js';
 
-// Ledger 9 with compact-runtime 0.19 — the era pair `v9.ts` declares via `era.runtime`.
-const conversions = makeConversions(V9, V0_19);
+// Ledger 9 with compact-runtime 0.20 — the era pair `v9.ts` declares via `era.runtime`.
+const conversions = makeConversions(V9, V0_20);
 
 /** Converts a runtime `ContractState` to ledger 9's. @category conversions */
 export const fromRuntimeContractState = conversions.fromRuntimeContractState;

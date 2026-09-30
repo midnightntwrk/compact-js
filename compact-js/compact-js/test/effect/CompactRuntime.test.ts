@@ -20,13 +20,13 @@ import { describe, expect, it } from 'vitest';
 
 describe('compact-runtime seam', () => {
   it('names the runtime line it binds', () => {
-    expect(CompactRuntime.line).toBe('0.19');
+    expect(CompactRuntime.line).toBe('0.20');
   });
 
   it('names the runtime line of the installed compact-runtime package', () => {
     // `line` is a repo-authored literal, so on its own the era-pairing check below compares two
     // constants that a dependency bump moves neither of. Anchoring `line` to the installed
-    // package's own `versionString` grounds the whole chain: a bump to 0.20.x fails here until
+    // package's own `versionString` grounds the whole chain: a bump to 0.21.x fails here until
     // the runtime binding (and its ledger pair) are swapped together.
     expect(versionString.startsWith(`${CompactRuntime.line}.`)).toBe(true);
   });
@@ -76,8 +76,8 @@ describe('CompactRuntime.tryRuntime', () => {
 describe('execution clock', () => {
   // midnight-sdk#403. Without a settable clock every execution stamps `block.secondsSinceEpoch`
   // with `Date.now()`, so anything derived from `block` — which midnight-sdk#400 puts on the public
-  // result — differs on every run and cannot be recorded as a fixture. 0.19 takes `time` in the
-  // ninth positional slot; the binding previously stepped over it to reach `parentBlockHash`.
+  // result — differs on every run and cannot be recorded as a fixture. 0.20 takes it as
+  // the `time` option; the binding previously left it out.
   //
   // The unit is **seconds** since the epoch, not milliseconds: both lines default it to
   // `Math.floor(Date.now() / 1_000)`. These tests are where that is stated.
@@ -110,7 +110,7 @@ describe('execution clock', () => {
 
 describe('era pairing', () => {
   it('pairs the bound ledger era with the bound runtime line', () => {
-    // The ledger era and the compact-runtime line move together (ledger 9 ↔ runtime 0.19 ↔
+    // The ledger era and the compact-runtime line move together (ledger 9 ↔ runtime 0.20 ↔
     // onchain-runtime-v4). The two seams are bound in separate `current.ts` files, so nothing in
     // the type system stops one being repointed without the other; this is the check that catches
     // a half-completed era swap.

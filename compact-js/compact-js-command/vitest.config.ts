@@ -23,7 +23,7 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     // `test/era8/**` needs `@midnight-ntwrk/compact-runtime` to resolve to the 0.16 line for the
     // compiled artifact its configuration loads, which only `vitest.era8.config.ts` arranges. Left
-    // in this project's `include` it would load a ledger 8 artifact against the 0.19 runtime and
+    // in this project's `include` it would load a ledger 8 artifact against the 0.20 runtime and
     // fail its `checkRuntimeVersion` on import.
     exclude: ['node_modules', 'dist', 'test/era8/**'],
     coverage: {

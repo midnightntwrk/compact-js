@@ -18,8 +18,8 @@ import { type SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKe
 import { type RuntimeLine } from '../era.js';
 
 /**
- * The era-neutral core every compact-runtime binding module (`v0_16.ts`, `v0_19.ts`, a future
- * `v0_20.ts`, …) must satisfy: the members whose signatures really are the same on every line
+ * The era-neutral core every compact-runtime binding module (`v0_16.ts`, `v0_20.ts`, a future
+ * `v0_21.ts`, …) must satisfy: the members whose signatures really are the same on every line
  * this codebase binds.
  *
  * @remarks
@@ -87,18 +87,18 @@ export interface RuntimeBinding {
    *
    * @remarks
    * The era-neutral half of the execution model. Named parameters because the lines disagree on
-   * both arity and order — 0.19 takes `(circuitId, address, …)`, 0.16 takes `(address, …)` with no
-   * circuit id — so a positional contract would let an era swap shift an argument silently.
+   * shape — 0.20 takes one options object, 0.16 takes `(address, …)` positionally with no circuit
+   * id — so a positional contract would let an era swap shift an argument silently.
    *
-   * A line without cross-contract calls must *reject* a `stateProvider`, not ignore it. See
-   * `execution.ts`.
+   * A line without cross-contract calls must *reject* a `stateProvider` or `moduleProvider`, not
+   * ignore it. See `execution.ts`.
    */
   readonly createExecutionContext: (params: never) => unknown;
   /**
    * Projects this line's circuit results into the era-neutral {@link ExecutionView}.
    *
    * @remarks
-   * On 0.19 a pass-through over `context.callProofDataTrace`. On 0.16 the trace is synthesised as
+   * On 0.20 a pass-through over `context.callProofDataTrace`. On 0.16 the trace is synthesised as
    * a single entry from `results.proofData` — complete by construction, since a line with no
    * `crossContractCall` cannot produce more than one call.
    */
@@ -117,7 +117,7 @@ export interface RuntimeBinding {
    *
    * @remarks
    * The era-neutral half of the signing-key difference: a bare hex `string` is already its own
-   * value on 0.16, while a 0.19 key carries it under `.value`. Having the binding answer this
+   * value on 0.16, while a 0.20 key carries it under `.value`. Having the binding answer this
    * means `ContractExecutable` can hand the hex to `platform-js`'s `SigningKey.make` without
    * branching on the era.
    */
@@ -134,9 +134,10 @@ export interface RuntimeBinding {
  * compact-runtime 0.16, because these features are era-impossible below ledger 9 rather than
  * merely absent:
  *
- * - **Cross-contract calls** need `crossContractCall` and a `ContractStateProvider` to resolve
- *   callee state. Neither exists on 0.16; nor does the per-callee `queryContexts` /
- *   `zswapLocalStates` / `contractStates` bookkeeping a call tree requires.
+ * - **Cross-contract calls** need `crossContractCall`, a `ContractStateProvider` to resolve callee
+ *   state and a `ContractModuleProvider` to resolve callee code. None exists on 0.16; nor does the
+ *   per-callee `queryContexts` / `zswapLocalStates` / `contractStates` bookkeeping a call tree
+ *   requires.
  * - **Contract events** need a `LogEvent`. The VM-level `log` gather op *does* exist under
  *   onchain-runtime-v3, but its payload is a bare `EncodedStateValue` against v4's
  *   `{ version, eventType, data }`, it carries no emitting-contract address, and 0.16 accumulates
@@ -151,15 +152,12 @@ export interface RuntimeBinding {
  */
 export interface CallTreeRuntimeBinding {
   /**
-   * The 0.19+ entry point: takes the circuit id *first* (0.16 takes the contract address) and
-   * returns a call-tree-shaped context. The return type is what discriminates the lines — 0.16's
-   * flat `{ currentPrivateState, currentZswapLocalState, currentQueryContext, costModel }` context
-   * has no trace and no event log.
+   * The 0.20+ entry point: takes one options object (0.16 takes the contract address first,
+   * positionally) and returns a call-tree-shaped context. The return type is what discriminates
+   * the lines — 0.16's flat `{ currentPrivateState, currentZswapLocalState, currentQueryContext,
+   * costModel }` context has no trace and no event log — therefore the options stay `never`.
    */
-  readonly createCircuitContext: (
-    circuitId: string,
-    ...rest: never[]
-  ) => {
+  readonly createCircuitContext: (options: never) => {
     readonly callContext: unknown;
     readonly callProofDataTrace: readonly unknown[];
     readonly events: readonly unknown[];

@@ -116,7 +116,7 @@ export { tryConvert };
  * Builds the runtime↔ledger conversions for one era pair.
  *
  * @param ledger The era's ledger binding (`v8.ts`, `v9.ts`, …).
- * @param runtime The compact-runtime binding that era pairs with (`v0_16.ts`, `v0_19.ts`, …).
+ * @param runtime The compact-runtime binding that era pairs with (`v0_16.ts`, `v0_20.ts`, …).
  *
  * @category constructors
  */

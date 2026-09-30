@@ -19,13 +19,13 @@
  * All `@midnight-ntwrk/compact-runtime` types and functions used by compact-js (and its sibling
  * packages) are reached through this module rather than the package directly. The concrete line is
  * bound in `internal/runtime/current.ts`. The facade re-exports a curated list of runtime names: if
- * one you need is missing, widen the binding (`internal/runtime/v0_19.ts`) rather than importing
+ * one you need is missing, widen the binding (`internal/runtime/v0_20.ts`) rather than importing
  * the package around the seam. Tests may import it directly where they must compare module
  * identity.
  *
  * @remarks
  * This is the twin of the {@link Ledger} seam, and exists for the same reason: the compact-runtime
- * line is era-paired with the ledger (0.19 with ledger 9, over onchain-runtime-v4), so a build that
+ * line is era-paired with the ledger (0.20 with ledger 9, over onchain-runtime-v4), so a build that
  * targets a different ledger era needs a different runtime line too. Routing every call site
  * through one module is what lets an era-scoped entry rebind both by editing two `current.ts`
  * files, instead of hunting nine import sites across three packages (midnight-sdk#387/#388).
