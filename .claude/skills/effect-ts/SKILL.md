@@ -1,6 +1,6 @@
 ---
 name: effect-ts
-description: Expert guidance for writing and reviewing idiomatic Effect-TS code — typed errors, dependency injection with Layers/Context, concurrency, Schema, streams, resource management, and common anti-patterns. Use whenever writing, modifying, or reviewing Effect code in this repo (the `compact-js` and `platform-js` packages heavily use Effect), or when asked to "write Effect code", "use Effect", "functional TypeScript", "handle errors with Effect", "dependency injection Effect", "Effect Layer", or to fix non-idiomatic Effect usage.
+description: Expert guidance for writing and reviewing idiomatic Effect-TS code — typed errors, dependency injection with Layers/Context, concurrency, Schema, streams, resource management, and common anti-patterns. Use whenever writing, modifying, or reviewing Effect code in this repo (the `compact-js` packages heavily use Effect), or when asked to "write Effect code", "use Effect", "functional TypeScript", "handle errors with Effect", "dependency injection Effect", "Effect Layer", or to fix non-idiomatic Effect usage.
 ---
 
 # Effect-TS Expert

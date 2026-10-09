@@ -15,7 +15,7 @@ This skill (`SKILL.md` and everything under `references/`) is vendored from the
   `mcp__plugin_matrix_*` / Context7 entries from `allowed-tools`, since those tools are not
   available in this repository. The skill now uses the standard tool set.
 - Adjusted the `description` to mention this repo's Effect-heavy packages
-  (`compact-js`, `platform-js`).
+  (`compact-js`).
 
 The reference documents under `references/` are unchanged from upstream.
 

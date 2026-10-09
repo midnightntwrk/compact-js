@@ -23,48 +23,129 @@ the contract and its circuits more convenient, and TypeScript idiomatic.
 
 > [!NOTE]  
 > The term _runtime_ is often used to describe the JavaScript executable for a contract. This is
-> distinct from the package `@midnight-ntwrk/compact-runtime`, which provides the utilities that each of
-> these JavaScript executables use.
+> distinct from the package `@midnight-ntwrk/compact-runtime`, which provides the utilities that each
+> of these JavaScript executables use.
 
-## Release Process
+## Ledger eras
 
-Releases are automated via GitHub Actions triggered by git tags. To release:
+The version suffix on an era-pinned entry names the **ledger era** it targets, not this package's
+own version: `@midnight-ntwrk/compact-js/v9` (and `/v9/effect`) targets **ledger 9**, and
+`/v8` (with `/v8/effect`) targets **ledger 8**.
 
-### Step 1: Determine the new version
-Decide on the version:
-- **Patch** (2.5.1): Bug fixes only
-- **Minor** (2.6.0): New features, backwards compatible
-- **Major** (3.0.0): Breaking changes
+The bound era is inspectable at run time via `Ledger.era`, from any entry.
 
-### Step 2: Update versions on main
-Update the version in all four `package.json` files:
-- Root: `/package.json`
-- `compact-js/package.json`
-- `compact-js-node/package.json`
-- `compact-js-command/package.json`
+### What each entry gives you
 
-```bash
-git checkout main
-git pull origin main
-# Edit all package.json files with new version
-git add -A
-git commit -m "chore: bump to 2.5.1"
-git push origin main
+| Entry | Ledger era | compact-runtime | Surface |
+| --- | --- | --- | --- |
+| `.` / `./effect` | the build's bound era (ledger 9 today) | 0.20 | Full |
+| `/v9` / `/v9/effect` | ledger 9 | 0.20 | Full |
+| `/v8` / `/v8/effect` | ledger 8 | 0.16 | `Ledger` and `CompactRuntime` seams only |
+
+`/v8/effect` binds ledger 8 directly rather than following the package's bound era, so the two
+era facades can be live in one process.
+
+> [!NOTE]
+> `/v9` and the unsuffixed entries still resolve the package's *bound* era. They agree today
+> because that era is ledger 9; when it advances, `/v9` must be repointed at a pinned ledger 9
+> binding the way `/v8` is pinned now.
+
+### Running both eras in one process
+
+This works, and it is mostly not a compact-js concern — which is the important thing to understand
+before designing around it.
+
+Every contract `compactc` emits begins with the same two lines, differing only in the version:
+
+```js
+import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
+__compactRuntime.checkRuntimeVersion('0.16.0');
 ```
 
-### Step 3: Create and push the release tag
-```bash
-git tag -a cjs-2.5.1 -m "Release 2.5.1"
-git push origin cjs-2.5.1
+That is a **bare specifier in generated code**, and `checkRuntimeVersion` refuses any other minor
+version. So a contract's era is decided by *how that specifier resolves where the contract file
+lives* — not by which compact-js entry your application imported. Importing `/v8/effect` cannot
+change it, because an entry point has no reach into generated code's imports.
+
+The pattern, therefore: give each era's contracts a **resolution scope** whose
+`@midnight-ntwrk/compact-runtime` is that era's line. Any of these does it:
+
+- a nested `node_modules` beside that era's artifacts (Node resolves bare specifiers by walking up
+  from the importing file);
+- a bundler alias scoped to that directory;
+- a separate workspace or package per era, each pinning its own runtime.
+
+Pin `@midnight-ntwrk/compact-js` the same way in that scope if you want the full executable surface
+for that era, rather than just the seams `/v8/effect` gives you.
+
+Two things are easy to get wrong:
+
+- **Copy the artifacts into the scope; do not symlink them.** Node resolves a module to its real
+  path before resolving *its* imports, so a symlinked artifact resolves its runtime from the
+  original location and fails the version check.
+- **The scope needs its own `package.json` with `"type": "module"`**, or the emitted ESM is parsed
+  as CommonJS.
+
+A scope is additive — it redirects only what resolves from inside it, leaving your application's own
+runtime untouched. `test/effect/DualEraResolution.test.ts` builds one and executes an era 8 and an
+era 9 circuit in the same process; read it as the executable version of this section.
+
+### Ledger 8 limitations
+
+Two kinds, worth keeping apart.
+
+**Era-impossible — these will never exist on ledger 8.** Contract events and cross-contract calls.
+onchain-runtime-v3's `log` payload carries no emitting-contract address or versioning and nothing
+accumulates them, and there is no `crossContractCall` at all. `createExecutionContext` *rejects* a
+cross-contract state provider rather than ignoring it.
+
+**Scope-pinned rather than entry-pinned.** `ContractExecutable`, `CompiledContract` and the
+configuration services are not exported from `/v8/effect`. They resolve the `Ledger` and
+`CompactRuntime` facades by module path, so they follow the package's bound era, and exporting them
+under `/v8` would hand back ledger-9-bound objects from a path named v8.
+
+This is deliberate rather than a gap. Executing a ledger 8 contract already requires a ledger 8
+resolution scope — see the section above, it is forced by the generated artifact — and inside that
+scope compact-js is pinned to ledger 8 too, so the executable is era-correct with no extra
+machinery. `/v8/effect` covers what is useful *without* a dedicated scope: decoding and converting
+ledger 8 state alongside ledger 9, in one process, which is what cross-era history reads need.
+
+Ledger 8 execution itself is verified: the suite compiles `counter.compact` with compactc 0.31.1 and
+runs a circuit on the 0.16 line.
+
+## Contract log events
+
+Contracts emit typed log events via the Compact `emit` expression. Each circuit result
+carries the raw events for the whole call tree on `result.events`, each tagged with its emitting
+contract's `address`.
+
+- **`ContractLog`** decodes raw events into typed, discriminated `ContractEvent`s. Decoding
+  **never throws**: an oversized, malformed, or dropped payload degrades gracefully
+  (`degraded: true`) rather than failing the batch.
+- **`ContractEventStore`** is an in-process accumulator over decoded events. It assigns a monotonic
+  `id` on `append`, supports `query` with a MIP-aligned filter (contract address, event type,
+  indexed-field hex prefixes, resume cursor), and a live, resumable `subscribe` stream that replays
+  matching history then tails new events.
+
+```ts
+import { ContractEventStore, ContractLog } from '@midnight-ntwrk/compact-js/effect';
+import { Effect, Stream } from 'effect';
+
+const program = Effect.gen(function* () {
+  const store = yield* ContractEventStore.ContractEventStore;
+
+  // Decode a circuit result's raw events and accumulate them.
+  const result = yield* contract.circuit(circuitId, ctx, ...args);
+  yield* store.append(ContractLog.decodeAll(result.events));
+
+  // Query accumulated events with a MIP-aligned filter.
+  const mints = yield* store.query({ eventType: 'unshielded-mint' });
+
+  // Or subscribe to a live, resumable feed (replay from a cursor, then tail).
+  yield* store
+    .subscribe({ eventType: 'unshielded-mint', fromId: 1n })
+    .pipe(Stream.runForEach((event) => Effect.log(event.id)));
+
+  return mints;
+}).pipe(Effect.provide(ContractEventStore.layer));
 ```
-
-That's it! The GitHub Action will automatically:
-- Build all packages
-- Run tests
-- Publish to npm
-- Create a GitHub release
-
-### Notes
-- **Tag format**: `cjs-X.Y.Z` (e.g., `cjs-2.5.1`)
-- **All three packages release together** at the same version
-- Releases happen directly from `main`—no release branches needed

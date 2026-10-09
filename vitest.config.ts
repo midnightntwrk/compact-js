@@ -14,30 +14,36 @@
  */
 
 /// <reference types="vitest" />
+/// <reference types="vitest/globals" />
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    include: ['test/**/*.test.ts'],
-    // `test/era8/**` needs `@midnight-ntwrk/compact-runtime` to resolve to the 0.16 line, which
-    // only `vitest.era8.config.ts` aliases. Left in this project's `include` it would load a
-    // ledger-8 artifact against the 0.20 runtime and fail its `checkRuntimeVersion` on import.
-    exclude: ['node_modules', 'dist', 'test/era8/**'],
     coverage: {
-      provider: 'v8',
       enabled: true,
       clean: true,
-      include: ['src/**/*.ts'],
-      exclude: ['test/**'],
-      reporter: ['clover', 'json', 'json-summary', 'lcov', 'text'],
-      reportsDirectory: './coverage'
+      provider: 'v8',
+      reporter: ['html', 'text', 'lcov', 'json', 'json-summary'],
+      reportsDirectory: 'coverage',
+      include: ['./**/*.{js,jsx,ts,tsx}'],
+      exclude: ['./**/src/test/**/*.{js,jsx,ts,tsx}']
     },
-    reporters: [
-      'default',
-      ['junit', { outputFile: `reports/report/test-report.xml` }],
-      ['html', { outputFile: `reports/report/test-report.html` }]
+    reporters: ['default', 'json'],
+    outputFile: {
+      json: 'reports/test-report.json'
+    },
+    testTimeout: 180000,
+    include: ['./**/*.test.ts'],
+    exclude: ['node_modules', 'dist'],
+    projects: [
+      '*/vitest.config.ts'
     ]
+  },
+  resolve: {
+    alias: {
+      '@midnight-ntwrk/onchain-runtime': '@midnight-ntwrk/onchain-runtime-cjs'
+    }
   }
 });

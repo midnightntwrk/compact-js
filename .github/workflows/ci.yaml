@@ -25,38 +25,93 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
-    outputs:
-      build_c_js: ${{ steps.build-targets.outputs.compact-js }}
-      build_p_js: ${{ steps.build-targets.outputs.platform-js }}
+    name: Build, Lint and Test
+    uses: ./.github/workflows/ci-base.yaml
+    with:
+      coverage-files: |
+        compact-js, ./compact-js/coverage/coverage-summary.json
+        compact-js-command, ./compact-js-command/coverage/coverage-summary.json
+        compact-js-node, ./compact-js-node/coverage/coverage-summary.json
+    secrets: inherit
 
+  # One leg per *shipped ledger era* (midnight-sdk#388: "CI exercises every shipped era").
+  #
+  # The `ci` job above runs `yarn test`, which covers both eras — but as a single check, so a
+  # ledger-8 regression reads as "compact-js tests failed" with the era buried in the log. These
+  # legs make the era the unit of attribution: `Ledger era 8` going red names the era, and a new
+  # era added to `internal/era/eras.ts` without a CI leg is a visible omission in this matrix
+  # rather than an invisible one inside an aggregate script.
+  #
+  # Deliberately not a `ci-base.yaml` call: these legs want only the test half of it — no lint, no
+  # coverage aggregation, no artifact upload (two legs uploading `Coverage Report compact-js` would
+  # collide). The setup steps below therefore mirror `ci-base.yaml`'s; keep them in step with it.
+  ledger-era:
+    name: Ledger era ${{ matrix.ledger-era }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # Both eras always report, so a failure on one does not hide the other's state.
+      fail-fast: false
+      matrix:
+        # Mirrors `compact-js-command/src/effect/internal/era/eras.ts`.
+        ledger-era: [8, 9]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Determine Build Targets
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
-        id: build-targets
+      - name: Load environment variables
+        run: |
+          export $(grep -v '^#' .github/env/global.env | xargs)
+          for var in $(cut -d= -f1 .github/env/global.env); do
+            echo "$var=${!var}" >> $GITHUB_ENV
+          done
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # ratchet:actions/setup-node@v4
         with:
-          filters: |
-            compact-js:
-              - 'compact-js/**'
-            platform-js:
-              - 'platform-js/**'
+          # `ci-base.yaml` also passes `always-auth: true` here; deliberately not mirrored, because
+          # setup-node v4 dropped that input and only answers it with an `Unexpected input(s)`
+          # annotation on every run. Authentication comes from `NODE_AUTH_TOKEN` below either way.
+          registry-url: https://npm.pkg.github.com/
+          scope: '@midnight-ntwrk'
+          node-version-file: '.nvmrc'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
-  ci-platformjs:
-    needs: ci
-    name: Build, Lint and Test Platform.js
-    with:
-      should_run: ${{ needs.ci.outputs.build_p_js }}
-    uses: ./.github/workflows/ci-platform-js.yaml
-    secrets: inherit
+      - name: Enable corepack
+        run: corepack enable
 
-  ci-compactjs:
-    needs: ci
-    name: Build, Lint and Test Compact.js
-    with:
-      should_run: ${{ needs.ci.outputs.build_c_js }}
-    uses: ./.github/workflows/ci-compact-js.yaml
-    secrets: inherit
+      - name: Configure yarn
+        run: |
+          yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
+          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
+          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true
+
+      - name: Cache Turbo and Yarn dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # node_modules is deliberately not cached, for the reason given in `ci-base.yaml`.
+          path: |
+            .yarn/cache
+            .turbo
+          key: turbo-v2-era${{ matrix.ledger-era }}-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('turbo.json') }}
+          restore-keys: |
+            turbo-v2-era${{ matrix.ledger-era }}-${{ runner.os }}-
+            turbo-v2-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: yarn install
+
+      # Needed by the era tests themselves, not just as a compile check: `EraIsolation.test.ts` and
+      # `EraLaziness.test.ts` assert over `build/esm`, and the per-era compiled fixtures are built
+      # by the `build-compact*` scripts this invokes.
+      - name: Run build
+        run: yarn build --cache-dir ./turbo
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Run ledger era ${{ matrix.ledger-era }} tests
+        run: yarn test-ledger-era-${{ matrix.ledger-era }} --concurrency 1 --cache-dir ./turbo
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}

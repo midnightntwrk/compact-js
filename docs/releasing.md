@@ -7,14 +7,13 @@ publish — that only runs CI (build/test).
 ## How to cut a release
 
 1. Merge your change to `main`.
-2. Actions → **CD** → **Run workflow** → set *Use workflow from* = `main`,
-   choose the workspace (`platform-js` or `compact-js`).
+2. Actions → **CD** → **Run workflow** → set *Use workflow from* = `main`.
 
-The job only publishes when run from a branch listed in that workspace's
-`version.json` → `releaseBranches` (`main` or `release/<pkg>/.*`). Run from any
-other branch and the publish steps are skipped.
+The job only publishes when run from a branch listed in `version.json` →
+`releaseBranches` (`main` or `release/compact-js/.*`). Run from any other branch
+and the publish steps are skipped.
 
-## Versioning — `<workspace>/version.json`
+## Versioning — `version.json`
 
 `version.json` is the **single source of truth** for the published version:
 
@@ -41,6 +40,5 @@ to the computed version **on the runner only** (so the packed tarball is correct
 
 ## Git tags
 
-- **compact-js** pushes a `compact-js-v<version>` git tag after a successful
-  publish.
-- **platform-js** does **not** tag — it only publishes to the registry.
+A `compact-js-v<version>` git tag is pushed after a successful publish, along
+with a GitHub release whose notes come from the top section of `CHANGELOG.md`.
