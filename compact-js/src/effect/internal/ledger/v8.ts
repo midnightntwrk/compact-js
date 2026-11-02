@@ -29,8 +29,8 @@
  *   takes no argument (v9 takes an optional `SignatureKind`). v8 has no `SignatureKind` concept at
  *   all: its keys are BIP-340 only. This is the one difference that reaches the public API, via
  *   `Ledger.fromPlatformSigningKey`'s return type — see the note on {@link era} below.
- * - `ContractOperationVersion` accepts only `'v3'` on v8 (`'v3' | 'v4'` on v9), so the shared `'v3'`
- *   literal is correct for both eras and needs no era-varying treatment.
+ * - `ContractOperationVersion` accepts only `'v3'` on v8 (`'v3' | 'v4'` on v9, which binds `'v4'`),
+ *   which is why each binding owns its `CONTRACT_OPERATION_VERSION`.
  */
 import {
   type SignatureKind,

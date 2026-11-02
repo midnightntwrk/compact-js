@@ -20,7 +20,7 @@ import { pathToFileURL } from 'node:url';
 import { CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
 
 /**
- * What resolution reads off a callee's module. A copy of runtime 0.20's list, because the runtime
+ * What resolution reads off a callee's module. A copy of runtime 0.21's list, because the runtime
  * does not export it.
  */
 const RESOLVED_MODULE_EXPORTS: readonly (keyof CompactRuntime.Module)[] = [
