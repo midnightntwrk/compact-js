@@ -44,7 +44,9 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
-      run: yarn workspaces foreach -A version ${{ steps.vars.outputs.target_version }}
+      env:
+        TARGET_VERSION: ${{ steps.vars.outputs.target_version }}
+      run: yarn workspaces foreach -A version "$TARGET_VERSION"
 
     - name: Generate CHANGELOGs from commits
       shell: bash
@@ -75,7 +77,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
-      run: find . -type f -name '*.tgz' | zip ${{ inputs.package-archive-name }}-${{ steps.vars.outputs.target_version }}.zip -j -@
+      env:
+        ARCHIVE_NAME: ${{ inputs.package-archive-name }}
+        TARGET_VERSION: ${{ steps.vars.outputs.target_version }}
+      run: find . -type f -name '*.tgz' | zip "$ARCHIVE_NAME-$TARGET_VERSION.zip" -j -@
 
     - name: Upload packages artifact
       if: ${{ steps.vars.outputs.on_release_branch == 'true' }}

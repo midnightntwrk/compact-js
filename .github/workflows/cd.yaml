@@ -5,13 +5,7 @@ env:
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-  issues: read
-  id-token: write
-  packages: write
-  checks: write
-  pull-requests: write
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,14 +15,23 @@ jobs:
   ci:
     name: Build, Lint and Test
     uses: ./.github/workflows/ci-base.yaml
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     with:
       create-package-artifacts: true
-    secrets: inherit
+    secrets:
+      MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
   publish:
     needs: ci
     name: Publish Packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
       version: ${{ steps.extract_version.outputs.version }}
     steps:
@@ -63,14 +66,18 @@ jobs:
     needs: publish
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
 
       - name: Create git tag
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          base_version=$(echo "${{ needs.publish.outputs.version }}" | sed 's/-alpha.*//')
+          base_version=$(echo "$VERSION" | sed 's/-alpha.*//')
           git tag -a "compact-js-v${base_version}" -m "Release compact-js-v${base_version}"
           git push origin "compact-js-v${base_version}"
 
@@ -84,9 +91,12 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.publish.outputs.version }}
+          NOTES: ${{ steps.changelog.outputs.body }}
+          REPO: ${{ github.repository }}
         run: |
-          base_version=$(echo "${{ needs.publish.outputs.version }}" | sed 's/-alpha.*//')
+          base_version=$(echo "$VERSION" | sed 's/-alpha.*//')
           gh release create "compact-js-v${base_version}" \
             --title "compact-js v${base_version}" \
-            --notes "${{ steps.changelog.outputs.body }}" \
-            --repo "${{ github.repository }}"
+            --notes "$NOTES" \
+            --repo "$REPO"

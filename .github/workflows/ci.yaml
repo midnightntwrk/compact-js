@@ -11,13 +11,7 @@ on:
   schedule:
     - cron: "30 4 * * *"
 
-permissions:
-  contents: read
-  issues: read
-  id-token: write
-  packages: write
-  checks: write
-  pull-requests: write
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,12 +21,18 @@ jobs:
   ci:
     name: Build, Lint and Test
     uses: ./.github/workflows/ci-base.yaml
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     with:
       coverage-files: |
         compact-js, ./compact-js/coverage/coverage-summary.json
         compact-js-command, ./compact-js-command/coverage/coverage-summary.json
         compact-js-node, ./compact-js-node/coverage/coverage-summary.json
-    secrets: inherit
+    secrets:
+      MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
   # One leg per *shipped ledger era* (midnight-sdk#388: "CI exercises every shipped era").
   #
@@ -48,6 +48,8 @@ jobs:
   ledger-era:
     name: Ledger era ${{ matrix.ledger-era }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     strategy:
       # Both eras always report, so a failure on one does not hide the other's state.

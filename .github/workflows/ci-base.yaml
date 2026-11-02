@@ -2,15 +2,15 @@ name: CI - (base)
 env:
   MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
-permissions:
-  contents: read
-  issues: read
-  checks: write
-  pull-requests: write
+permissions: {}
 
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      MIDNIGHTCI_PACKAGES_WRITE:
+        description: Reads @midnight-ntwrk packages from npm.pkg.github.com and ghcr.io.
+        required: true
     inputs:
       node-version-file:
         type: string
@@ -30,6 +30,11 @@ jobs:
   ci:
     name: Build, Lint and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5

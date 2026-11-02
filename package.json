@@ -7,7 +7,10 @@
   "resolutions": {
     "effect": "^3.22.1",
     "toml": "^5.0.1",
-    "@midnight-ntwrk/onchain-runtime-v3": "https://registry.npmjs.org/@midnight-ntwrk/onchain-runtime-v3/-/onchain-runtime-v3-3.1.1.tgz"
+    "@midnight-ntwrk/onchain-runtime-v3": "https://registry.npmjs.org/@midnight-ntwrk/onchain-runtime-v3/-/onchain-runtime-v3-3.1.1.tgz",
+    "fast-uri": "^3.1.9",
+    "glob": "^14.0.2",
+    "ip-address": "^10.7.4"
   },
   "repository": {
     "type": "git",
@@ -58,8 +61,8 @@
     "@midnight-ntwrk/midnight-js-compact": "5.0.0-beta.3",
     "@tsconfig/node22": "^22.0.6",
     "@types/node": "^26.6.2",
-    "@vitest/coverage-v8": "^4.1.11",
-    "@vitest/ui": "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
@@ -74,6 +77,6 @@
     "turbo": "^2.10.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   }
 }
