@@ -109,8 +109,11 @@ export { CostModel };
 /**
  * The contract operation (verifier key) version this era's ledger expects. Defined once so an era
  * bump is a one-line edit; both constructors below read it from here.
+ *
+ * `'v4'` is the slot for ZKIR v3 (`verifier-key[v7]`) keys, the only kind compactc 0.36 emits;
+ * `'v3'` holds ZKIR v2 (`verifier-key[v6]`) keys and rejects a 0.36 key on decode.
  */
-const CONTRACT_OPERATION_VERSION = 'v3';
+const CONTRACT_OPERATION_VERSION = 'v4';
 
 /**
  * The signature schemes verified end-to-end against the ledger 9 CMA path (`signData` and
@@ -123,10 +126,10 @@ const CMA_SIGNATURE_KINDS: ReadonlySet<SignatureKind> = new Set(['schnorr', 'ecd
 /** The ledger 9 {@link Era} descriptor. @category era */
 export const era = {
   ledger: 9,
-  // Ledger 9 pairs with compact-runtime 0.20 (over onchain-runtime-v4). Stated here rather than
+  // Ledger 9 pairs with compact-runtime 0.21 (over onchain-runtime-v4). Stated here rather than
   // read from the runtime seam so this binding stays the single description of the era, and so the
   // two seams do not import each other; `CompactRuntime.test.ts` checks they agree.
-  runtime: '0.20',
+  runtime: '0.21',
   supportsCmaSignatureKind: (kind: SignatureKind) => CMA_SIGNATURE_KINDS.has(kind),
   cmaSignatureKindsDescription: [...CMA_SIGNATURE_KINDS].join(', '),
   defaultCmaSignatureKind: 'schnorr'
