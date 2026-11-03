@@ -28,7 +28,7 @@ import { Brand } from 'effect';
  *
  * @remarks
  * Declared here rather than re-exported from the {@link CompactRuntime} seam, and stated exactly:
- * compact-runtime 0.16 and 0.20 declare this identically (`ContractAddress` is `string` on both
+ * compact-runtime 0.16 and 0.21 declare this identically (`ContractAddress` is `string` on both
  * onchain-runtime majors), so naming the shape costs no precision and keeps this module off the
  * seam — see the note on {@link Contract}.
  */
@@ -43,7 +43,7 @@ export interface WitnessContext<L, PS> {
  *
  * @remarks
  * This is the one shape that genuinely differs between runtime lines: 0.16 passes a flat, single
- * contract frame (`currentPrivateState`, `currentQueryContext`, `currentZswapLocalState`) and 0.20
+ * contract frame (`currentPrivateState`, `currentQueryContext`, `currentZswapLocalState`) and 0.21
  * passes a call tree (`callContext`, `queryContexts`, `callProofDataTrace`, `events`). Beyond
  * `costModel` and `gasLimit` they have nothing in common, so neither is assignable to the other and
  * naming either one pins the spine to an era.
