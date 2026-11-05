@@ -21,7 +21,7 @@
  * since some must compare ledger module identity.
  *
  * @remarks
- * How the v8 surface differs from v9, against `@midnightntwrk/ledger-v8@8.1.2`:
+ * How the v8 surface differs from v9, against `@midnightntwrk/ledger-v8@8.1.3`:
  *
  * - Every name the facade re-exports is present on v8; nothing was added between v8 and v9 that the
  *   facade depends on.

@@ -110,7 +110,7 @@ export {
  *
  * @remarks
  * onchain-runtime-v3 declares `static deserialize(raw: Uint8Array): ContractState` — an upstream
- * mistake in the generated `.d.ts`, and the exact one `@midnightntwrk/ledger-v8@8.1.2` carries on
+ * mistake in the generated `.d.ts`, and the exact one `@midnightntwrk/ledger-v8@8.1.3` carries on
  * the ledger side (see `internal/ledger/v8.ts`). The WASM really returns a
  * `ContractMaintenanceAuthority`: verified against the shipped 3.1.1 build, where
  * `deserialize(cma.serialize())` yields a value whose constructor is
