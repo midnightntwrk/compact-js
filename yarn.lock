@@ -1077,6 +1077,7 @@ __metadata:
     "@midnight-ntwrk/platform-js": "npm:^3.0.0"
     "@midnightntwrk/ledger-v8": "npm:8.1.2"
     "@midnightntwrk/ledger-v9": "npm:^1.0.0"
+    "@midnightntwrk/onchain-runtime-v4": "npm:4.0.0"
     "@noble/hashes": "npm:^2.4.0"
     compact-runtime-ledger8: "npm:@midnight-ntwrk/compact-runtime@0.16.0"
     effect: "npm:^3.22.1"
@@ -1211,17 +1212,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midnightntwrk/onchain-runtime-v4@npm:4.0.0-rc.2":
-  version: 4.0.0-rc.2
-  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.0-rc.2"
-  checksum: 10/c2176e55591586a6871ec1fa6449c9f6236f230890be1ae08cb90294bb244f2d9f5390b4892d6aa87236b95d967f27f37a595d5ffbbe74c5eab80fdb66750173
-  languageName: node
-  linkType: hard
-
-"@midnightntwrk/onchain-runtime-v4@npm:^4.0.0-rc.2, @midnightntwrk/onchain-runtime-v4@npm:^4.0.0-rc.3":
-  version: 4.0.0-rc.5
-  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.0-rc.5"
-  checksum: 10/005576235e786cfcaa436ca597a00a33fba47f56e7d49070444649699a6bd7f6824b265d62e0f5a65361e2fbb9398e2d4523166cc514c649672193ef163df430
+"@midnightntwrk/onchain-runtime-v4@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.0"
+  checksum: 10/70d169878d43e17e819b48f17d9baa5229da6f1f72dcf0f86be70b4d8eef7ead4d2a21f4c10d7da673af0a5f65196c5009b7b52139184acfa3c30b435efdc1cf
   languageName: node
   linkType: hard
 

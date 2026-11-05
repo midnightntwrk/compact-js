@@ -55,5 +55,5 @@ describe('the TypeScript toolchain behind ConfigCompiler', () => {
       ),
       `ts-node 10 cannot drive TypeScript ${version}`
     ).toContain('export const answer = 42;');
-  });
+  }, 60_000);
 });

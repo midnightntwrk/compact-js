@@ -17,7 +17,12 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { beforeEach, describe, expect, it } from '@effect/vitest';
-import { CompiledContract, Contract, ContractExecutable, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import {
+  CompiledContract,
+  Contract,
+  ContractExecutable,
+  ContractRuntimeError
+} from '@midnight-ntwrk/compact-js/effect';
 import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import { ContractState } from '@midnight-ntwrk/compact-runtime';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
@@ -43,7 +48,7 @@ import { CounterContract } from '../contract';
 const COUNTER_ASSETS_PATH = resolve(import.meta.dirname, '../contract/managed/counter');
 const VALID_COIN_PUBLIC_KEY = 'd2dc8d175c0ef7d1f7e5b7f32bd9da5fcd4c60fa1b651f1d312986269c2d3c79';
 const NO_GAS = { readTime: 0n, computeTime: 0n, bytesWritten: 0n, bytesDeleted: 0n };
-const AMPLE_GAS = { readTime: 10n ** 12n, computeTime: 10n ** 12n, bytesWritten: 10n ** 6n, bytesDeleted: 10n ** 6n };
+const AMPLE_GAS = { readTime: 10n ** 12n, computeTime: 10n ** 12n, bytesWritten: 10n ** 6n, bytesDeleted: 0n };
 
 const testLayer = Layer.mergeAll(ZKFileConfiguration.layer(COUNTER_ASSETS_PATH), Configuration.layer).pipe(
   Layer.provideMerge(NodeContext.layer),
