@@ -89,7 +89,11 @@ export interface LedgerBinding {
     deserialize(signature: never, proof: never, binding: never, raw: Uint8Array): { serialize(): Uint8Array };
   };
   readonly UnshieldedOffer: {
-    new: (inputs: never, outputs: never, signatures: never) => {
+    new: (
+      inputs: never,
+      outputs: never,
+      signatures: never
+    ) => {
       readonly inputs: readonly unknown[];
       readonly outputs: readonly unknown[];
     };
@@ -164,22 +168,22 @@ type Requires<A, B, Message extends string> = [A] extends [B] ? never : Message;
  */
 export type LedgerBindingViolations<M extends LedgerBinding> =
   // Round-trips: every codec must return the type it claims to decode, not a sibling. Not
-  // hypothetical — `@midnightntwrk/ledger-v8@8.1.2` declares
+  // hypothetical — `@midnightntwrk/ledger-v8@8.1.3` declares
   // `ContractMaintenanceAuthority.deserialize` as returning `ContractState`.
   | Requires<
       ReturnType<M['ContractState']['deserialize']>,
       InstanceType<M['ContractState']>,
-      'ContractState.deserialize must return this era\'s ContractState'
+      "ContractState.deserialize must return this era's ContractState"
     >
   | Requires<
       ReturnType<M['ContractMaintenanceAuthority']['deserialize']>,
       InstanceType<M['ContractMaintenanceAuthority']>,
-      'ContractMaintenanceAuthority.deserialize must return this era\'s ContractMaintenanceAuthority'
+      "ContractMaintenanceAuthority.deserialize must return this era's ContractMaintenanceAuthority"
     >
   | Requires<
       ReturnType<M['LedgerParameters']['deserialize']>,
       ReturnType<M['LedgerParameters']['initialParameters']>,
-      'LedgerParameters.deserialize must return this era\'s LedgerParameters'
+      "LedgerParameters.deserialize must return this era's LedgerParameters"
     >
   // The signing path, end to end: platform key -> era key -> signature -> maintenance update.
   // This is the chain that carries the era's one public-API-visible difference.
@@ -214,71 +218,70 @@ export type LedgerBindingViolations<M extends LedgerBinding> =
   | Requires<
       InstanceType<M['ChargedState']>,
       ConstructorParameters<M['QueryContext']>[0],
-      'QueryContext must accept this era\'s ChargedState'
+      "QueryContext must accept this era's ChargedState"
     >
   | Requires<
       InstanceType<M['ContractState']>,
       ConstructorParameters<M['ContractDeploy']>[0],
-      'ContractDeploy must accept this era\'s ContractState'
+      "ContractDeploy must accept this era's ContractState"
     >
   | Requires<
       InstanceType<M['ContractMaintenanceAuthority']>,
       ConstructorParameters<M['ReplaceAuthority']>[0],
-      'ReplaceAuthority must accept this era\'s ContractMaintenanceAuthority'
+      "ReplaceAuthority must accept this era's ContractMaintenanceAuthority"
     >
   // Transcript partitioning, as called by `ContractExecutable.partitionAllTranscripts`.
   | Requires<
       InstanceType<M['PreTranscript']>[],
       Parameters<M['partitionTranscripts']>[0],
-      'partitionTranscripts must accept an array of this era\'s PreTranscript'
+      "partitionTranscripts must accept an array of this era's PreTranscript"
     >
   | Requires<
       ReturnType<M['LedgerParameters']['initialParameters']>,
       Parameters<M['partitionTranscripts']>[1],
-      'partitionTranscripts must accept this era\'s LedgerParameters'
+      "partitionTranscripts must accept this era's LedgerParameters"
     >
   // Intent assembly, as called by the CLI's deploy/circuit/maintain commands.
   | Requires<
       InstanceType<M['ContractCallPrototype']>,
       Parameters<ReturnType<M['Intent']['new']>['addCall']>[0],
-      'Intent.addCall must accept this era\'s ContractCallPrototype'
+      "Intent.addCall must accept this era's ContractCallPrototype"
     >
   | Requires<
       InstanceType<M['ContractDeploy']>,
       Parameters<ReturnType<M['Intent']['new']>['addDeploy']>[0],
-      'Intent.addDeploy must accept this era\'s ContractDeploy'
+      "Intent.addDeploy must accept this era's ContractDeploy"
     >
   | Requires<
       InstanceType<M['MaintenanceUpdate']>,
       Parameters<ReturnType<M['Intent']['new']>['addMaintenanceUpdate']>[0],
-      'Intent.addMaintenanceUpdate must accept this era\'s MaintenanceUpdate'
+      "Intent.addMaintenanceUpdate must accept this era's MaintenanceUpdate"
     >
   // Mixing two eras here is silently discarded rather than rejected (see
   // `LedgerDualInstantiation.test.ts`), so the pairing must hold at the build.
   | Requires<
       ReturnType<M['Intent']['new']>,
       Parameters<M['Transaction']['fromParts']>[3],
-      'Transaction.fromParts must accept this era\'s Intent'
+      "Transaction.fromParts must accept this era's Intent"
     >
   | Requires<
       ReturnType<M['Intent']['new']>,
       Parameters<M['Transaction']['fromPartsRandomized']>[3],
-      'Transaction.fromPartsRandomized must accept this era\'s Intent'
+      "Transaction.fromPartsRandomized must accept this era's Intent"
     >
   // The offer slots, pinned through `ZswapOffer`'s prototype: `deserialize` is generic, so
   // `ReturnType<>` widens to `ZswapOffer<Proofish>` and the naive pairing does not discriminate.
   | Requires<
       NonNullable<Parameters<M['Transaction']['fromParts']>[1]>,
       M['ZswapOffer']['prototype'],
-      'Transaction.fromParts must accept this era\'s ZswapOffer as the guaranteed offer'
+      "Transaction.fromParts must accept this era's ZswapOffer as the guaranteed offer"
     >
   | Requires<
       NonNullable<Parameters<M['Transaction']['fromParts']>[2]>,
       M['ZswapOffer']['prototype'],
-      'Transaction.fromParts must accept this era\'s ZswapOffer as the fallible offer'
-    >
+      "Transaction.fromParts must accept this era's ZswapOffer as the fallible offer"
+    >;
   // The funding classes (`DustActions`, `UnshieldedOffer`) are pinned per era in `conformance.ts`
   // rather than here. Both slots are generic in their markers, so projecting them through `M`
   // widens past the concrete pair `Intent` accepts and the relation stops discriminating — a check
   // that cannot fail is worse than none.
-  ;
