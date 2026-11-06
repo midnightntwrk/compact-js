@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="42" failures="0" errors="0" time="0.396666458">
+    <testsuite name="test/era8/CrossEraRepartition.test.ts" timestamp="2026-11-06T18:06:44.580Z" hostname="black-box" tests="3" failures="0" errors="0" skipped="0" time="0.098955867">
+        <testcase classname="test/era8/CrossEraRepartition.test.ts" name="a ledger 8 call composed under ledger 9 &gt; re-partitions under the target era from the inputs the call reported" time="0.071519341">
+        </testcase>
+        <testcase classname="test/era8/CrossEraRepartition.test.ts" name="a ledger 8 call composed under ledger 9 &gt; requires the state to be encoded across, not handed across" time="0.013503448">
+        </testcase>
+        <testcase classname="test/era8/CrossEraRepartition.test.ts" name="a ledger 8 call composed under ledger 9 &gt; carries a block and effects ledger 9 accepts unchanged" time="0.013021819">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/era8/Fixtures.test.ts" timestamp="2026-11-06T18:06:44.580Z" hostname="black-box" tests="4" failures="0" errors="0" skipped="0" time="0.001948606">
+        <testcase classname="test/era8/Fixtures.test.ts" name="era 8 fixtures &gt; has a compiled counter contract" time="0.000913914">
+        </testcase>
+        <testcase classname="test/era8/Fixtures.test.ts" name="era 8 fixtures &gt; has a compiled unshielded contract" time="0.000101391">
+        </testcase>
+        <testcase classname="test/era8/Fixtures.test.ts" name="era 8 fixtures &gt; has the ZK assets for counter" time="0.000086263">
+        </testcase>
+        <testcase classname="test/era8/Fixtures.test.ts" name="era 8 fixtures &gt; has the ZK assets for unshielded" time="0.000055625">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/era8/LedgerEightAdapter.test.ts" timestamp="2026-11-06T18:06:44.580Z" hostname="black-box" tests="10" failures="0" errors="0" skipped="0" time="0.045281647">
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; builds a context the generated ledger 8 contract accepts" time="0.02994529">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; synthesises a single-entry call trace carrying the circuit id and address" time="0.002743747">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; carries the proof data from results onto the trace entry" time="0.002614773">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; captures the initial query context from before execution, not after" time="0.003273296">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; reports no contract events, because the era cannot emit them" time="0.002223095">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; surfaces the root private and zswap state" time="0.00201391">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; stamps the block clock with the given time rather than the wall clock" time="0.000446432">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; falls back to the wall clock when no time is given" time="0.000293053">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; refuses a cross-contract state provider rather than ignoring it" time="0.000495315">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightAdapter.test.ts" name="ledger 8 execution adapter &gt; refuses a cross-contract module provider for the same reason" time="0.000342326">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/era8/LedgerEightExecutable.test.ts" timestamp="2026-11-06T18:06:44.581Z" hostname="black-box" tests="9" failures="0" errors="0" skipped="0" time="0.127506485">
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; is the ledger 8 era, not the era the build binds" time="0.000844023">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; initializes a deployable contract state" time="0.033609864">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; converts its deploy result through the ledger 8 conversions" time="0.013722982">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; runs a circuit and reports the root call" time="0.025538305">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; exposes the inputs its transcript was partitioned from" time="0.012378235">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; re-partitions to the same transcript from the exposed inputs alone" time="0.013392058">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; emits no events on an era that cannot emit them" time="0.010374615">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; reports no gas costs on an era whose runtime cannot total them" time="0.009303974">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecutable.test.ts" name="a ledger 8 contract through the `/v8/effect` executable &gt; honours a query gas limit on the older line too" time="0.007153827">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/era8/LedgerEightExecution.test.ts" timestamp="2026-11-06T18:06:44.581Z" hostname="black-box" tests="5" failures="0" errors="0" skipped="0" time="0.036293477">
+        <testcase classname="test/era8/LedgerEightExecution.test.ts" name="ledger 8 era execution &gt; binds the compact-runtime 0.16 line" time="0.000889939">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecution.test.ts" name="ledger 8 era execution &gt; loads an artifact compiled for runtime 0.16 without a version mismatch" time="0.010619918">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecution.test.ts" name="ledger 8 era execution &gt; constructs initial contract state on the ledger 8 runtime" time="0.011492724">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecution.test.ts" name="ledger 8 era execution &gt; runs a circuit and records a public transcript" time="0.009665036">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightExecution.test.ts" name="ledger 8 era execution &gt; returns proof data on the results, not a call-proof trace on the context" time="0.002776298">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/era8/LedgerEightFacade.test.ts" timestamp="2026-11-06T18:06:44.581Z" hostname="black-box" tests="11" failures="0" errors="0" skipped="0" time="0.086680376">
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; instantiates the conversions for a second era pair" time="0.001177502">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; pairs ledger 8 with the compact-runtime line it declares" time="0.000101471">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; round-trips a ledger 8 contract state through the era-8 conversions" time="0.008286555">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; converts a ledger 8 contract state to its paired runtime state" time="0.006160945">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; produces a bare hex signing key on ledger 8, not a tagged one" time="0.00058343">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; rejects an ECDSA key on ledger 8, which cannot represent one" time="0.000311287">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; is what the `/v8/effect` entry resolves" time="0.067334695">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; exposes no contract-event surface on the `/v8/effect` entry" time="0.000602156">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; offers the boundary wrapper on both halves of the `/v8/effect` entry" time="0.000134454">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; turns a rejected era 8 runtime call into a typed failure, not a defect" time="0.000652011">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightFacade.test.ts" name="ledger 8 facade &gt; reports the era 8 CMA allowlist in its failure message" time="0.000191471">
+        </testcase>
+    </testsuite>
+</testsuites>
