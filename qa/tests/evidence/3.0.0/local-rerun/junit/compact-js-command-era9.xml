@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="127" failures="0" errors="0" time="36.19457649">
+    <testsuite name="test/effect/Circuit.test.ts" timestamp="2026-11-06T18:06:15.169Z" hostname="black-box" tests="9" failures="0" errors="0" skipped="0" time="3.889789351">
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; should report error for unknown circuit in manifest" time="3.590201158">
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; should report success with valid setup" time="0.074320873">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; reports a runtime rejection of the --input-zswap file instead of dying silently" time="0.040550618">
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; reports a malformed --input-ps file instead of dying silently" time="0.028277983">
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; reports an --input-ps file holding JSON null instead of silently resetting the private state" time="0.024405317">
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; reports a malformed --input-zswap file instead of dying silently" time="0.034647861">
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; reports a runtime rejection when encoding the resulting zswap local state, after the intent is written" time="0.030718998">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; produces a valid single-call intent for a non-cross-contract circuit" time="0.032766231">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/Circuit.test.ts" name="Circuit Command &gt; should report success with valid ledger parameters" time="0.031497307">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/CircuitCrossContract.test.ts" timestamp="2026-11-06T18:06:15.173Z" hostname="black-box" tests="14" failures="0" errors="0" skipped="0" time="4.2970803">
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; --contract-states-dir produces one call per trace entry (root + each callee)" time="3.635998806">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; each call&apos;s operation is resolvable from its source state (root from --input, callee from dir)" time="0.082445944">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; --output-oc writes only the root (middle) updated state" time="0.057299409">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; --output-contract-states-dir writes each callee state by address, creating the dir" time="0.061437967">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; state-threading round-trip advances v by both increments" time="0.089412377">
+            <system-out>
+[]
+
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; --output-result / --output-ps / --output-zswap hold the root&apos;s values, not a callee&apos;s" time="0.04380579">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; --output-zswap-calls writes every call&apos;s zswap state, callees first and the root last" time="0.045987116">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; a callee state lacking the called operation fails with a reported error" time="0.027103928">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; a cross-contract circuit with neither directory fails with a reported error" time="0.019698717">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; one directory without the other is rejected by name, before the circuit runs" time="0.015029968">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; the modules directory without the states directory is rejected the same way" time="0.018273347">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; a callee module the provider rejects is reported with its path" time="0.025093405">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; a callee missing from --contract-states-dir fails with a reported error" time="0.02161945">
+        </testcase>
+        <testcase classname="test/effect/CircuitCrossContract.test.ts" name="Circuit Command (cross-contract calls) &gt; a read-only cross-contract circuit (getInner) returns the callee value" time="0.066798301">
+            <system-out>
+[]
+
+&quot;1&quot;
+
+            </system-out>
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/CircuitCrossContractCoins.test.ts" timestamp="2026-11-06T18:06:15.174Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="3.775406731">
+        <testcase classname="test/effect/CircuitCrossContractCoins.test.ts" name="Circuit Command (a callee that mints a shielded coin) &gt; --output-zswap-calls holds the callee&apos;s coin, which --output-zswap does not" time="3.668568547">
+            <system-out>
+[]
+
+            </system-out>
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/CompiledContractReflection.test.ts" timestamp="2026-11-06T18:06:15.174Z" hostname="black-box" tests="55" failures="0" errors="0" skipped="0" time="0.500223195">
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (bigint: abc)" time="0.04506227">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (bigint: )" time="0.008508303">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (bigint:    )" time="0.007005558">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (boolean: maybe)" time="0.004876741">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (boolean: trueX)" time="0.004833149">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (boolean: xfalse)" time="0.006074691">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (number: abc)" time="0.004770982">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (number: )" time="0.005191105">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (number: Infinity)" time="0.006267976">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (number: -Infinity)" time="0.005168201">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail to parse with an invalid argument (number: 1e999)" time="0.004874948">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (number)" time="0.006577159">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (bigint)" time="0.00640784">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (boolean)" time="0.006226978">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (boolean)" time="0.004801709">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (string)" time="0.004569782">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse with a valid argument (Uint8Array)" time="0.004713854">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse multiple arguments" time="0.005733047">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail when parsing an invalid tuple element" time="0.005166558">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse multiple valid tuple type elements" time="0.005297014">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse nested tuple type elements" time="0.005539982">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse object literal type elements" time="0.00622235">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse object literal type elements containing tuple types" time="0.010101499">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse nested object literal type elements" time="0.005345015">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse object with bytes property as Bech32m-encoded string" time="0.006157197">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should successfully parse object with bytes property as hex string" time="0.006663312">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse object with nested bytes property as Bech32m string" time="0.006801633">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse a named struct type alias (ShieldedCoinInfo)" time="0.008983199">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should preserve a quoted bigint in a named struct alias" time="0.006978988">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should reject an unsafe unquoted bigint in a named struct alias" time="0.00740433">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse multiple named struct alias arguments" time="0.006765445">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve a named alias that references another named alias" time="0.006237288">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail with a descriptive error for an unknown type reference" time="0.005663385">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse a generic alias by binding its type argument (Maybe&lt;bigint&gt;)" time="0.004823331">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should report a coherent cause chain for an invalid value inside a generic instantiation" time="0.005664697">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse a generic alias whose type argument needs decoding (Maybe&lt;Uint8Array&gt;)" time="0.006866566">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse an array of a generic alias (Maybe&lt;string&gt;[])" time="0.007826276">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse a nested generic alias without type-parameter collision (Maybe&lt;Maybe&lt;bigint&gt;&gt;)" time="0.009053611">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should parse a multi-parameter generic alias (Either&lt;bigint, string&gt;)" time="0.007544224">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve a type parameter passed through to another generic alias" time="0.006697316">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve a type parameter used as an array element type" time="0.006310356">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve a type parameter used as a tuple element type" time="0.016030986">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should let a type parameter shadow a same-named alias" time="0.006642172">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail when a generic struct member is missing rather than decoding it as NaN" time="0.005997045">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should apply a type-parameter default when the argument is omitted" time="0.006237809">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should prefer an explicit type argument over the default" time="0.005930328">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve a default that references an earlier type parameter" time="0.005557286">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail when more type arguments are given than the alias declares" time="0.005813198">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail when a generic alias is used without its type argument" time="0.005119719">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve 25 levels of a recursive alias, which consume input" time="0.014229207">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should resolve 100 levels of a recursive alias, which consume input" time="0.106716124">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail with a depth limit rather than overflowing the stack for a self-referential alias" time="0.006199296">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail with a depth limit rather than overflowing the stack for a mutually recursive alias pair" time="0.007494911">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should fail with a depth limit rather than overflowing the stack for a self-referential generic alias" time="0.005944886">
+        </testcase>
+        <testcase classname="test/effect/CompiledContractReflection.test.ts" name="CompiledContractReflection &gt; argument parsing &gt; should still resolve a recursive alias that consumes input at each step" time="0.003734486">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ConfigCompiler.test.ts" timestamp="2026-11-06T18:06:15.176Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="3.594906075">
+        <testcase classname="test/effect/ConfigCompiler.test.ts" name="ConfigCompiler &gt; layer &gt; with valid and well formed configuration file &gt; should compile and return module" time="3.592994809">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ConfigCompilerToolchain.test.ts" timestamp="2026-11-06T18:06:15.176Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="1.73939352">
+        <testcase classname="test/effect/ConfigCompilerToolchain.test.ts" name="the TypeScript toolchain behind ConfigCompiler &gt; is declared as a dependency, bounded below the TypeScript 7 line" time="0.001601462">
+        </testcase>
+        <testcase classname="test/effect/ConfigCompilerToolchain.test.ts" name="the TypeScript toolchain behind ConfigCompiler &gt; transpiles TypeScript through ts-node" time="1.736020567">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ConfigFixtureResolution.test.ts" timestamp="2026-11-06T18:06:15.176Z" hostname="black-box" tests="6" failures="0" errors="0" skipped="0" time="0.004718723">
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; should be discovered" time="0.00151034">
+        </testcase>
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; cccMiddle/contract.config.ts &gt; should import the compiled contract with a specifier Node can resolve" time="0.000866656">
+        </testcase>
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; cccMintCaller/contract.config.ts &gt; should import the compiled contract with a specifier Node can resolve" time="0.000158729">
+        </testcase>
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; counter/brokenWitness.config.ts &gt; should import the compiled contract with a specifier Node can resolve" time="0.000148229">
+        </testcase>
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; counter/contract.config.ts &gt; should import the compiled contract with a specifier Node can resolve" time="0.000082906">
+        </testcase>
+        <testcase classname="test/effect/ConfigFixtureResolution.test.ts" name="contract configuration fixtures &gt; counter-v8/contract.config.ts &gt; should import the compiled contract with a specifier Node can resolve" time="0.000084129">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/Deploy.test.ts" timestamp="2026-11-06T18:06:15.176Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="3.647437739">
+        <testcase classname="test/effect/Deploy.test.ts" name="Deploy Command &gt; should report success with valid setup" time="3.601844846">
+        </testcase>
+        <testcase classname="test/effect/Deploy.test.ts" name="Deploy Command &gt; reports a runtime rejection when encoding the initial zswap local state, after the intent is written" time="0.043580094">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/EraSelection.test.ts" timestamp="2026-11-06T18:06:15.176Z" hostname="black-box" tests="11" failures="0" errors="0" skipped="0" time="0.107769331">
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the era registry &gt; holds one command set per selectable era, each pinned to its own era pair" time="0.002280222">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the era registry &gt; applies the handler factories once per era" time="0.000369817">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the era registry &gt; defaults to the era this build binds" time="0.000102964">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the era registry &gt; refuses an era it has no command set for" time="0.00071018">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the shared intent operations &gt; builds its intent from the era it was given" time="0.027941879">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the shared intent operations &gt; routes every ledger call through the era&apos;s own boundary wrapper" time="0.014160386">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; the shared intent operations &gt; turns a rejection from the era into a typed failure, not a defect" time="0.011062191">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; era capabilities &gt; rejects --contract-states-dir on an era with no cross-contract calls" time="0.009368636">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; era capabilities &gt; rejects --output-contract-states-dir on the same era" time="0.009569054">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; era capabilities &gt; rejects --output-events on an era that cannot emit them" time="0.009755015">
+        </testcase>
+        <testcase classname="test/effect/EraSelection.test.ts" name="era selection &gt; era capabilities &gt; lets both options past on an era that has the capabilities" time="0.020525626">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ErrorReporting.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="7" failures="0" errors="0" skipped="0" time="3.593093525">
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="reportContractExecutionError &gt; reports an error whose cause is a bare string rather than dying" time="0.03764733">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="reportContractExecutionError &gt; reports an error whose cause chain reaches a value with no message" time="0.022178234">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="reportContractExecutionError &gt; reports an error whose cause has a null prototype rather than dying" time="0.024256244">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="reportContractExecutionError &gt; reports a self-referential cause chain rather than overflowing the stack" time="0.013965459">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="reportContractExecutionError &gt; reports what loading a cross-contract callee rejected with" time="0.013519187">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="a command that fails in a way it does not handle &gt; reports a misspelled witness instead of exiting silently" time="3.468044441">
+        </testcase>
+        <testcase classname="test/effect/ErrorReporting.test.ts" name="a command that fails in a way it does not handle &gt; reports a defect that escapes the failure channel" time="0.011159966">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/LedgerEraOption.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="8" failures="0" errors="0" skipped="0" time="3.796252622">
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; runs the era this build binds when the option is omitted" time="3.656318524">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; accepts the era this build binds" time="0.037402368">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; accepts a registered era other than the bound one" time="0.021011012">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; rejects an era this build has no command set for" time="0.019622021">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; `circuit` reports a configuration built for another era" time="0.013558452">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; `deploy` reports a configuration built for another era" time="0.010851434">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; `maintain contract` reports a configuration built for another era" time="0.019912079">
+        </testcase>
+        <testcase classname="test/effect/LedgerEraOption.test.ts" name="--ledger-era option &gt; `maintain circuit` reports a configuration built for another era" time="0.015178047">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/MaintainCircuit.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="3.598043544">
+        <testcase classname="test/effect/MaintainCircuit.test.ts" name="Maintain Circuit Command &gt; should report success with valid setup" time="3.595880464">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/MaintainContract.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="3.587691253">
+        <testcase classname="test/effect/MaintainContract.test.ts" name="Maintain Contract Command &gt; should report success with valid setup" time="3.585589547">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/RuntimeIdentity.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="0.002804411">
+        <testcase classname="test/effect/RuntimeIdentity.test.ts" name="compact-runtime identity &gt; resolves the same compact-runtime module as the CompactRuntime facade" time="0.00135144">
+        </testcase>
+        <testcase classname="test/effect/RuntimeIdentity.test.ts" name="compact-runtime identity &gt; resolves a compact-runtime on the line the facade is bound to" time="0.00013808">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/encodedZswapLocalStateSchema.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="0.054760568">
+        <testcase classname="test/effect/encodedZswapLocalStateSchema.test.ts" name="EncodedZswapLocalStateSchema &gt; round-trips a state carrying inputs and outputs through JSON" time="0.03423914">
+        </testcase>
+        <testcase classname="test/effect/encodedZswapLocalStateSchema.test.ts" name="EncodedZswapLocalStateSchema &gt; encodes bigints and byte arrays to JSON-representable forms" time="0.01903847">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/json.test.ts" timestamp="2026-11-06T18:06:15.177Z" hostname="black-box" tests="5" failures="0" errors="0" skipped="0" time="0.005205602">
+        <testcase classname="test/effect/json.test.ts" name="stringifyCircuitOutput &gt; encodes bigint as a decimal string" time="0.001947775">
+        </testcase>
+        <testcase classname="test/effect/json.test.ts" name="stringifyCircuitOutput &gt; encodes Uint8Array as a number array rather than an indexed object" time="0.000194467">
+        </testcase>
+        <testcase classname="test/effect/json.test.ts" name="stringifyCircuitOutput &gt; serializes a non-empty log-event array carrying bigint and Uint8Array payloads" time="0.000902533">
+        </testcase>
+        <testcase classname="test/effect/json.test.ts" name="stringifyCircuitOutput &gt; applies indentation when a space argument is given" time="0.000151596">
+        </testcase>
+        <testcase classname="test/effect/json.test.ts" name="stringifyCircuitOutput &gt; leaves ordinary JSON values untouched via the replacer" time="0.000174619">
+        </testcase>
+    </testsuite>
+</testsuites>

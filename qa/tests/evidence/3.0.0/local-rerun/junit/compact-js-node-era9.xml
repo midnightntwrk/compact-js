@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="20" failures="0" errors="0" time="0.044350066">
+    <testsuite name="test/effect/FileSystemContractModuleProvider.test.ts" timestamp="2026-11-06T18:05:59.439Z" hostname="black-box" tests="11" failures="0" errors="0" skipped="0" time="0.017367858">
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; resolves an address with no module on disk to undefined" time="0.001089406">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; loads a module that has every export resolution reads" time="0.003154622">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; rejects a module that lacks an export, naming the file" time="0.004198311">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; rejects an export bound to undefined, as the runtime does" time="0.001701149">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; rejects an export bound to null, as the runtime does" time="0.001390623">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; rejects a Contract that is not a class" time="0.001297808">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; finds the module through a caller-supplied layout" time="0.001157554">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; resolves an address with nothing on disk to undefined when the layout shares a folder" time="0.000169039">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; resolves a string that is not an address to undefined, even where it would reach a module" time="0.00031829">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; fails the load, naming the link, when the address links to nothing" time="0.000308171">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractModuleProvider.test.ts" name="FileSystemContractModuleProvider &gt; fails the load, naming the file, when the address has a directory but no module" time="0.000244231">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/FileSystemContractStateProvider.test.ts" timestamp="2026-11-06T18:05:59.442Z" hostname="black-box" tests="7" failures="0" errors="0" skipped="0" time="0.024649577">
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; reads and deserializes a contract state file at &lt;base&gt;/&lt;address&gt;" time="0.015510444">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; decodes through a caller-supplied era rather than the build&apos;s bound one" time="0.001794505">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; returns undefined when the contract state file is missing" time="0.000273847">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; propagates a non-ENOENT file system error (path is a directory)" time="0.001005106">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; uses fileNameForAddress to resolve the contract state file path" time="0.001101709">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; returns the same state regardless of the block hash" time="0.001482197">
+        </testcase>
+        <testcase classname="test/effect/FileSystemContractStateProvider.test.ts" name="FileSystemContractStateProvider &gt; rejects with a ContractRuntimeError when the state file exists but contains invalid bytes" time="0.001327715">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/RuntimeIdentity.test.ts" timestamp="2026-11-06T18:05:59.443Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="0.002332631">
+        <testcase classname="test/effect/RuntimeIdentity.test.ts" name="compact-runtime identity &gt; resolves the same compact-runtime module as the CompactRuntime facade" time="0.001170779">
+        </testcase>
+        <testcase classname="test/effect/RuntimeIdentity.test.ts" name="compact-runtime identity &gt; resolves a compact-runtime on the line the facade is bound to" time="0.000142429">
+        </testcase>
+    </testsuite>
+</testsuites>
