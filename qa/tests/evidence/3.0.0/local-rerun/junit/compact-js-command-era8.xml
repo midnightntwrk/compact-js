@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="0" errors="0" time="0.798338956">
+    <testsuite name="test/era8/LedgerEightCommands.test.ts" timestamp="2026-11-06T18:06:46.547Z" hostname="black-box" tests="3" failures="0" errors="0" skipped="0" time="0.798338956">
+        <testcase classname="test/era8/LedgerEightCommands.test.ts" name="the CLI targeting ledger 8 &gt; deploys a ledger 8 contract and writes ledger 8 artifacts" time="0.769425243">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightCommands.test.ts" name="the CLI targeting ledger 8 &gt; writes a contract state ledger 8 can read and ledger 9 cannot" time="0.019014405">
+        </testcase>
+        <testcase classname="test/era8/LedgerEightCommands.test.ts" name="the CLI targeting ledger 8 &gt; refuses the options ledger 8 cannot honour, by name" time="0.008425748">
+        </testcase>
+    </testsuite>
+</testsuites>

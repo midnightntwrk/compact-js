@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="236" failures="0" errors="0" time="7.822130645">
+    <testsuite name="test/effect/CompactRuntime.test.ts" timestamp="2026-11-06T18:06:03.592Z" hostname="black-box" tests="9" failures="0" errors="0" skipped="0" time="0.020364862">
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="compact-runtime seam &gt; names the runtime line it binds" time="0.001791389">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="compact-runtime seam &gt; names the runtime line of the installed compact-runtime package" time="0.000176172">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="compact-runtime seam &gt; binds the seam to the compact-runtime package" time="0.000103054">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="CompactRuntime.tryRuntime &gt; yields the runtime call&apos;s result when it succeeds" time="0.002452648">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="CompactRuntime.tryRuntime &gt; converts a runtime rejection into a typed failure rather than a defect" time="0.001370165">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="CompactRuntime.tryRuntime &gt; shares its boundary handling with the ledger seam&apos;s tryConvert" time="0.000141788">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="execution clock &gt; stamps the block clock with the given time rather than the wall clock" time="0.011168572">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="execution clock &gt; falls back to the wall clock when no time is given" time="0.001091329">
+        </testcase>
+        <testcase classname="test/effect/CompactRuntime.test.ts" name="era pairing &gt; pairs the bound ledger era with the bound runtime line" time="0.000183346">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractEventStore.subscribe.test.ts" timestamp="2026-11-06T18:06:03.598Z" hostname="black-box" tests="9" failures="0" errors="0" skipped="0" time="0.215066609">
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; delivers live events appended after subscription" time="0.058109907">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; replays history then tails live from fromId with no gap or duplicate" time="0.018034756">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; applies the filter to both replayed and live events" time="0.025824063">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; delivers to multiple independent subscribers" time="0.016290074">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; resumes from a last-seen id after a disconnect (fromId = lastSeenId + 1)" time="0.013098262">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; fromId is inclusive — passing the last-seen id redelivers it (resume off-by-one guard)" time="0.022445348">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; delivers live events in ascending id order under concurrent appends" time="0.023290262">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; sliding live buffer: a stalled subscriber never wedges appends, drops the oldest un-consumed live events, and can recover them from history" time="0.022834252">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.subscribe.test.ts" name="ContractEventStore.subscribe &gt; cleans up on scope close without wedging the store" time="0.012595755">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractEventStore.test.ts" timestamp="2026-11-06T18:06:03.598Z" hostname="black-box" tests="18" failures="0" errors="0" skipped="0" time="0.102756221">
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.append &gt; assigns monotonically increasing ids starting at 1" time="0.045040729">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.append &gt; continues the id sequence across appends" time="0.016227076">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; returns an empty array from an empty store" time="0.001417434">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; returns all events, in ascending id order, with no filter" time="0.010279184">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; filters by contract address" time="0.001776041">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; filters by event type" time="0.004532812">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; filters by fromId (resume cursor)" time="0.001235141">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; matches when any indexed field starts with the prefix" time="0.001458662">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; does not match when no indexed field starts with the prefix" time="0.001832327">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; honors a leading 0x and is case-insensitive" time="0.001084256">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; matches an odd-length prefix against the high nibble of the first byte" time="0.00144169">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; matches an odd-length prefix after a whole-byte prefix" time="0.001145702">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; scopes the prefix to a named field" time="0.001968534">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; fails fast with MalformedHexPrefixError on a non-hex prefix rather than matching nothing" time="0.001901668">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; fails a non-hex prefix even after stripping a leading 0x" time="0.000716151">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; fails the subscribe stream on a non-hex prefix" time="0.006208884">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; field-prefix filters &gt; excludes misc, lifecycle, and degraded events from field filters" time="0.001145792">
+        </testcase>
+        <testcase classname="test/effect/ContractEventStore.test.ts" name="ContractEventStore.query &gt; combines criteria with logical AND" time="0.000936477">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractEventValidator.test.ts" timestamp="2026-11-06T18:06:03.599Z" hostname="black-box" tests="6" failures="0" errors="0" skipped="0" time="0.157452839">
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; accepts an empty event array" time="0.0690621">
+        </testcase>
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; accepts well-formed events carrying bigint and Uint8Array payloads" time="0.019690831">
+        </testcase>
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; fails when the value is not an array" time="0.017152843">
+        </testcase>
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; fails on an unrecognized event type" time="0.015500495">
+        </testcase>
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; fails when an event is missing its version" time="0.015748553">
+        </testcase>
+        <testcase classname="test/effect/ContractEventValidator.test.ts" name="validateEvents &gt; reports every malformed event when validating a batch" time="0.017218486">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractEvents.integration.test.ts" timestamp="2026-11-06T18:06:03.600Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="0.068510149">
+        <testcase classname="test/effect/ContractEvents.integration.test.ts" name="contract events integration &gt; decodes raw events, accumulates them, and observes them via query and subscribe" time="0.066914228">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.boundary.test.ts" timestamp="2026-11-06T18:06:03.600Z" hostname="black-box" tests="3" failures="0" errors="0" skipped="0" time="0.195374626">
+        <testcase classname="test/effect/ContractExecutable.boundary.test.ts" name="ContractExecutable runtime boundary &gt; fails in the error channel, not as a defect, when the runtime rejects the resulting zswap local state" time="0.119160471">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.boundary.test.ts" name="ContractExecutable runtime boundary &gt; fails in the error channel, not as a defect, when the ledger rejects reading a call&apos;s final state" time="0.044052444">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.boundary.test.ts" name="ContractExecutable runtime boundary &gt; reports a rejected contract constructor as an initialization failure, not a coin public key one" time="0.030700162">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.clock.test.ts" timestamp="2026-11-06T18:06:03.601Z" hostname="black-box" tests="3" failures="0" errors="0" skipped="0" time="0.215547317">
+        <testcase classname="test/effect/ContractExecutable.clock.test.ts" name="ContractExecutable execution clock &gt; stamps the call&apos;s block clock from the effect&apos;s own Clock" time="0.121450633">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.clock.test.ts" name="ContractExecutable execution clock &gt; reads the clock afresh for each call rather than once per executable" time="0.068762335">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.clock.test.ts" name="ContractExecutable execution clock &gt; falls back to the wall clock when nothing overrides it" time="0.023804643">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.gas.test.ts" timestamp="2026-11-06T18:06:03.601Z" hostname="black-box" tests="3" failures="0" errors="0" skipped="0" time="0.200685025">
+        <testcase classname="test/effect/ContractExecutable.gas.test.ts" name="ContractExecutable gas &gt; reports what each contract in the call tree spent" time="0.115650669">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.gas.test.ts" name="ContractExecutable gas &gt; executes unchanged under a limit no single query reaches" time="0.046905788">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.gas.test.ts" name="ContractExecutable gas &gt; fails with a runtime error when the limit leaves no budget" time="0.036285189">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.maintenanceBoundary.test.ts" timestamp="2026-11-06T18:06:03.601Z" hostname="black-box" tests="8" failures="0" errors="0" skipped="0" time="0.305543433">
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the ledger rejects the verifier key of an add-or-replace update" time="0.088298234">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the ledger rejects the maintenance update construction" time="0.031664261">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the ledger rejects the maintenance update signature" time="0.045829598">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the ledger rejects reading the data to sign" time="0.030169231">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the runtime rejects reading an operation during initialization" time="0.024466892">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when the runtime rejects setting the maintenance authority" time="0.033706455">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; samples a maintenance authority signing key tagged with the era scheme when none is configured" time="0.024981322">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.maintenanceBoundary.test.ts" name="ContractExecutable maintenance boundary &gt; fails in the error channel when no signing key is configured and the runtime rejects sampling one" time="0.024644798">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.partitionInputs.test.ts" timestamp="2026-11-06T18:06:03.601Z" hostname="black-box" tests="6" failures="0" errors="0" skipped="0" time="0.181198319">
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; reports the block context from before the call, not after it" time="0.07314797">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; reports the state the call ran against, separately from the state it left behind" time="0.027245294">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; reports the effects from before the call, not after it" time="0.020453019">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; reports the commitment indices from after the call, not before it" time="0.026307696">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; fails in the error channel, not as a defect, when reading the partition inputs is rejected" time="0.017295371">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.partitionInputs.test.ts" name="ContractCallPublic partition inputs &gt; names the post-execution context when that is the one that could not be read" time="0.015203024">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutable.test.ts" timestamp="2026-11-06T18:06:03.602Z" hostname="black-box" tests="14" failures="0" errors="0" skipped="0" time="0.379721576">
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; fails rather than dies when the configured witnesses are wrong" time="0.036998816">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; should initialize a new instance" time="0.038979083">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; samples a signing key tagged with the era default when none is configured" time="0.033593041">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; should return the given signing key" time="0.019848759">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; should derive an ECDSA maintenance authority from an ECDSA signing key" time="0.020774486">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; initialize &gt; should fail with an invalid CoinPublicKey" time="0.017100423">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; circuits &gt; should return identifiers of provable circuits" time="0.02694107">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; circuits &gt; should brand a circuit identifier without altering it" time="0.011944206">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; circuits &gt; should return updated contract state" time="0.045653075">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; contract maintenance operations &gt; replaceContractMaintenanceAuthority should return new signing key" time="0.031555847">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; contract maintenance operations &gt; removeContractOperation should work" time="0.020789795">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; contract maintenance operations &gt; addOrReplaceContractOperation should work" time="0.021691326">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; contract maintenance operations &gt; should sign a maintenance update with an ECDSA key that verifies against the installed authority" time="0.032940519">
+        </testcase>
+        <testcase classname="test/effect/ContractExecutable.test.ts" name="ContractExecutable &gt; contract maintenance operations &gt; should fail loudly when the signing key uses an unsupported signature scheme" time="0.018729257">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractExecutableRuntime.test.ts" timestamp="2026-11-06T18:06:03.602Z" hostname="black-box" tests="1" failures="0" errors="0" skipped="0" time="0.071002451">
+        <testcase classname="test/effect/ContractExecutableRuntime.test.ts" name="ContractExecutableRuntime &gt; should use given context" time="0.069736473">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractKeyLocation.test.ts" timestamp="2026-11-06T18:06:03.602Z" hostname="black-box" tests="20" failures="0" errors="0" skipped="0" time="0.009734767">
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="hashVerifierKey &gt; hashes &quot;&quot; to the expected SHA-256 digest" time="0.003478764">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="hashVerifierKey &gt; hashes &quot;abc&quot; to the expected SHA-256 digest" time="0.000273757">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="hashVerifierKey &gt; hashes &quot;abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq&quot; to the expected SHA-256 digest" time="0.00021733">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="hashVerifierKey &gt; hashes &quot;The quick brown fox jumps over the lazy dog&quot; to the expected SHA-256 digest" time="0.00016449">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="hashVerifierKey &gt; hashes inputs spanning many blocks" time="0.000348708">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; round-trips a canonical location" time="0.000541522">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; encodes to the documented grammar" time="0.000205989">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a protocol builtin" time="0.000200238">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a bare circuit name" time="0.000106571">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse the wasm default" time="0.000062789">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a non-hex address" time="0.000060143">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a missing vk parameter" time="0.000050265">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a short vk hash" time="0.000053411">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse an uppercase vk hash" time="0.000054693">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; does not parse a circuit containing a slash" time="0.000076314">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; throws when encoding a non-hex address" time="0.000957236">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; throws when encoding a circuit containing &quot;/&quot;" time="0.000192423">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; throws when encoding a circuit containing &quot;?&quot;" time="0.000131188">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; throws when encoding an empty circuit" time="0.000123703">
+        </testcase>
+        <testcase classname="test/effect/ContractKeyLocation.test.ts" name="encodeContractKeyLocation / parseContractKeyLocation &gt; throws when encoding a malformed vk hash" time="0.00012746">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ContractLog.test.ts" timestamp="2026-11-06T18:06:03.603Z" hostname="black-box" tests="31" failures="0" errors="0" skipped="0" time="0.030509422">
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; preserves the envelope (version + emitting address) on every event" time="0.002566202">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes shielded-spend (nullifier)" time="0.001395733">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes shielded-receive (commitment + optional contract address + ciphertext)" time="0.004435378">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes shielded-mint (commitment + domainSep + amount)" time="0.00078975">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes shielded-burn (nullifier + amount)" time="0.000402439">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes unshielded-spend (sender Either=left → coin-public-key)" time="0.0005513">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes unshielded-receive (recipient Either=right → contract-address)" time="0.003002916">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes unshielded-mint (domainSep + tokenType + amount)" time="0.000558533">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes unshielded-burn (sender + tokenType + amount)" time="0.000376721">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes paused/unpaused as empty-payload lifecycle events" time="0.00024876">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; decodes misc (name + payload)" time="0.001559523">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; handles Maybe=none for optional amount" time="0.000229092">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; degrades a dropped ({ tag: null }) payload" time="0.000207812">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; right-pads a short (trailing-zero-stripped) payload rather than degrading" time="0.000576548">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; degrades the reserved fallback version 0" time="0.000169059">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; degrades an out-of-range Either discriminant rather than decoding a wrong kind" time="0.000233731">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; degrades a malformed envelope address without throwing" time="0.000249792">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; does not abort a batch when one event has a malformed address" time="0.000210146">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode &gt; graceful degradation (never throws) &gt; right-pads short buffers for every event type — never throws, never degrades" time="0.002488495">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; reads shielded-mint amount as little-endian" time="0.000393864">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; reads shielded-burn amount as little-endian" time="0.000352776">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; reads unshielded-mint amount as little-endian" time="0.000459436">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; decodes shielded-receive in commitment · ciphertext · contract-address order" time="0.00258664">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; decodes unshielded-spend sender as a 65-byte Either (discriminant 1 = coin-public-key)" time="0.000592829">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; decodes unshielded-receive recipient as a 65-byte Either (discriminant 0 = contract-address)" time="0.00090076">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decode — live-emit wire format (SDK#278) &gt; decodes unshielded-burn sender as a 65-byte Either with a little-endian amount" time="0.000644145">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decodeAll &gt; is index-aligned with the input and preserves order" time="0.001001911">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.decodeAll &gt; preserves degraded events in place rather than dropping them" time="0.000179979">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.indexedFields &gt; derives per-type indexed fields" time="0.000338479">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.indexedFields &gt; indexes the sender/token bytes for unshielded events" time="0.000459958">
+        </testcase>
+        <testcase classname="test/effect/ContractLog.test.ts" name="ContractLog.indexedFields &gt; indexes nothing for misc, lifecycle, or degraded events" time="0.000120988">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/CrossContractCall.test.ts" timestamp="2026-11-06T18:06:03.604Z" hostname="black-box" tests="21" failures="0" errors="0" skipped="0" time="0.938549837">
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; stateProvider is called to resolve callee state" time="0.168186711">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; incrementInner captures every sub-call plus the root, in trace order" time="0.068247494">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; every call exposes its own Zswap local state, keyed to its own contract" time="0.057241749">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; getInner reads callee state and returns the root result plus one sub-call" time="0.055808365">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; totals gas for the callee as well as the root" time="0.041228596">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; uses the exact expected contract address for each returned call" time="0.038747475">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; calls the same callee through different circuits with one address but distinct commitments" time="0.046320003">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; includes the private input, output, and private transcript outputs for each call" time="0.036396269">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; contains the callee&apos;s post-execution contract state" time="0.035732958">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; takes the result, privateState, and zswapLocalState from the root, not the callee" time="0.033478595">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; partitions each call into guaranteed and fallible programs that match the original batch" time="0.037860502">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; reports each call&apos;s own block context, effects, and commitment indices" time="0.035288599">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; exposes the inputs each call&apos;s transcript was partitioned from" time="0.03427627">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; returns a ContractRuntimeError when the state provider cannot find a callee state" time="0.027659917">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; fails with a defined error when a cross-contract call is attempted without a stateProvider" time="0.021531674">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; passes the exact parentBlockHash through to the state provider" time="0.035289221">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; orders nested cross-contract calls from the deepest completed call back to the root" time="0.045024278">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; rejects a self-call where a circuit calls another circuit on its own address (re-entrancy is not supported)" time="0.039907464">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; returns a ContractRuntimeError when transcript partitioning returns the wrong number of items" time="0.027185541">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; returns a ContractRuntimeError when pre-transcript construction throws" time="0.027883829">
+        </testcase>
+        <testcase classname="test/effect/CrossContractCall.test.ts" name="cross-contract calls &gt; throws the explicit error when the runtime returns no zswap local state" time="0.023287156">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/DualEraResolution.test.ts" timestamp="2026-11-06T18:06:03.605Z" hostname="black-box" tests="4" failures="0" errors="0" skipped="0" time="0.264701896">
+        <testcase classname="test/effect/DualEraResolution.test.ts" name="two ledger eras in one process &gt; resolves a different compact-runtime line per scope" time="0.080015907">
+        </testcase>
+        <testcase classname="test/effect/DualEraResolution.test.ts" name="two ledger eras in one process &gt; loads both eras&apos; compiled contracts without a version mismatch" time="0.060016504">
+        </testcase>
+        <testcase classname="test/effect/DualEraResolution.test.ts" name="two ledger eras in one process &gt; executes a circuit on each era, in the same process" time="0.109721403">
+        </testcase>
+        <testcase classname="test/effect/DualEraResolution.test.ts" name="two ledger eras in one process &gt; keeps the host process on its own era" time="0.010129261">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/EraIsolation.test.ts" timestamp="2026-11-06T18:06:03.605Z" hostname="black-box" tests="4" failures="0" errors="0" skipped="0" time="0.008471653">
+        <testcase classname="test/effect/EraIsolation.test.ts" name="era isolation of built entries &gt; keeps the ledger 8 era out of the ledger 9 entry" time="0.002662232">
+        </testcase>
+        <testcase classname="test/effect/EraIsolation.test.ts" name="era isolation of built entries &gt; keeps the ledger 9 era out of the ledger 8 entry" time="0.000966844">
+        </testcase>
+        <testcase classname="test/effect/EraIsolation.test.ts" name="era isolation of built entries &gt; has each era entry reach its own era packages" time="0.002281494">
+        </testcase>
+        <testcase classname="test/effect/EraIsolation.test.ts" name="era isolation of built entries &gt; keeps the unsuffixed entry on a single era" time="0.000929614">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/EraLaziness.test.ts" timestamp="2026-11-06T18:06:03.605Z" hostname="black-box" tests="4" failures="0" errors="0" skipped="0" time="1.424898426">
+        <testcase classname="test/effect/EraLaziness.test.ts" name="era laziness at run time &gt; loads exactly one ledger WASM when only the ledger 9 entry is imported" time="0.444510895">
+        </testcase>
+        <testcase classname="test/effect/EraLaziness.test.ts" name="era laziness at run time &gt; loads exactly one ledger WASM when only the ledger 8 entry is imported" time="0.380323442">
+        </testcase>
+        <testcase classname="test/effect/EraLaziness.test.ts" name="era laziness at run time &gt; loads exactly one ledger WASM for the unsuffixed entry" time="0.329642381">
+        </testcase>
+        <testcase classname="test/effect/EraLaziness.test.ts" name="era laziness at run time &gt; loads both ledger WASMs, distinctly, when both entries are imported" time="0.268145654">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/Ledger.test.ts" timestamp="2026-11-06T18:06:03.605Z" hostname="black-box" tests="6" failures="0" errors="0" skipped="0" time="0.121444802">
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger.operationForCircuit &gt; resolves the operation when the state has one for the circuit" time="0.075412241">
+        </testcase>
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger.operationForCircuit &gt; fails with a ContractRuntimeError naming the circuit and address when the operation is absent" time="0.002956809">
+        </testcase>
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger.operationForCircuit &gt; fails in the error channel, not as a defect, when the ledger rejects the state" time="0.000438938">
+        </testcase>
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger.fromRuntimeQueryContext &gt; carries state, address, block and effects" time="0.0250492">
+        </testcase>
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger.fromRuntimeQueryContext &gt; carries comIndices via the block assignment, despite the readonly declaration" time="0.01475612">
+        </testcase>
+        <testcase classname="test/effect/Ledger.test.ts" name="Ledger conversion error channel &gt; fails with a ContractRuntimeError rather than throwing on undeserializable bytes" time="0.000924935">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/LedgerDualInstantiation.test.ts" timestamp="2026-11-06T18:06:03.606Z" hostname="black-box" tests="10" failures="0" errors="0" skipped="0" time="0.043722121">
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is rejected by Intent.addDeploy" time="0.013937937">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is rejected by new ChargedState" time="0.000669503">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is rejected by new ContractDeploy" time="0.000350922">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is rejected by partitionTranscripts" time="0.003004208">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is silently discarded by Transaction.fromParts, which does not throw" time="0.004559984">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is silently discarded by Transaction.fromPartsRandomized, which does not throw" time="0.000779771">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is silently discarded by Intent.guaranteedUnshieldedOffer, which does not throw" time="0.003213033">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is silently discarded by Intent.fallibleUnshieldedOffer, which does not throw" time="0.001344366">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is silently discarded by Intent.dustActions, which does not throw" time="0.002817266">
+        </testcase>
+        <testcase classname="test/effect/LedgerDualInstantiation.test.ts" name="a ledger handle from a second instantiation &gt; is not the only thing those setters swallow — a wrong class is accepted just as quietly" time="0.010699567">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/LedgerEra.test.ts" timestamp="2026-11-06T18:06:03.607Z" hostname="black-box" tests="23" failures="0" errors="0" skipped="0" time="0.045821212">
+        <testcase classname="test/effect/LedgerEra.test.ts" name="Ledger era seam &gt; describes the ledger 9 era" time="0.001640025">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="Ledger era seam &gt; binds the seam to the ledger 9 package" time="0.000264629">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="Ledger era seam &gt; constructs era-versioned values without leaking the version literal" time="0.001103543">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; `/v9` mirrors `/v9/effect`, not the unsuffixed root" time="0.001498817">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; `/v9/effect` exposes the same API as `/effect`" time="0.000147749">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; the unsuffixed root follows the bound era, which is what it is for" time="0.000161575">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; `/v9/effect` binds ledger 9 itself rather than following the build&apos;s bound era" time="0.000283595">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; `/v9/effect` resolves the ledger 9 package" time="0.000158559">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era-pinned entries &gt; offers the boundary wrapper on both seams of every era entry" time="0.000257265">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="the ledger 8 entry &gt; pins ledger 8 and its paired 0.16 runtime" time="0.000145254">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="the ledger 8 entry &gt; exposes every era-free module, so era-agnostic code compiles against either entry" time="0.001461137">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="the ledger 8 entry &gt; omits contract events, which ledger 8 cannot emit" time="0.000386519">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="the ledger 8 entry &gt; executes contracts, through its own era pair rather than the bound one" time="0.000249451">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="the ledger 8 entry &gt; gives each era entry its own executable, pinned rather than following the build" time="0.000137069">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; composes and round-trips an unproven transaction from `/v9/effect` alone" time="0.019977602">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; composes and round-trips an unproven transaction from `/v8/effect` alone" time="0.012955363">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; drops an intent built on the other era *silently*, which is why both must come from one facade" time="0.001833799">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; binds /v9/effect to its own era&apos;s composition classes" time="0.000204065">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; binds /v8/effect to its own era&apos;s composition classes" time="0.000119316">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="transaction composition on the Ledger facade &gt; takes the cost model from each era&apos;s ledger, not from its paired runtime" time="0.000274148">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era capability split &gt; keeps contract events out of the era-neutral surface" time="0.000202602">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era capability split &gt; exposes contract events on the ledger 9 entry" time="0.000136608">
+        </testcase>
+        <testcase classname="test/effect/LedgerEra.test.ts" name="era capability split &gt; composes the ledger 9 entry from the era-neutral surface plus the event surface" time="0.000334391">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/PnpEraResolution.test.ts" timestamp="2026-11-06T18:06:03.608Z" hostname="black-box" tests="2" failures="0" errors="0" skipped="0" time="2.204293614">
+        <testcase classname="test/effect/PnpEraResolution.test.ts" name="two ledger eras under the yarn PnP linker &gt; resolves both runtime lines as distinct instances" time="0.426838513">
+        </testcase>
+        <testcase classname="test/effect/PnpEraResolution.test.ts" name="two ledger eras under the yarn PnP linker &gt; rejects the node_modules linker&apos;s nested-directory recipe" time="0.334982758">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/Unshielded.test.ts" timestamp="2026-11-06T18:06:03.609Z" hostname="black-box" tests="5" failures="0" errors="0" skipped="0" time="0.264423531">
+        <testcase classname="test/effect/Unshielded.test.ts" name="Unshielded Tokens &gt; minting &gt; should return unshielded spends for a given contract address" time="0.11943508">
+        </testcase>
+        <testcase classname="test/effect/Unshielded.test.ts" name="Unshielded Tokens &gt; minting &gt; should return unshielded spends for a given user address" time="0.038121063">
+        </testcase>
+        <testcase classname="test/effect/Unshielded.test.ts" name="Unshielded Tokens &gt; minting &gt; should return unshielded spends for the deployed contract when minting" time="0.046247786">
+        </testcase>
+        <testcase classname="test/effect/Unshielded.test.ts" name="Unshielded Tokens &gt; sending &gt; should return unshielded outputs and spends" time="0.036017174">
+        </testcase>
+        <testcase classname="test/effect/Unshielded.test.ts" name="Unshielded Tokens &gt; receiving &gt; should return unshielded inputs" time="0.022664652">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/effect/ZKManifest.test.ts" timestamp="2026-11-06T18:06:03.609Z" hostname="black-box" tests="25" failures="0" errors="0" skipped="0" time="0.352335937">
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; parses metadata and flattens directory entries into &quot;&lt;dir&gt;/&lt;file&gt;&quot; keys" time="0.053730875">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; leaves optional version metadata undefined when absent" time="0.015899307">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; treats an empty directory as contributing no files" time="0.014375713">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; fails when manifest-version is missing" time="0.012910679">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; fails on an unsupported manifest-version" time="0.009465519">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; fails on malformed JSON" time="0.01478259">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a file node with a non-hex hash" time="0.015160103">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a file node with a negative size" time="0.013429447">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a non-reserved top-level key whose value is a bare string" time="0.009382412">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; reports a present-but-malformed manifest-version distinctly from a missing one" time="0.01030904">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects an object-valued optional metadata key instead of silently dropping it" time="0.014760789">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; safely drops a top-level `__proto__` key without polluting the prototype" time="0.012287684">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; safely drops a `__proto__` key nested inside a directory" time="0.008108579">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a directory name that is not a safe path segment" time="0.008563527">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a file name that is not a safe path segment" time="0.005977208">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a bare-string file leaf that is not the directory marker" time="0.005982096">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a file leaf carrying an unknown property" time="0.011091506">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; fails with a typed error (not a defect) on pathologically deep nesting" time="0.051759615">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a manifest with a duplicated file entry (same path, differing hash)" time="0.010583869">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a manifest with a duplicated top-level metadata key" time="0.010840453">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; detects a duplicate key spelled with a JSON string escape" time="0.007842907">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; accepts the same file name under two different directories" time="0.00621184">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; does not mistake key-like structure inside a string value for a duplicate key" time="0.008682631">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; does not treat repeated strings inside a JSON array as duplicate keys" time="0.008659999">
+        </testcase>
+        <testcase classname="test/effect/ZKManifest.test.ts" name="ZKManifest.parse &gt; rejects a directory nested more than one level deep" time="0.008553788">
+        </testcase>
+    </testsuite>
+</testsuites>
