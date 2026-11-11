@@ -28,4 +28,5 @@ logs
 .states
 .eslintcache
 .rollup.cache
+.rn-drafts/
 .DS_Store
