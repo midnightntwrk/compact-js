@@ -1,6 +1,6 @@
 {
   "name": "@midnight-ntwrk/compact-js",
-  "version": "3.0.1-rc.0",
+  "version": "3.0.1-rc.1",
   "description": "Typescript-based execution environment for smart contracts compiled with the Compact language",
   "type": "module",
   "exports": {
@@ -20,7 +20,7 @@
     "@midnight-ntwrk/platform-js": "^3.0.0",
     "@midnightntwrk/ledger-v8": "8.1.3",
     "@midnightntwrk/ledger-v9": "^1.0.2-rc.0",
-    "@midnightntwrk/onchain-runtime-v4": "4.0.2-rc.0",
+    "@midnightntwrk/onchain-runtime-v4": "^4.0.0-rc.3",
     "@noble/hashes": "^2.4.0",
     "compact-runtime-ledger8": "npm:@midnight-ntwrk/compact-runtime@0.16.0",
     "effect": "^3.22.1",
