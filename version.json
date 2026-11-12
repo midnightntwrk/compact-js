@@ -1,8 +1,8 @@
 {
   "v_info": {
-    "version": "3.0.0",
-    "preRelease": "",
-    "tag": "latest",
+    "version": "3.0.1",
+    "preRelease": "0",
+    "tag": "rc",
     "releaseBranches": [
       "main",
       "release/compact-js/.*"
