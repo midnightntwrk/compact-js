@@ -1,6 +1,6 @@
 {
   "name": "@midnight-ntwrk/compact-js-node",
-  "version": "3.0.0",
+  "version": "3.0.1-rc.0",
   "description": "Platform specific types and utilities for working with the Compact language on a Node.js runtime",
   "type": "module",
   "exports": {
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@midnight-ntwrk/compact-runtime": "0.21.0",
-    "@midnightntwrk/ledger-v9": "^1.0.0"
+    "@midnightntwrk/ledger-v9": "^1.0.2-rc.0"
   },
   "peerDependencies": {
     "@midnight-ntwrk/compact-js": "workspace:^"
