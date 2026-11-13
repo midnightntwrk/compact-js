@@ -8,6 +8,7 @@
     "effect": "^3.22.1",
     "toml": "^5.0.1",
     "@midnight-ntwrk/onchain-runtime-v3": "https://registry.npmjs.org/@midnight-ntwrk/onchain-runtime-v3/-/onchain-runtime-v3-3.1.1.tgz",
+    "@midnightntwrk/onchain-runtime-v4": "4.0.2-rc.0",
     "fast-uri": "^3.1.9",
     "glob": "^14.0.2",
     "ip-address": "^10.7.4"
