@@ -41,4 +41,26 @@ to the computed version **on the runner only** (so the packed tarball is correct
 ## Git tags
 
 A `compact-js-v<version>` git tag is pushed after a successful publish, along
-with a GitHub release whose notes come from the top section of `CHANGELOG.md`.
+with a GitHub release.
+
+## Release notes
+
+The release body is **generated** by `scripts/generate-release-notes.mjs`, in the
+v9 component release-note format. It is also committed to
+`docs/release-notes/<version>.md` and uploaded as a run artifact.
+
+Content comes from the `.changeset/*.md` entries added since the previous tag —
+`major` → Breaking changes, `minor` → New features, `patch` → Improvements — plus
+the workspace manifests, `.github/env/global.env` and git history. Changesets are
+a **content** source only; they do not affect the published version, which stays
+`version.json`'s to decide, and the generator never consumes them.
+
+Fields no automation can know (the summary, known issues, the proof-server / node
+/ indexer rows) come from an optional `docs/release-notes/overlays/<version>.md`
+written during the release PR. Without one the note still generates, carrying
+`TODO (owner):` markers in their place; CD prints how many remain in the job
+summary.
+
+See [release-notes/README.md](release-notes/README.md) for the full layering rules
+and [release-notes/overlays/TEMPLATE.md](release-notes/overlays/TEMPLATE.md) to
+start an overlay.
