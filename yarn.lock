@@ -1212,17 +1212,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midnightntwrk/onchain-runtime-v4@npm:4.0.0-rc.2":
-  version: 4.0.0-rc.2
-  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.0-rc.2"
-  checksum: 10/c2176e55591586a6871ec1fa6449c9f6236f230890be1ae08cb90294bb244f2d9f5390b4892d6aa87236b95d967f27f37a595d5ffbbe74c5eab80fdb66750173
-  languageName: node
-  linkType: hard
-
-"@midnightntwrk/onchain-runtime-v4@npm:^4.0.0-rc.2, @midnightntwrk/onchain-runtime-v4@npm:^4.0.0-rc.3":
-  version: 4.0.1
-  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.1"
-  checksum: 10/dd90b77dd9b54a57d6f41ff40c96128286e9faa88bd860b497d7afffe137b978137bef74f6e1d3a78e3e26acae2abd61f74f1d8c92f2cb83f2e3be61319c99e9
+"@midnightntwrk/onchain-runtime-v4@npm:4.0.2-rc.0":
+  version: 4.0.2-rc.0
+  resolution: "@midnightntwrk/onchain-runtime-v4@npm:4.0.2-rc.0"
+  checksum: 10/cf9bfa95b9e70edb5d00fdb256b49560bfc29d4295d200dbd19a97da70c1bf8dc2df6f712772f6f71eb1c6670dade51f11c0aea75d44cd476d307fc4f7dabc2b
   languageName: node
   linkType: hard
 
