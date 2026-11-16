@@ -1,66 +1,80 @@
 # Releasing
 
-Packages are published from the **CD** workflow (`.github/workflows/cd.yaml`),
-which is **manual only** (`workflow_dispatch`). Merging to `main` does **not**
-publish — that only runs CI (build/test).
+Versions come from [Changesets](https://github.com/changesets/changesets). Packages are
+published from the **CD** workflow (`.github/workflows/cd.yaml`), which is **manual only**
+(`workflow_dispatch`). Merging to `main` does **not** publish — that only runs CI.
 
-## How to cut a release
+CD never writes to this repository: it builds, publishes the tarballs and creates the
+GitHub Release. Everything that changes a file — the version bump, the CHANGELOGs, the
+release note — happens in a **release PR** that goes through normal review.
 
-1. Merge your change to `main`.
-2. Actions → **CD** → **Run workflow** → set *Use workflow from* = `main`.
+## 1. Describe the change (every PR)
 
-The job only publishes when run from a branch listed in `version.json` →
-`releaseBranches` (`main` or `release/compact-js/.*`). Run from any other branch
-and the publish steps are skipped.
+```bash
+yarn changeset
+```
 
-## Versioning — `version.json`
+Pick the semver bump per package, write the summary a consumer will read, and commit the
+generated `.changeset/*.md` file with your change.
 
-`version.json` is the **single source of truth** for the published version:
+> A release with no changesets is a no-op — `changeset version` has nothing to apply, so
+> nothing is published. If a change should ship, it needs a changeset.
 
-| field             | meaning                                              |
-| ----------------- | ---------------------------------------------------- |
-| `version`         | base semver, e.g. `3.0.0`                            |
-| `preRelease`      | suffix (see below)                                   |
-| `tag`             | npm dist-tag used in `npm publish --tag <tag>`       |
-| `releaseBranches` | regexes of branches allowed to publish               |
+## 2. Prepare the release (release PR)
 
-The published version is derived from `version` + `preRelease`:
+On a branch off `main`:
 
-| `preRelease` | publishes              | use for                 |
-| ------------ | ---------------------- | ----------------------- |
-| `""` (empty) | `3.0.0`                | a stable release        |
-| `-rc.1`      | `3.0.0-rc.1` (exact)   | a specific pre-release  |
-| `-alpha`     | `3.0.0-alpha.<height>` | continuous pre-releases |
+```bash
+yarn release:prepare
+```
 
-`<height>` = number of commits since `version.json` last changed.
+That runs `changeset version` — which bumps every workspace `package.json`, writes each
+package's `CHANGELOG.md` and deletes the changesets it consumed — and then generates
+`docs/release-notes/<version>.md` from those CHANGELOGs.
 
-**You only edit `version.json`.** The CD job bumps every workspace `package.json`
-to the computed version **on the runner only** (so the packed tarball is correct)
-— this commit is **not** pushed back to `main`, so branch protection is unaffected.
+`changeset version` needs `GITHUB_TOKEN` set to a token with `read:user` and `repo:status`;
+without it `@changesets/changelog-github` cannot resolve PR links and the command fails.
 
-## Git tags
+The note carries `TODO (owner):` markers for every field no automation can know — the
+summary, known issues, and the proof-server / node / indexer rows. Fill them in by writing
+`docs/release-notes/overlays/<version>.md` (start from
+[`overlays/TEMPLATE.md`](release-notes/overlays/TEMPLATE.md)) and re-running with `--force`,
+or edit the note directly. Open the PR, get it reviewed, merge it.
 
-A `compact-js-v<version>` git tag is pushed after a successful publish, along
-with a GitHub release.
+## 3. Publish
 
-## Release notes
+Actions → **CD** → **Run workflow** → *Use workflow from* = `main`.
 
-The release body is **generated** by `scripts/generate-release-notes.mjs`, in the
-v9 component release-note format. It is also committed to
-`docs/release-notes/<version>.md` and uploaded as a run artifact.
+CD reads the version from `compact-js/package.json` and the body from
+`docs/release-notes/<version>.md`. It fails if that note is missing, and warns if it still
+carries TODO markers. The npm dist-tag follows the version: `3.0.2` → `latest`,
+`3.0.2-rc.1` → `rc`, `3.1.0-alpha.4` → `alpha`.
 
-Content comes from the `.changeset/*.md` entries added since the previous tag —
-`major` → Breaking changes, `minor` → New features, `patch` → Improvements — plus
-the workspace manifests, `.github/env/global.env` and git history. Changesets are
-a **content** source only; they do not affect the published version, which stays
-`version.json`'s to decide, and the generator never consumes them.
+Only branches matching the `release-branches` input of
+`.github/actions/create-package-artifacts` (`main` or `release/compact-js/.*`) produce
+artifacts; CD run from anywhere else skips the publish steps.
 
-Fields no automation can know (the summary, known issues, the proof-server / node
-/ indexer rows) come from an optional `docs/release-notes/overlays/<version>.md`
-written during the release PR. Without one the note still generates, carrying
-`TODO (owner):` markers in their place; CD prints how many remain in the job
-summary.
+## Release candidates
 
-See [release-notes/README.md](release-notes/README.md) for the full layering rules
-and [release-notes/overlays/TEMPLATE.md](release-notes/overlays/TEMPLATE.md) to
-start an overlay.
+```bash
+yarn changeset pre enter rc   # in its own PR
+```
+
+While pre mode is on, every `release:prepare` yields `X.Y.Z-rc.N`. Graduate the line with
+`yarn changeset pre exit` in its own PR, then run `release:prepare` once more for the
+stable version.
+
+## Git tags and releases
+
+`gh release create` creates the `compact-js-v<version>` tag server-side from the released
+commit, so there is no tag push. Re-dispatching CD for a version that already has a Release
+updates its notes instead of failing.
+
+## Known limitation
+
+The **Artifacts** section lists each package without its npm `dist.shasum`, because the
+note is written before the packages are published. To add them after a release, re-run
+`node scripts/generate-release-notes.mjs --shasums --force` and open a follow-up PR.
+
+`CHANGELOG.md` at the repository root is frozen history from the pre-Changesets flow; the
+per-package `CHANGELOG.md` files are the live ones.

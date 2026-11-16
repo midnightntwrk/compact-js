@@ -33,9 +33,11 @@ jobs:
       contents: read
       packages: write
     outputs:
-      version: ${{ steps.extract_version.outputs.version }}
+      version: ${{ steps.vars.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
@@ -47,20 +49,27 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+      # `changeset version` set this in the release PR; CD never computes or bumps a version.
+      - name: Resolve version
+        id: vars
+        run: |
+          version=$(jq -r '.version' ./compact-js/package.json)
+          if [[ "$version" == *-* ]]; then
+            dist_tag="${version#*-}"
+            dist_tag="${dist_tag%%.*}"
+          else
+            dist_tag=latest
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "dist_tag=${dist_tag}" >> "$GITHUB_OUTPUT"
+
       - name: Publish Package Artifacts
         uses: ./.github/actions/publish-package-artifacts
         with:
           package-archive-name: 'compact-js'
           working-directory: .
           auth-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-
-      - name: Extract version for release
-        id: extract_version
-        run: |
-          version=$(jq -r '.version' ./compact-js/package.json)
-          base_version=$(echo "$version" | sed 's/-alpha.*//')
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "base_version=${base_version}" >> "$GITHUB_OUTPUT"
+          dist-tag: ${{ steps.vars.outputs.dist_tag }}
 
   release:
     needs: publish
@@ -71,91 +80,59 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
-          # The generator reads tags and history to scope this release's changesets.
-          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
-        with:
-          # Registry auth so the generator can read each published tarball's dist.shasum.
-          # `always-auth` is deliberately not passed — setup-node dropped it, and answers it
-          # with an `Unexpected input(s)` annotation. `NODE_AUTH_TOKEN` below is what authenticates.
-          registry-url: https://npm.pkg.github.com/
-          scope: '@midnight-ntwrk'
-          node-version-file: .nvmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-
-      - name: Generate release notes
-        id: notes
+      # The note is a reviewed artifact of the release PR, so CD reads it and never
+      # writes it. An absent note means the PR skipped `yarn release:prepare`.
+      - name: Locate the release note
+        id: note
         env:
           VERSION: ${{ needs.publish.outputs.version }}
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
         run: |
-          base_version="${VERSION%%-alpha.*}"
-          note="docs/release-notes/${base_version}.md"
-          # Runs before the tag is created, so the tag it would otherwise mistake for the
-          # previous release does not exist yet. `--shasums` needs the publish job's packages live.
-          node scripts/generate-release-notes.mjs \
-            --version "$base_version" \
-            --out "$note" \
-            --report release-notes-report.json \
-            --shasums \
-            --force
+          note="docs/release-notes/${VERSION}.md"
+          if [[ ! -f "$note" ]]; then
+            echo "::error::$note is missing — run 'yarn release:prepare' and merge it before releasing ${VERSION}"
+            exit 1
+          fi
+          todos=$(grep -c 'TODO (owner):' "$note" || true)
+          if [[ "$todos" -gt 0 ]]; then
+            echo "::warning::$note still carries ${todos} 'TODO (owner):' marker(s)"
+          fi
           {
-            echo "### Release notes — compact-js ${base_version}"
+            echo "### Release notes — compact-js ${VERSION}"
             echo
-            jq -r '"`\(.changesets | length)` changeset(s) · `\(.todos)` owner TODO(s) left in the note"' release-notes-report.json
-            echo
-            jq -r '.warnings[] | "- :warning: \(.)"' release-notes-report.json
+            echo "\`${todos}\` owner TODO(s) left in \`${note}\`"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "path=${note}" >> "$GITHUB_OUTPUT"
-          echo "tag=compact-js-v${base_version}" >> "$GITHUB_OUTPUT"
-          echo "base_version=${base_version}" >> "$GITHUB_OUTPUT"
+          echo "tag=compact-js-v${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Upload release notes artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v5.0.0
         with:
-          name: Release notes ${{ steps.notes.outputs.base_version }}
-          path: |
-            ${{ steps.notes.outputs.path }}
-            release-notes-report.json
+          name: Release notes ${{ needs.publish.outputs.version }}
+          path: ${{ steps.note.outputs.path }}
 
-      - name: Commit release notes
-        env:
-          BRANCH: ${{ github.ref_name }}
-          NOTE: ${{ steps.notes.outputs.path }}
-          VERSION: ${{ steps.notes.outputs.base_version }}
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add "$NOTE"
-          if git diff --cached --quiet; then
-            echo "release notes are unchanged — nothing to commit"
-            exit 0
-          fi
-          git commit -m "docs: add compact-js ${VERSION} release notes"
-          # Branch protection may reject this. The note still reaches the tag below, the
-          # GitHub Release and the build artifact, so the release is not held up for it.
-          git push origin "HEAD:${BRANCH}" \
-            || echo "::warning::could not push the release notes to ${BRANCH} — the note is on the tag, the release and the run artifact, but not on the branch"
-
-      - name: Create git tag
-        env:
-          TAG: ${{ steps.notes.outputs.tag }}
-        run: |
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
-
+      # `gh release create` creates the tag server-side from --target, so there is no
+      # tag push and nothing to collide on a re-dispatch.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.notes.outputs.tag }}
-          VERSION: ${{ steps.notes.outputs.base_version }}
-          NOTE: ${{ steps.notes.outputs.path }}
+          TAG: ${{ steps.note.outputs.tag }}
+          VERSION: ${{ needs.publish.outputs.version }}
+          NOTE: ${{ steps.note.outputs.path }}
           REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
         run: |
-          gh release create "$TAG" \
-            --title "compact-js v${VERSION}" \
-            --notes-file "$NOTE" \
-            --repo "$REPO"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "::notice::release $TAG already exists — updating its notes"
+            gh release edit "$TAG" \
+              --title "compact-js v${VERSION}" \
+              --notes-file "$NOTE" \
+              --repo "$REPO"
+          else
+            gh release create "$TAG" \
+              --title "compact-js v${VERSION}" \
+              --notes-file "$NOTE" \
+              --target "$SHA" \
+              --repo "$REPO"
+          fi

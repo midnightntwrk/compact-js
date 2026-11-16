@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Generate this tag's component release note in the v9 template shape — the
+// Generate this release's component release note in the v9 template shape — the
 // structure `docs/release-notes/3.0.0.md` follows.
 //
 // Three layers, each overriding the one before it:
-//   1. derived    — changesets, workspace manifests, `.github/env/global.env`, git
+//   1. derived    — package CHANGELOGs, workspace manifests, `.github/env/global.env`
 //   2. base       — `docs/release-notes/overlays/_base.md`, the sections stable across releases
 //   3. per-release— `docs/release-notes/overlays/<version>.md`, this release's human-only fields
 //
@@ -12,26 +12,26 @@
 // Anything no layer supplies is emitted as a `TODO (owner):` marker rather than
 // dropped, so the note is always structurally complete.
 //
-// Changesets are the content source only — `version.json` remains the published
-// version's source of truth, and nothing here consumes or rewrites them. A
-// changeset belongs to this release when it was added after the previous release
-// tag, so re-running is idempotent and no pruning commit is needed.
+// Runs as the second half of `yarn release:prepare`, after `changeset version`
+// has set the manifest versions and written each package's CHANGELOG. Those two
+// are the whole input: the version is read from the manifest and the content from
+// the CHANGELOG section `changeset version` just added. Nothing is derived from
+// tags or commit archaeology, so a release that follows release candidates reads
+// the same as one that does not.
 //
 // Usage:
 //   node scripts/generate-release-notes.mjs [--version X.Y.Z] [--out PATH] [--force]
-//                                           [--since REF] [--report PATH] [--shasums]
+//                                           [--report PATH] [--shasums]
 //
 // `--shasums` reads each published tarball's `dist.shasum` from the registry, so
 // it only works once the packages are live. Omit it for a local dry run.
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const TAG_PREFIX = 'compact-js-v';
-const CHANGESET_DIR = '.changeset';
 const NOTE_DIR = 'docs/release-notes';
 const OVERLAY_DIR = `${NOTE_DIR}/overlays`;
 const TODO = (what) => `TODO (owner): ${what}`;
@@ -52,75 +52,65 @@ const enabled = (name) => argv.includes(`--${name}`);
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const readIfPresent = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : undefined);
 
-/** Run git, returning '' rather than throwing — every call here is best-effort enrichment. */
-const git = (...args) => {
-  try {
-    return execFileSync('git', args, {
-      cwd: repoRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return '';
-  }
-};
-
 const lines = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean);
 
 // ---------------------------------------------------------------- inputs
 
-/** Mirror of the version arithmetic in `.github/actions/create-package-artifacts`. */
-const resolveVersion = () => {
-  const { v_info } = readJson(join(repoRoot, 'version.json'));
-  const { version, preRelease } = v_info;
-  if (!preRelease) return version;
-  if (/\.\d+$/.test(preRelease)) return `${version}${preRelease}`;
-  const source = git('log', '--format=%h', '-1', '--', 'version.json');
-  const height = source ? lines(git('log', '--format=%h', `${source}..`)).length : 0;
-  return `${version}${preRelease}.${height}`;
+const BUMP_RANK = { patch: 0, minor: 1, major: 2 };
+const CHANGELOG_LEVELS = new Map([
+  ['Major Changes', 'major'],
+  ['Minor Changes', 'minor'],
+  ['Patch Changes', 'patch'],
+]);
+
+/**
+ * The CHANGELOG section `changeset version` wrote for `version`, as `### <Level> Changes`
+ * blocks. Returns undefined when the file has no section for it, which is how a package
+ * that this release did not touch is told apart from one whose entry is empty.
+ */
+const changelogSection = (dir, version) => {
+  const text = readIfPresent(join(repoRoot, dir, 'CHANGELOG.md'));
+  if (!text) return undefined;
+  const at = text.indexOf(`\n## ${version}\n`);
+  if (at === -1) return undefined;
+  const body = text.slice(at + `\n## ${version}\n`.length);
+  const next = body.search(/^## /m);
+  return next === -1 ? body : body.slice(0, next);
 };
 
 /**
- * The previous release, by tag creation date among HEAD's ancestors. Dates rather
- * than version sort: releases are chronological, and `-v:refname` orders
- * `3.0.0-rc.6` above `3.0.0` unless `versionsort.suffix` is configured.
+ * `@changesets/changelog-github` renders each entry as
+ * `- [#37](…/pull/37) [\`sha\`](…) Thanks [@who](…)! - <summary>`, continuation lines
+ * indented by two spaces. Keep the PR link, drop the commit link and the thanks: the
+ * note cites work, not authorship.
  */
-const resolveSince = (version) => {
-  const explicit = flag('since');
-  if (explicit) return explicit;
-  const tags = lines(
-    git('tag', '--list', `${TAG_PREFIX}*`, '--sort=-creatordate', '--merged', 'HEAD'),
-  ).filter((tag) => tag !== `${TAG_PREFIX}${version}`);
-  if (tags.length > 0) return tags[0];
-  warn(
-    `no ${TAG_PREFIX}* tag reachable from HEAD — every changeset and commit in history ` +
-      `is being treated as part of ${version}`,
-  );
-  return '';
-};
+const ENTRY_START = /^-\s+(.*)$/;
+const ENTRY_PREAMBLE =
+  /^(?:\[#(\d+)\]\([^)]*\)\s*)?(?:\[`[0-9a-f]+`\]\([^)]*\)\s*)?(?:Thanks\s+\[@[^\]]+\]\([^)]*\)!\s*)?-?\s*/;
 
-const BUMP_RANK = { patch: 0, minor: 1, major: 2 };
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
-const BUMP_LINE = /^['"]?([^'":]+?)['"]?\s*:\s*(major|minor|patch)$/;
-
-const parseChangeset = (file, text) => {
-  const parsed = FRONTMATTER.exec(text);
-  if (!parsed) {
-    warn(`${CHANGESET_DIR}/${file}: no frontmatter block — not included in the note`);
-    return undefined;
+const parseEntries = (section) => {
+  const entries = [];
+  let current;
+  for (const line of section.split('\n')) {
+    const start = ENTRY_START.exec(line);
+    if (start) {
+      if (current) entries.push(current);
+      const rest = start[1];
+      // Dependency roll-ups restate sibling bumps; they are noise in a release note.
+      if (/^Updated dependencies\b/.test(rest)) {
+        current = undefined;
+        continue;
+      }
+      const pr = ENTRY_PREAMBLE.exec(rest)?.[1];
+      current = { pr, body: [rest.replace(ENTRY_PREAMBLE, '')] };
+    } else if (current && line.trim()) {
+      current.body.push(line.trim());
+    }
   }
-  const bumps = {};
-  for (const line of lines(parsed[1])) {
-    const bump = BUMP_LINE.exec(line);
-    if (bump) bumps[bump[1].trim()] = bump[2];
-  }
-  const body = parsed[2].trim();
-  if (Object.keys(bumps).length === 0 || !body) {
-    warn(`${CHANGESET_DIR}/${file}: no package bumps or empty summary — not included in the note`);
-    return undefined;
-  }
-  const level = Object.values(bumps).reduce((a, b) => (BUMP_RANK[b] > BUMP_RANK[a] ? b : a));
-  return { file, bumps, level, title: titleOf(body, file), body };
+  if (current) entries.push(current);
+  return entries
+    .map(({ pr, body }) => ({ pr, body: body.join('\n').trim() }))
+    .filter((entry) => entry.body);
 };
 
 const TITLE_LIMIT = 80;
@@ -130,13 +120,13 @@ const TITLE_LIMIT = 80;
  * runs long — a changeset whose opening sentence is a whole paragraph would otherwise
  * become an unreadable `###` heading.
  */
-const titleOf = (body, file) => {
+const titleOf = (body) => {
   const sentence = /^([\s\S]*?[.!?])(\s|$)/.exec(body);
   const full = (sentence ? sentence[1] : body).replace(/\s+/g, ' ').replace(/\.$/, '');
   if (full.length <= TITLE_LIMIT) return full;
   warn(
-    `${CHANGESET_DIR}/${file}: opening sentence is longer than ${TITLE_LIMIT} characters, so the ` +
-      `item heading was clipped — shorten it, or set the heading in the overlay`,
+    `an entry's opening sentence is longer than ${TITLE_LIMIT} characters, so the item heading ` +
+      `was clipped — shorten the changeset, or set the heading in the overlay`,
   );
   const clause = full.slice(0, TITLE_LIMIT).lastIndexOf(', ');
   if (clause > 0) return full.slice(0, clause);
@@ -144,59 +134,39 @@ const titleOf = (body, file) => {
   return full.slice(0, word > 0 ? word : TITLE_LIMIT);
 };
 
-const collectChangesets = (since) => {
-  const dir = join(repoRoot, CHANGESET_DIR);
-  if (!existsSync(dir)) return [];
-  const present = readdirSync(dir)
-    .filter((name) => name.endsWith('.md') && name !== 'README.md')
-    .sort();
-
-  let unreleased = present;
-  if (since) {
-    const addedSince = new Set(
-      lines(
-        git(
-          'log',
-          '--diff-filter=A',
-          '--name-only',
-          '--format=',
-          `${since}..HEAD`,
-          '--',
-          CHANGESET_DIR,
-        ),
-      ).map((path) => path.slice(CHANGESET_DIR.length + 1)),
-    );
-    unreleased = present.filter((file) => addedSince.has(file));
-    for (const file of present.filter((file) => !addedSince.has(file))) {
-      warn(
-        `${CHANGESET_DIR}/${file}: added at or before ${since}, so it is treated as already ` +
-          `released and left out of ${TAG_PREFIX}-this-release`,
-      );
+/**
+ * Every package's entries for this version, de-duplicated. One changeset bumps several
+ * packages, so the same summary appears in each CHANGELOG — at the highest level any
+ * package gave it, which is the level the release as a whole changed at.
+ */
+const collectEntries = (version, packages) => {
+  const byBody = new Map();
+  for (const { dir } of packages) {
+    const section = changelogSection(dir, version);
+    if (section === undefined) {
+      warn(`${dir}/CHANGELOG.md has no "## ${version}" section — that package contributes nothing`);
+      continue;
+    }
+    for (const [heading, level] of CHANGELOG_LEVELS) {
+      const at = section.indexOf(`### ${heading}`);
+      if (at === -1) continue;
+      const rest = section.slice(at + `### ${heading}`.length);
+      const next = rest.search(/^### /m);
+      for (const entry of parseEntries(next === -1 ? rest : rest.slice(0, next))) {
+        const seen = byBody.get(entry.body);
+        if (!seen) byBody.set(entry.body, { ...entry, level });
+        else if (BUMP_RANK[level] > BUMP_RANK[seen.level]) seen.level = level;
+      }
     }
   }
-
-  const changesets = unreleased
-    .map((file) => parseChangeset(file, readFileSync(join(dir, file), 'utf8')))
-    .filter(Boolean);
-  if (changesets.length === 0) {
-    warn(`no changesets found for this release — the note's generated sections will be empty`);
+  const entries = [...byBody.values()].map((entry) => ({ ...entry, title: titleOf(entry.body) }));
+  if (entries.length === 0) {
+    warn(`no CHANGELOG entries found for ${version} — the note's generated sections will be empty`);
   }
-  return changesets.map((changeset) => ({ ...changeset, ...provenance(changeset.file) }));
+  return entries;
 };
 
-/** Link a changeset to the commit that added it, and to its PR when a merge names one. */
-const provenance = (file) => {
-  const commit = git('log', '--diff-filter=A', '--format=%h', '-1', '--', `${CHANGESET_DIR}/${file}`);
-  if (!commit) return {};
-  const merge = lines(
-    git('log', '--merges', '--ancestry-path', '--format=%s', `${commit}..HEAD`),
-  ).reverse().find((subject) => /^Merge pull request #\d+/.test(subject));
-  const pr = merge ? /#(\d+)/.exec(merge)[1] : undefined;
-  return { commit, pr };
-};
-
-const citation = ({ commit, pr }) =>
-  pr ? `(PR #${pr})` : commit ? `(commit ${commit})` : '';
+const citation = ({ pr }) => (pr ? `(PR #${pr})` : '');
 
 // ------------------------------------------------------- derived sections
 
@@ -283,22 +253,19 @@ const shasum = (name, version) => {
   }
 };
 
-const itemsFor = (changesets, level) => changesets.filter((changeset) => changeset.level === level);
+const itemsFor = (entries, level) => entries.filter((entry) => entry.level === level);
 
-const describedItems = (changesets) =>
-  changesets
-    .map(
-      (changeset) =>
-        `### ${changeset.title}\n\n**Description**: ${changeset.body} ${citation(changeset)}`.trim(),
-    )
+const describedItems = (entries) =>
+  entries
+    .map((entry) => `### ${entry.title}\n\n**Description**: ${entry.body} ${citation(entry)}`.trim())
     .join('\n\n');
 
-const breakingItems = (changesets) =>
-  changesets
-    .map((changeset) =>
+const breakingItems = (entries) =>
+  entries
+    .map((entry) =>
       [
-        `### ${changeset.title}`,
-        `**What changed**: ${changeset.body} ${citation(changeset)}`.trim(),
+        `### ${entry.title}`,
+        `**What changed**: ${entry.body} ${citation(entry)}`.trim(),
         `**What breaks**: ${TODO('describe the exact scenarios that stop working')}`,
         `**Required actions**:`,
         `- ${TODO('the steps a consumer has to take')}`,
@@ -309,28 +276,16 @@ const breakingItems = (changesets) =>
     .join('\n\n');
 
 /**
- * What actually landed on the release branch. First-parent only: a merge commit speaks
- * for its whole PR, so the work-in-progress commits inside it stay out of the note.
+ * Patch entries indexed by the PR that merged them. A changeset carries no fix/feature
+ * distinction, so this is the same work **Improvements** describes in prose — the v9
+ * template wants both, and `3.0.0.md` lists PR-38 in each.
  */
-const landedChanges = (since) =>
-  lines(git('log', '--first-parent', '--format=%h\x1f%p\x1f%s', since ? `${since}..HEAD` : 'HEAD'))
-    .map((entry) => {
-      const [commit, parents, subject] = entry.split('\x1f');
-      const pr = /^Merge pull request #(\d+)/.exec(subject)?.[1];
-      if (!pr) return { commit, subject };
-      const merged = parents.split(' ')[1];
-      return { commit, pr, subject: git('log', '--format=%s', '-1', merged) || subject };
-    });
-
-const FIX_SUBJECT = /^fix(\([^)]*\))?!?:\s*/;
-
-const fixedDefects = (since) => {
-  const fixes = landedChanges(since).filter((change) => FIX_SUBJECT.test(change.subject));
+const fixedDefects = (entries) => {
+  const fixes = itemsFor(entries, 'patch');
   if (fixes.length === 0) return 'None.';
-  const rows = fixes.map(({ commit, pr, subject }) => {
-    const text = subject.replace(FIX_SUBJECT, '').replace(/\s*\(#\d+\)$/, '');
-    return `| ${pr ? `PR-${pr}` : commit} | ${text.charAt(0).toUpperCase()}${text.slice(1)}. |`;
-  });
+  const rows = fixes.map(
+    ({ pr, title }) => `| ${pr ? `PR-${pr}` : TODO('defect number')} | ${title}. |`,
+  );
   return ['| Defect number | Description |', '| --- | --- |', ...rows].join('\n');
 };
 
@@ -355,11 +310,10 @@ const SECTION_ORDER = [
   'Fixed defect list',
 ];
 
-const derive = (version, changesets, since) => {
-  const packages = manifests();
-  const releaseType = changesets.length
-    ? changesets.reduce((a, c) => (BUMP_RANK[c.level] > BUMP_RANK[a] ? c.level : a), 'patch')
-    : TODO('no changesets found — state the release type');
+const derive = (version, entries, packages) => {
+  const releaseType = entries.length
+    ? entries.reduce((a, e) => (BUMP_RANK[e.level] > BUMP_RANK[a] ? e.level : a), 'patch')
+    : TODO('no CHANGELOG entries found — state the release type');
   const sections = new Map();
 
   sections.set(
@@ -402,7 +356,7 @@ const derive = (version, changesets, since) => {
   sections.set(
     'Tested-with versions',
     [
-      'Read from the package manifests and the CI environment at this tag: these are build pins — not QA-verified.',
+      'Read from the package manifests and the CI environment at this release: these are build pins — not QA-verified.',
       '',
       renderTable(testedWithRows(packages)),
       '',
@@ -432,14 +386,14 @@ const derive = (version, changesets, since) => {
 
   sections.set(
     'What changed',
-    changesets.length
-      ? changesets.map((c) => `- ${c.title} ${citation(c)}`.trim() + '.').join('\n')
-      : TODO('no changesets found — list what changed'),
+    entries.length
+      ? entries.map((e) => `- ${e.title} ${citation(e)}`.trim() + '.').join('\n')
+      : TODO('no CHANGELOG entries found — list what changed'),
   );
 
-  const features = itemsFor(changesets, 'minor');
-  const improvements = itemsFor(changesets, 'patch');
-  const breaking = itemsFor(changesets, 'major');
+  const features = itemsFor(entries, 'minor');
+  const improvements = itemsFor(entries, 'patch');
+  const breaking = itemsFor(entries, 'major');
 
   sections.set('New features', features.length ? describedItems(features) : 'None.');
   sections.set(
@@ -469,7 +423,7 @@ const derive = (version, changesets, since) => {
 
   sections.set(
     'Fixed defect list',
-    [`The following defects were fixed in ${version}.`, '', fixedDefects(since)].join('\n'),
+    [`The following defects were fixed in ${version}.`, '', fixedDefects(entries)].join('\n'),
   );
 
   return sections;
@@ -525,16 +479,39 @@ const parseLabelled = (markdown) => {
  */
 const LABELLED_SECTIONS = new Set(['Metadata', 'Deployment information', 'Links and references']);
 
+const nonTableProse = (markdown) =>
+  markdown
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('|'))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+/**
+ * TEMPLATE.md carries its guidance in HTML comments so that copying it verbatim cannot
+ * publish "Only the rows the repository cannot derive…" as release-note prose.
+ */
+const stripGuidance = (markdown) => markdown.replace(/<!--[\s\S]*?-->/g, '').trim();
+
 const applyOverlay = (sections, overlay, source) => {
-  for (const [heading, content] of splitSections(overlay)) {
+  for (const [heading, raw] of splitSections(overlay)) {
     if (!SECTION_ORDER.includes(heading)) {
       warn(`${source}: "## ${heading}" is not a release-note section — ignored`);
       continue;
     }
+    const content = stripGuidance(raw);
+    if (!content) continue;
     if (heading === 'Tested-with versions') {
-      const merged = new Map([...parseTable(sections.get(heading)), ...parseTable(content)]);
-      const prose = content.split('\n').filter((line) => !line.trim().startsWith('|')).join('\n').trim();
-      sections.set(heading, [renderTable(merged), prose].filter(Boolean).join('\n\n'));
+      // The generated prose is a caveat about where the table's versions came from, so a
+      // row merge keeps it and appends whatever the overlay adds below.
+      const generated = sections.get(heading);
+      const merged = new Map([...parseTable(generated), ...parseTable(content)]);
+      sections.set(
+        heading,
+        [renderTable(merged), nonTableProse(generated), nonTableProse(content)]
+          .filter(Boolean)
+          .join('\n\n'),
+      );
     } else if (LABELLED_SECTIONS.has(heading)) {
       const merged = new Map([...parseLabelled(sections.get(heading)), ...parseLabelled(content)]);
       sections.set(heading, [...merged].map(([label, value]) => `- **${label}**: ${value}`).join('\n'));
@@ -546,10 +523,11 @@ const applyOverlay = (sections, overlay, source) => {
 
 // -------------------------------------------------------------------- main
 
-const version = flag('version') ?? resolveVersion();
-const since = resolveSince(version);
-const changesets = collectChangesets(since);
-const sections = derive(version, changesets, since);
+const packages = manifests();
+const core = packages.find((manifest) => manifest.name === '@midnight-ntwrk/compact-js');
+const version = flag('version') ?? core.version;
+const entries = collectEntries(version, packages);
+const sections = derive(version, entries, packages);
 
 for (const [file, required] of [
   ['_base.md', false],
@@ -569,8 +547,8 @@ const note = [
 ].join('\n\n') + '\n';
 
 const outPath = resolve(repoRoot, flag('out') ?? `${NOTE_DIR}/${version}.md`);
-// A published note may have been hand-edited after it was generated, so replacing one
-// is always deliberate. CD passes --force; a local preview should pass --out instead.
+// A note is edited after it is generated — that is what the TODO markers are for — so
+// replacing one is always deliberate. Pass --out to preview without touching it.
 if (existsSync(outPath) && !enabled('force')) {
   console.error(
     `release notes: ${outPath} already exists — pass --force to replace it, or --out to write elsewhere`,
@@ -582,7 +560,7 @@ writeFileSync(outPath, note);
 
 const todos = note.split('\n').filter((line) => line.includes('TODO (owner):')).length;
 console.log(
-  `release notes: ${outPath} — ${changesets.length} changeset(s), ` +
+  `release notes: ${outPath} — ${entries.length} entr(ies), ` +
     `${todos} owner TODO(s), ${warnings.length} warning(s)`,
 );
 
@@ -593,8 +571,7 @@ if (reportPath) {
     JSON.stringify(
       {
         version,
-        since: since || null,
-        changesets: changesets.map(({ file, level, bumps, pr, commit }) => ({ file, level, bumps, pr, commit })),
+        entries: entries.map(({ title, level, pr }) => ({ title, level, pr })),
         todos,
         warnings,
       },

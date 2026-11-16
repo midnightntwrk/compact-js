@@ -11,6 +11,10 @@ inputs:
   auth-token:
     type: string
     required: true
+  dist-tag:
+    type: string
+    description: npm dist-tag to publish under, derived from the version being published.
+    required: true
 
 runs:
   using: 'composite'
@@ -28,21 +32,12 @@ runs:
         ARCHIVE_NAME: ${{ inputs.package-archive-name }}
       run: find "./Packages $ARCHIVE_NAME" -type f -name '*.zip' -execdir unzip '{}' ';'
 
-    - name: Determine Tag
-      id: vars
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        tag=$(jq -r '.v_info.tag' version.json)
-
-        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-
     - name: Publish packages
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: find "./Packages $ARCHIVE_NAME" -type f -name '*.tgz' -execdir npm publish '{}' --tag "$TAG" --access public ';'
       env:
         ARCHIVE_NAME: ${{ inputs.package-archive-name }}
-        TAG: ${{ steps.vars.outputs.tag }}
+        TAG: ${{ inputs.dist-tag }}
         GITHUB_TOKEN: ${{ inputs.auth-token }}
         NODE_AUTH_TOKEN: ${{ inputs.auth-token }}

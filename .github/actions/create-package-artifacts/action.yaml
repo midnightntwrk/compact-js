@@ -1,5 +1,5 @@
 name: "Create Package Artifacts"
-description: "Creates versioned packages that can be published to a package registry"
+description: "Packs the workspace packages at the version their manifests already carry"
 
 inputs:
   package-archive-name:
@@ -8,64 +8,70 @@ inputs:
   working-directory:
     type: string
     required: true
+  release-branches:
+    type: string
+    description: Alternation of branch-name regexes allowed to produce release artifacts.
+    required: false
+    default: 'main|release/compact-js/.*'
+
+outputs:
+  target_version:
+    description: The version the packed tarballs carry.
+    value: ${{ steps.vars.outputs.target_version }}
+  dist_tag:
+    description: The npm dist-tag that version publishes under.
+    value: ${{ steps.vars.outputs.dist_tag }}
+  on_release_branch:
+    description: Whether this branch is allowed to produce release artifacts.
+    value: ${{ steps.vars.outputs.on_release_branch }}
 
 runs:
   using: "composite"
   steps:
-    - name: Determine Version
+    - name: Resolve version
       id: vars
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      env:
+        RELEASE_BRANCHES: ${{ inputs.release-branches }}
       run: |
-        on_release_branch=$(jq --arg b "$(git rev-parse --abbrev-ref HEAD)" '(.v_info.releaseBranches | join("|")) as $p | ($b | test("^(" + $p + ")$"))' version.json)
-
-        source_commit=$(git log --format=%h -1 -- version.json)
-        commit_height=$(($(git log --format=%h $source_commit.. | wc -l)))
-        version=$(jq -r '.v_info.version' version.json)
-        preRelease=$(jq -r '.v_info.preRelease' version.json)
-        tag=$(jq -r '.v_info.tag' version.json)
-        # If preRelease is empty, publish the bare stable version (e.g. 3.0.0).
-        # If preRelease carries an explicit numeric suffix (e.g. -rc.1), publish
-        # that exact version. Otherwise append the commit height for continuous
-        # prereleases (e.g. -alpha.42).
-        if [[ -z "$preRelease" ]]; then
-          target_version="$version"
-        elif [[ "$preRelease" =~ \.[0-9]+$ ]]; then
-          target_version="$version$preRelease"
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [[ "$branch" =~ ^(${RELEASE_BRANCHES})$ ]]; then
+          on_release_branch=true
         else
-          target_version="$version$preRelease.$commit_height"
+          on_release_branch=false
+        fi
+
+        # `changeset version` set this in the release PR, so the manifests are
+        # authoritative here and nothing is bumped on the runner.
+        target_version=$(jq -r '.version' compact-js/package.json)
+
+        # 3.0.1 -> latest, 3.0.1-rc.2 -> rc, 3.1.0-alpha.4 -> alpha
+        if [[ "$target_version" == *-* ]]; then
+          dist_tag="${target_version#*-}"
+          dist_tag="${dist_tag%%.*}"
+        else
+          dist_tag=latest
         fi
 
         echo "target_version=${target_version}" >> "$GITHUB_OUTPUT"
-        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+        echo "dist_tag=${dist_tag}" >> "$GITHUB_OUTPUT"
         echo "on_release_branch=${on_release_branch}" >> "$GITHUB_OUTPUT"
 
-    - name: Bump versions
+    - name: Verify manifests agree on the version
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       env:
         TARGET_VERSION: ${{ steps.vars.outputs.target_version }}
-      run: yarn workspaces foreach -A version "$TARGET_VERSION"
-
-    - name: Generate CHANGELOGs from commits
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       run: |
         for pkg in compact-js compact-js-node compact-js-command; do
-          (cd "$pkg" && yarn changelog || true)
+          found=$(jq -r '.version' "$pkg/package.json")
+          if [[ "$found" != "$TARGET_VERSION" ]]; then
+            echo "::error::$pkg is at $found but compact-js is at $TARGET_VERSION — re-run 'yarn release:prepare'"
+            exit 1
+          fi
         done
-
-    - name: Commit CHANGELOG and version updates
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
-      run: |
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git config user.name "github-actions[bot]"
-        git add -A
-        git commit -m "chore: bump versions and generate CHANGELOGs" || true
 
     - name: Create packages
       shell: bash

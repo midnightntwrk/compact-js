@@ -14,6 +14,10 @@ Run `yarn changeset` from this workspace root (`compact-js/`) and follow the
 prompts to record the semver bump (patch / minor / major) and a summary for your
 change. Commit the generated file in `.changeset/` as part of your PR.
 
-This workspace is currently in **pre-release (`rc`) mode** — see `pre.json`.
-Versions bump as `2.5.5-rc.N`. To graduate to a stable line, exit pre mode with
-`yarn changeset pre exit` in a dedicated PR before the release.
+Changesets decide the published version. A release that has none is a no-op, so
+every change that ships needs one — see [`docs/releasing.md`](../docs/releasing.md)
+for how they turn into a release.
+
+The workspace is on a **stable line** (no `pre.json`). To cut release candidates,
+`yarn changeset pre enter rc` in its own PR; versions then bump as `3.0.2-rc.N`
+until `yarn changeset pre exit` graduates the line.
