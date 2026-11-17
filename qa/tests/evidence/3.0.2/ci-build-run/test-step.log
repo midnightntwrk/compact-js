@@ -1,0 +1,348 @@
+##[group]Run yarn test --concurrency 1 --cache-dir ./turbo
+yarn test --concurrency 1 --cache-dir ./turbo
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+
+   • Packages in scope: @midnight-ntwrk/compact-js, @midnight-ntwrk/compact-js-command, @midnight-ntwrk/compact-js-node
+   • Running test in 3 packages
+   • Remote caching disabled
+
+##[group]@midnight-ntwrk/compact-js:test
+cache miss, executing e9c1d53ca1adde87
+
+ RUN  v4.1.12 compact-js
+      Coverage enabled with v8
+
+ ✓ test/effect/ContractLog.test.ts (31 tests) 46ms
+Sourcemap for "compact-js/test/contract/managed/unshielded/contract/index.js" points to missing source files
+ ✓ test/effect/ContractExecutable.test.ts (14 tests) 796ms
+ ✓ test/effect/ContractExecutable.partitionInputs.test.ts (6 tests) 377ms
+ ✓ test/effect/LedgerEra.test.ts (23 tests) 59ms
+ ✓ test/effect/CrossContractCall.test.ts (21 tests) 2066ms
+     ✓ stateProvider is called to resolve callee state  306ms
+ ✓ test/effect/ZKManifest.test.ts (25 tests) 608ms
+ ✓ test/effect/ContractEventStore.test.ts (18 tests) 104ms
+ ✓ test/effect/ContractExecutable.maintenanceBoundary.test.ts (8 tests) 501ms
+Sourcemap for "/tmp/compact-js-era8-scope-q9fePt/counter/contract/index.js" points to missing source files
+Sourcemap for "/tmp/compact-js-era8-scope-gff9XL/counter/contract/index.js" points to missing source files
+ ✓ test/effect/Unshielded.test.ts (5 tests) 529ms
+Sourcemap for "/tmp/compact-js-era8-scope-A19r9J/counter/contract/index.js" points to missing source files
+ ✓ test/effect/DualEraResolution.test.ts (4 tests) 284ms
+ ✓ test/effect/ContractEventStore.subscribe.test.ts (9 tests) 271ms
+ ✓ test/effect/EraLaziness.test.ts (4 tests) 2310ms
+     ✓ loads exactly one ledger WASM when only the ledger 9 entry is imported  566ms
+     ✓ loads exactly one ledger WASM when only the ledger 8 entry is imported  545ms
+     ✓ loads exactly one ledger WASM for the unsuffixed entry  583ms
+     ✓ loads both ledger WASMs, distinctly, when both entries are imported  613ms
+ ✓ test/effect/ContractExecutable.boundary.test.ts (3 tests) 314ms
+ ✓ test/effect/PnpEraResolution.test.ts (2 tests) 4121ms
+     ✓ resolves both runtime lines as distinct instances  1037ms
+     ✓ rejects the node_modules linker's nested-directory recipe  816ms
+ ✓ test/effect/LedgerDualInstantiation.test.ts (10 tests) 32ms
+ ✓ test/effect/Ledger.test.ts (6 tests) 131ms
+ ✓ test/effect/CompactRuntime.test.ts (9 tests) 25ms
+ ✓ test/effect/ContractExecutable.clock.test.ts (3 tests) 408ms
+ ✓ test/effect/EraIsolation.test.ts (4 tests) 24ms
+ ✓ test/effect/ContractKeyLocation.test.ts (20 tests) 11ms
+ ✓ test/effect/ContractEventValidator.test.ts (6 tests) 167ms
+ ✓ test/effect/ContractExecutable.gas.test.ts (3 tests) 347ms
+ ✓ test/effect/ContractEvents.integration.test.ts (1 test) 75ms
+ ✓ test/effect/ContractExecutableRuntime.test.ts (1 test) 77ms
+
+ Test Files  24 passed (24)
+      Tests  236 passed (236)
+   Start at  10:01:00
+   Duration  12.43s (transform 737ms, setup 0ms, import 16.04s, tests 13.68s, environment 2ms)
+
+ HTML  Report is generated
+       You can run npx vite preview --outDir reports/report to see the test results.
+JUNIT report written to compact-js/reports/report/test-report.xml
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    84.2 |     70.7 |   80.78 |   84.91 |                   
+ ...ode/src/effect |   41.48 |     8.69 |   46.15 |   41.11 |                   
+  ...leProvider.ts |    12.5 |        0 |       0 |   13.15 | ...92-115,150-172 
+  ...teProvider.ts |    6.66 |        0 |       0 |    6.66 | 93-133            
+  ...figuration.ts |   84.61 |    44.44 |    92.3 |   83.78 | 54,69,77-86       
+  index.ts         |       0 |        0 |       0 |       0 |                   
+ compact-js/src    |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+ ...-js/src/effect |   94.73 |    93.67 |      92 |   95.37 |                   
+  ...actContext.ts |       0 |        0 |       0 |       0 |                   
+  ...actRuntime.ts |     100 |      100 |     100 |     100 |                   
+  ...edContract.ts |      85 |      100 |   66.66 |      85 | 76-78             
+  Contract.ts      |     100 |      100 |     100 |     100 |                   
+  ...ationError.ts |     100 |      100 |     100 |     100 |                   
+  ...EventStore.ts |    98.7 |    97.43 |     100 |     100 | 193               
+  ...ationError.ts |     100 |      100 |     100 |     100 |                   
+  ...tValidator.ts |     100 |      100 |     100 |     100 |                   
+  ...Executable.ts |     100 |      100 |     100 |     100 |                   
+  ...bleRuntime.ts |     100 |      100 |     100 |     100 |                   
+  ...eyLocation.ts |      96 |     92.3 |     100 |   95.83 | 109               
+  ContractLog.ts   |   86.66 |    87.03 |   91.66 |   86.56 | 264-271,470,478   
+  ...ntimeError.ts |     100 |      100 |     100 |     100 |                   
+  Ledger.ts        |     100 |      100 |     100 |     100 |                   
+  ...refixError.ts |     100 |      100 |     100 |     100 |                   
+  ...figuration.ts |       0 |        0 |       0 |       0 |                   
+  ...nReadError.ts |      60 |      100 |       0 |      75 | 72                
+  ZKManifest.ts    |   98.05 |       98 |     100 |   98.96 | 221               
+  ...ifestError.ts |     100 |      100 |     100 |     100 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+ ...ffect/internal |   92.99 |    68.96 |     100 |   94.77 |                   
+  boundary.ts      |     100 |      100 |     100 |     100 |                   
+  ...actContext.ts |      90 |       50 |     100 |     100 | 68                
+  ...ntsSurface.ts |       0 |        0 |       0 |       0 |                   
+  era.ts           |       0 |        0 |       0 |       0 |                   
+  ...reeSurface.ts |       0 |        0 |       0 |       0 |                   
+  ...ralSurface.ts |       0 |        0 |       0 |       0 |                   
+  executable.ts    |   93.05 |    70.37 |     100 |   94.32 | ...1039,1106,1187 
+  ...Assertions.ts |       0 |        0 |       0 |       0 |                   
+ ...t/internal/era |   81.25 |        0 |       0 |   81.25 |                   
+  v8Executable.ts  |     100 |      100 |     100 |     100 |                   
+  v8Ledger.ts      |   76.92 |        0 |       0 |   76.92 | 105-109           
+  v8Runtime.ts     |       0 |        0 |       0 |       0 |                   
+  v9Executable.ts  |     100 |      100 |     100 |     100 |                   
+  v9Ledger.ts      |   76.92 |        0 |       0 |   76.92 | 103-107           
+  v9Runtime.ts     |       0 |        0 |       0 |       0 |                   
+ ...nternal/ledger |   78.43 |    66.66 |      64 |   81.25 |                   
+  binding.ts       |       0 |        0 |       0 |       0 |                   
+  conformance.ts   |       0 |        0 |       0 |       0 |                   
+  conversions.ts   |      75 |      100 |    64.7 |   78.26 | ...65,181-183,202 
+  current.ts       |       0 |        0 |       0 |       0 |                   
+  v8.ts            |   71.42 |       50 |      25 |   76.92 | 168,179,188       
+  v9.ts            |    92.3 |       50 |     100 |   91.66 | 141               
+ ...ternal/runtime |    60.6 |    38.46 |      50 |   62.06 |                   
+  binding.ts       |       0 |        0 |       0 |       0 |                   
+  conformance.ts   |       0 |        0 |       0 |       0 |                   
+  current.ts       |       0 |        0 |       0 |       0 |                   
+  execution.ts     |       0 |        0 |       0 |       0 |                   
+  v0_16.ts         |   36.84 |        0 |       0 |   41.17 | 258-288,316-338   
+  v0_21.ts         |   92.85 |    83.33 |     100 |   91.66 | 176               
+ compact-js/src/v8 |       0 |        0 |       0 |       0 |                   
+  effect.ts        |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+ compact-js/src/v9 |       0 |        0 |       0 |       0 |                   
+  effect.ts        |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
+···· TSTyche 7.2.5 at compact-js
+
+uses TypeScript 6.0.3 with ./test/typetests/tsconfig.json
+
+pass ./test/typetests/effect/CompactRuntime.tst.ts
+pass ./test/typetests/effect/CompiledContract.tst.ts
+pass ./test/typetests/effect/Contract.tst.ts
+pass ./test/typetests/effect/ContractExecutable.tst.ts
+pass ./test/typetests/effect/EraExecutable.tst.ts
+pass ./test/typetests/effect/Ledger.tst.ts
+pass ./test/typetests/effect/LedgerBinding.tst.ts
+pass ./test/typetests/effect/RuntimeBinding.tst.ts
+
+Targets:    1 passed, 1 total
+Test files: 8 passed, 8 total
+Tests:      91 passed, 91 total
+Assertions: 187 passed, 187 total
+Duration:   2s
+
+ RUN  v4.1.12 compact-js
+
+ ✓ test/era8/LedgerEightAdapter.test.ts (10 tests) 85ms
+ ✓ test/era8/LedgerEightFacade.test.ts (11 tests) 217ms
+ ✓ test/era8/LedgerEightExecution.test.ts (5 tests) 72ms
+ ✓ test/era8/Fixtures.test.ts (4 tests) 5ms
+ ✓ test/era8/CrossEraRepartition.test.ts (3 tests) 213ms
+ ✓ test/era8/LedgerEightExecutable.test.ts (9 tests) 275ms
+
+ Test Files  6 passed (6)
+      Tests  42 passed (42)
+   Start at  10:01:19
+   Duration  1.69s (transform 384ms, setup 0ms, import 3.17s, tests 865ms, environment 1ms)
+
+##[endgroup]
+##[group]@midnight-ntwrk/compact-js-node:test
+cache miss, executing efeded10d06a7b8c
+
+ RUN  v4.1.12 compact-js-node
+      Coverage enabled with v8
+
+ ✓ test/effect/RuntimeIdentity.test.ts (2 tests) 5ms
+ ✓ test/effect/FileSystemContractModuleProvider.test.ts (11 tests) 24ms
+ ✓ test/effect/FileSystemContractStateProvider.test.ts (7 tests) 43ms
+
+ Test Files  3 passed (3)
+      Tests  20 passed (20)
+   Start at  10:01:22
+   Duration  1.17s (transform 297ms, setup 0ms, import 2.47s, tests 72ms, environment 0ms)
+
+ HTML  Report is generated
+       You can run npx vite preview --outDir reports/report to see the test results.
+JUNIT report written to compact-js-node/reports/report/test-report.xml
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   63.82 |    76.08 |      50 |   64.44 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+ src/effect        |   63.82 |    76.08 |      50 |   64.44 |                   
+  ...leProvider.ts |    97.5 |    92.85 |     100 |   97.36 | 111               
+  ...teProvider.ts |     100 |      100 |     100 |     100 |                   
+  ...figuration.ts |   15.38 |        0 |       0 |   16.21 | 44-97,115-118     
+  index.ts         |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
+##[endgroup]
+##[group]@midnight-ntwrk/compact-js:build
+cache hit, suppressing logs f402700e9fc36d69
+##[endgroup]
+##[group]@midnight-ntwrk/compact-js-node:build
+cache hit, suppressing logs 3ccfab30ecef1bbb
+##[endgroup]
+##[group]@midnight-ntwrk/compact-js-command:test
+cache miss, executing ea84de4e15c03816
+
+ RUN  v4.1.12 compact-js-command
+      Coverage enabled with v8
+
+ ✓ test/effect/CompiledContractReflection.test.ts (55 tests) 915ms
+ ✓ test/effect/EraSelection.test.ts (11 tests) 173ms
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t1/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:242:6 > Circuit Command (cross-contract calls) > --contract-states-dir produces one call per trace entry (root + each callee)
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t2/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:262:6 > Circuit Command (cross-contract calls) > each call's operation is resolvable from its source state (root from --input, callee from dir)
+[]
+
+stdout | test/effect/Circuit.test.ts:125:6 > Circuit Command > should report success with valid setup
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t3/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:298:6 > Circuit Command (cross-contract calls) > --output-oc writes only the root (middle) updated state
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t4/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:315:6 > Circuit Command (cross-contract calls) > --output-contract-states-dir writes each callee state by address, creating the dir
+[]
+
+stdout | test/effect/Circuit.test.ts:325:6 > Circuit Command > reports a runtime rejection when encoding the resulting zswap local state, after the intent is written
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t5/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/Circuit.test.ts:366:6 > Circuit Command > produces a valid single-call intent for a non-cross-contract circuit
+[]
+
+stdout | test/effect/CircuitCrossContract.test.ts:334:6 > Circuit Command (cross-contract calls) > state-threading round-trip advances v by both increments
+[]
+
+stdout | test/effect/Circuit.test.ts:410:6 > Circuit Command > should report success with valid ledger parameters
+[]
+
+stdout | test/effect/CircuitCrossContract.test.ts:334:6 > Circuit Command (cross-contract calls) > state-threading round-trip advances v by both increments
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t6/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:352:6 > Circuit Command (cross-contract calls) > --output-result / --output-ps / --output-zswap hold the root's values, not a callee's
+[]
+
+ ✓ test/effect/Circuit.test.ts (9 tests) 8490ms
+     ✓ should report error for unknown circuit in manifest  7802ms
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t7/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:377:6 > Circuit Command (cross-contract calls) > --output-zswap-calls writes every call's zswap state, callees first and the root last
+[]
+
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t8/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+Sourcemap for "/tmp/ccc-circuit-IEgV5l/t14/contract-modules-in/6cbb15562202ff5b8a8c2f62b592ae6e303845a17a40eb284b1febc47b844dc6/contract/index.js" points to missing source files
+stdout | test/effect/CircuitCrossContract.test.ts:509:6 > Circuit Command (cross-contract calls) > a read-only cross-contract circuit (getInner) returns the callee value
+[]
+
+stdout | test/effect/CircuitCrossContract.test.ts:509:6 > Circuit Command (cross-contract calls) > a read-only cross-contract circuit (getInner) returns the callee value
+"1"
+
+ ✓ test/effect/CircuitCrossContract.test.ts (14 tests) 9572ms
+     ✓ --contract-states-dir produces one call per trace entry (root + each callee)  7859ms
+Sourcemap for "compact-js/test/contract/managed/cccMinter/contract/index.js" points to missing source files
+ ✓ test/effect/LedgerEraOption.test.ts (8 tests) 7846ms
+     ✓ runs the era this build binds when the option is omitted  7492ms
+ ✓ test/effect/ErrorReporting.test.ts (7 tests) 8010ms
+     ✓ reports a misspelled witness instead of exiting silently  7787ms
+ ✓ test/effect/encodedZswapLocalStateSchema.test.ts (2 tests) 89ms
+Sourcemap for "/tmp/ccc-coins-ofKDXK/contract-modules-in/074ff84d19a29e0ee0241a825a0abe004a74e249dfad3fcf187989f37030b520/contract/index.js" points to missing source files
+ ✓ test/effect/ConfigFixtureResolution.test.ts (6 tests) 6ms
+stdout | test/effect/CircuitCrossContractCoins.test.ts:115:6 > Circuit Command (a callee that mints a shielded coin) > --output-zswap-calls holds the callee's coin, which --output-zswap does not
+[]
+
+ ✓ test/effect/CircuitCrossContractCoins.test.ts (1 test) 8075ms
+     ✓ --output-zswap-calls holds the callee's coin, which --output-zswap does not  7939ms
+ ✓ test/effect/Deploy.test.ts (2 tests) 7803ms
+     ✓ should report success with valid setup  7691ms
+ ✓ test/effect/ConfigCompilerToolchain.test.ts (2 tests) 3076ms
+     ✓ transpiles TypeScript through ts-node  3066ms
+ ✓ test/effect/MaintainCircuit.test.ts (1 test) 7252ms
+     ✓ should report success with valid setup  7248ms
+ ✓ test/effect/MaintainContract.test.ts (1 test) 7705ms
+     ✓ should report success with valid setup  7701ms
+ ✓ test/effect/json.test.ts (5 tests) 6ms
+ ✓ test/effect/RuntimeIdentity.test.ts (2 tests) 3ms
+ ✓ test/effect/ConfigCompiler.test.ts (1 test) 5517ms
+         ✓ should compile and return module  5514ms
+
+ Test Files  16 passed (16)
+      Tests  127 passed (127)
+   Start at  10:01:25
+   Duration  36.78s (transform 1.30s, setup 0ms, import 22.21s, tests 74.54s, environment 2ms)
+
+ HTML  Report is generated
+       You can run npx vite preview --outDir reports/report to see the test results.
+JUNIT report written to compact-js-command/reports/report/test-report.xml
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   89.54 |    83.12 |      87 |   89.23 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 27-52             
+ src/effect        |   88.37 |    66.66 |   76.47 |    92.5 |                   
+  ...Reflection.ts |     100 |      100 |     100 |     100 |                   
+  ...ationError.ts |      60 |      100 |       0 |      75 | 50                
+  ...igCompiler.ts |      92 |    66.66 |   88.88 |   91.66 | 127,144           
+  ConfigError.ts   |      80 |      100 |      50 |     100 |                   
+  index.ts         |     100 |      100 |     100 |     100 |                   
+ ...ffect/internal |    91.1 |    85.65 |   88.38 |    90.5 |                   
+  args.ts          |     100 |      100 |     100 |     100 |                   
+  ...uitCommand.ts |   95.78 |    93.61 |    93.1 |   95.78 | 188,285-295,344   
+  command.ts       |   75.25 |     67.3 |      75 |   74.19 | ...62-268,283-311 
+  ...igProvider.ts |     100 |      100 |     100 |     100 |                   
+  ...Reflection.ts |   93.92 |    90.17 |   95.23 |   93.37 | ...08,220,233,260 
+  deployCommand.ts |     100 |      100 |     100 |     100 |                   
+  ...tateSchema.ts |     100 |      100 |     100 |     100 |                   
+  json.ts          |     100 |      100 |     100 |     100 |                   
+  ...uitCommand.ts |      85 |      100 |    62.5 |      85 | 72-73,95          
+  ...ainCommand.ts |      60 |      100 |       0 |      60 | 45-49             
+  ...actCommand.ts |   93.33 |      100 |      80 |   93.33 | 82                
+  options.ts       |     100 |    83.33 |     100 |     100 | 248               
+ ...t/internal/era |     100 |      100 |     100 |     100 |                   
+  binding.ts       |       0 |        0 |       0 |       0 |                   
+  eras.ts          |     100 |      100 |     100 |     100 |                   
+  registry.ts      |     100 |      100 |     100 |     100 |                   
+  v8.ts            |     100 |      100 |     100 |     100 |                   
+  v9.ts            |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------
+
+ RUN  v4.1.12 compact-js-command
+
+ ✓ test/era8/LedgerEightCommands.test.ts (3 tests) 1500ms
+     ✓ deploys a ledger 8 contract and writes ledger 8 artifacts  1449ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:02:03
+   Duration  3.06s (transform 363ms, setup 0ms, import 1.46s, tests 1.50s, environment 0ms)
+
+##[endgroup]
+
+ Tasks:    5 successful, 5 total
+Cached:    2 cached, 5 total
+  Time:    1m8.648s 
+

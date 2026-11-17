@@ -1,0 +1,512 @@
+token: provided via env
+! Corepack is about to download https://repo.yarnpkg.com/4.18.0/packages/yarnpkg-cli/bin/yarn.js
+== node v24.18.0, yarn 4.10.3, commit a2a00d1e47aadf1710d5e451db07d35b6a5f5003
+== yarn install
+➤ YN0000: · Yarn 4.10.3
+➤ YN0000: ┌ Resolution step
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Post-resolution validation
+➤ YN0060: │ @effect/workflow is listed by your project with version 0.19.0 (p455699), which doesn't satisfy what @effect/cluster requests (~0.19.1).
+➤ YN0060: │ @effect/workflow is listed by your project with version 0.19.0 (p622e9c), which doesn't satisfy what @effect/cluster requests (~0.19.1).
+➤ YN0060: │ @effect/workflow is listed by your project with version 0.19.0 (p8764af), which doesn't satisfy what @effect/cluster requests (~0.19.1).
+➤ YN0060: │ @effect/workflow is listed by your project with version 0.19.0 (p8d60f1), which doesn't satisfy what @effect/cluster requests (~0.19.1).
+➤ YN0060: │ @effect/workflow is listed by your project with version 0.19.0 (pde01a7), which doesn't satisfy what @effect/cluster requests (~0.19.1).
+➤ YN0060: │ vitest is listed by your project with version 4.1.12 (p62dcf5), which doesn't satisfy what @effect/vitest and other dependencies request (but they have non-overlapping ranges!).
+➤ YN0002: │ @midnight-ntwrk/compact-js-command@workspace:compact-js-command doesn't provide @types/node (p04f996), requested by ts-node.
+➤ YN0002: │ @midnight-ntwrk/compact-js-sources@workspace:. doesn't provide @midnight-ntwrk/compact-js (pacf970), requested by @midnight-ntwrk/compact-js-node.
+➤ YN0002: │ @midnight-ntwrk/compact-js-sources@workspace:. doesn't provide prettier (p70f991), requested by eslint-plugin-prettier.
+➤ YN0086: │ Some peer dependencies are incorrectly met by your project; run yarn explain peer-requirements <hash> for details, where <hash> is the six-letter p-prefixed code.
+➤ YN0086: │ Some peer dependencies are incorrectly met by dependencies; run yarn explain peer-requirements for details.
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Fetch step
+➤ YN0013: │ 11 packages were added to the project (+ 5.02 MiB).
+➤ YN0000: └ Completed in 2s 782ms
+➤ YN0000: ┌ Link step
+➤ YN0007: │ @parcel/watcher@npm:2.5.1 must be built because it never has been before or the last one failed
+➤ YN0007: │ unrs-resolver@npm:1.11.1 must be built because it never has been before or the last one failed
+➤ YN0007: │ msgpackr-extract@npm:3.0.3 must be built because it never has been before or the last one failed
+➤ YN0000: └ Completed in 1s 402ms
+➤ YN0000: · Done with warnings in 4s 295ms
+== yarn build
+
+Attention:
+Turborepo now collects completely anonymous telemetry regarding usage.
+This information is used to shape the Turborepo roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://turborepo.dev/docs/telemetry
+
+• turbo 2.10.10
+
+   • Packages in scope: @midnight-ntwrk/compact-js, @midnight-ntwrk/compact-js-command, @midnight-ntwrk/compact-js-node
+   • Running build in 3 packages
+   • Remote caching disabled
+
+@midnight-ntwrk/compact-js:build: cache miss, executing f402700e9fc36d69
+@midnight-ntwrk/compact-js-node:build: cache miss, executing 3ccfab30ecef1bbb
+@midnight-ntwrk/compact-js:build: compact-if-stale: ./test/contract/managed/counter is missing or incomplete, so running `yarn compact`
+@midnight-ntwrk/compact-js:build: Fetching Compactc...
+@midnight-ntwrk/compact-js:build: Target directory: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Trying to fetch release from: https://api.github.com/repos/LFDT-Minokawa/compact/releases/tags/compactc-v0.36.1
+@midnight-ntwrk/compact-js:build: Fetching Compact archive: https://api.github.com/repos/LFDT-Minokawa/compact/releases/tags/compactc-v0.36.1
+@midnight-ntwrk/compact-js:build: Compact version: 0.36.1
+@midnight-ntwrk/compact-js-node:build: fix-esm-only-exports: compact-js-node is ESM-only; repointed 6 'default' conditions at ./dist/esm.
+@midnight-ntwrk/compact-js:build: Compact archive fetched and saved to node_modules/@midnight-ntwrk/midnight-js-compact/compactc-0.36.1.zip
+@midnight-ntwrk/compact-js:build: Archive:  node_modules/@midnight-ntwrk/midnight-js-compact/compactc-0.36.1.zip
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/compactc  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/compactc.bin  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/fixup-compact  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/format-compact  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/zkir-v3  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1/toolchain-0.36.1.md  
+@midnight-ntwrk/compact-js:build: Compact extracted to node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compact archive removed
+@midnight-ntwrk/compact-js:build: Compactc v0.36.1 ready
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/counter.compact ./test/contract/managed/counter
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 3 circuits:
+@midnight-ntwrk/compact-js-node:build: verify-exports: 2 declared subpaths present in packed exports, 1 blocked, all targets exist.
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/unshielded.compact ./test/contract/managed/unshielded
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 7 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccInner.compact ./test/contract/managed/cccInner
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 2 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccMiddle.compact ./test/contract/managed/cccMiddle
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 2 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccOuter.compact ./test/contract/managed/cccOuter
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 1 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccSelf.compact ./test/contract/managed/cccSelf
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 4 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccMinter.compact ./test/contract/managed/cccMinter
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 1 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/cccMintCaller.compact ./test/contract/managed/cccMintCaller
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.36.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.36.1
+@midnight-ntwrk/compact-js:build: Compiling 1 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: compact-if-stale: ./test/contract/managed-v8/counter is missing or incomplete, so running `yarn compact-v8`
+@midnight-ntwrk/compact-js:build: Fetching Compactc...
+@midnight-ntwrk/compact-js:build: Target directory: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1
+@midnight-ntwrk/compact-js:build: Trying to fetch release from: https://api.github.com/repos/LFDT-Minokawa/compact/releases/tags/compactc-v0.31.1
+@midnight-ntwrk/compact-js:build: Fetching Compact archive: https://api.github.com/repos/LFDT-Minokawa/compact/releases/tags/compactc-v0.31.1
+@midnight-ntwrk/compact-js:build: Compact version: 0.31.1
+@midnight-ntwrk/compact-js:build: Compact archive fetched and saved to node_modules/@midnight-ntwrk/midnight-js-compact/compactc-0.31.1.zip
+@midnight-ntwrk/compact-js:build: Archive:  node_modules/@midnight-ntwrk/midnight-js-compact/compactc-0.31.1.zip
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/compactc  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/compactc.bin  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/fixup-compact  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/format-compact  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/zkir  
+@midnight-ntwrk/compact-js:build:   inflating: node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1/zkir-v3  
+@midnight-ntwrk/compact-js:build: Compact extracted to node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1
+@midnight-ntwrk/compact-js:build: Compact archive removed
+@midnight-ntwrk/compact-js:build: Compactc v0.31.1 ready
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/counter.compact ./test/contract/managed-v8/counter
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.31.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1
+@midnight-ntwrk/compact-js:build: Compiling 3 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: Trying to compile: ./test/contract/unshielded.compact ./test/contract/managed-v8/unshielded
+@midnight-ntwrk/compact-js:build: Using compactc binary...
+@midnight-ntwrk/compact-js:build: Using Compact version 0.31.1 from node_modules/@midnight-ntwrk/midnight-js-compact/managed/0.31.1
+@midnight-ntwrk/compact-js:build: Compiling 7 circuits:
+@midnight-ntwrk/compact-js:build: Child process exited with code 0
+@midnight-ntwrk/compact-js:build: fix-esm-only-exports: compact-js is ESM-only; repointed 26 'default' conditions at ./dist/esm.
+@midnight-ntwrk/compact-js:build: verify-exports: 6 declared subpaths present in packed exports, 1 blocked, all targets exist.
+@midnight-ntwrk/compact-js-command:build: cache miss, executing 896ed00deccad517
+@midnight-ntwrk/compact-js-command:build: fix-esm-only-exports: compact-js-command is ESM-only; repointed 7 'default' conditions at ./dist/esm.
+@midnight-ntwrk/compact-js-command:build: verify-exports: 2 declared subpaths present in packed exports, 1 blocked, all targets exist.
+
+ Tasks:    3 successful, 3 total
+Cached:    0 cached, 3 total
+  Time:    29.168s 
+
+== yarn lint
+== yarn test
+• turbo 2.10.10
+
+   • Packages in scope: @midnight-ntwrk/compact-js, @midnight-ntwrk/compact-js-command, @midnight-ntwrk/compact-js-node
+   • Running test in 3 packages
+   • Remote caching disabled
+
+@midnight-ntwrk/compact-js:test: cache miss, executing e9c1d53ca1adde87
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  RUN  v4.1.12 compact-js
+@midnight-ntwrk/compact-js:test:       Coverage enabled with v8
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/EraIsolation.test.ts (4 tests) 12ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractKeyLocation.test.ts (20 tests) 6ms
+@midnight-ntwrk/compact-js:test: Sourcemap for "/tmp/compact-js-era8-scope-frpGYq/counter/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/LedgerDualInstantiation.test.ts (10 tests) 26ms
+@midnight-ntwrk/compact-js:test: Sourcemap for "/tmp/compact-js-era8-scope-s0J47S/counter/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js:test: Sourcemap for "/tmp/compact-js-era8-scope-8MUM0H/counter/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/DualEraResolution.test.ts (4 tests) 270ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractEventStore.test.ts (18 tests) 98ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractLog.test.ts (31 tests) 55ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractEventStore.subscribe.test.ts (9 tests) 261ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractEvents.integration.test.ts (1 test) 72ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/CompactRuntime.test.ts (9 tests) 66ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractEventValidator.test.ts (6 tests) 180ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/Ledger.test.ts (6 tests) 125ms
+@midnight-ntwrk/compact-js:test: Sourcemap for "compact-js/test/contract/managed/unshielded/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/LedgerEra.test.ts (23 tests) 38ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutableRuntime.test.ts (1 test) 83ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ZKManifest.test.ts (25 tests) 496ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.partitionInputs.test.ts (6 tests) 218ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.boundary.test.ts (3 tests) 217ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.gas.test.ts (3 tests) 217ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.clock.test.ts (3 tests) 246ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.maintenanceBoundary.test.ts (8 tests) 310ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/Unshielded.test.ts (5 tests) 312ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/ContractExecutable.test.ts (14 tests) 393ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/EraLaziness.test.ts (4 tests) 1857ms
+@midnight-ntwrk/compact-js:test:      ✓ loads exactly one ledger WASM when only the ledger 9 entry is imported  522ms
+@midnight-ntwrk/compact-js:test:      ✓ loads exactly one ledger WASM when only the ledger 8 entry is imported  671ms
+@midnight-ntwrk/compact-js:test:      ✓ loads exactly one ledger WASM for the unsuffixed entry  354ms
+@midnight-ntwrk/compact-js:test:      ✓ loads both ledger WASMs, distinctly, when both entries are imported  307ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/CrossContractCall.test.ts (21 tests) 1028ms
+@midnight-ntwrk/compact-js:test:  ✓ test/effect/PnpEraResolution.test.ts (2 tests) 2565ms
+@midnight-ntwrk/compact-js:test:      ✓ resolves both runtime lines as distinct instances  442ms
+@midnight-ntwrk/compact-js:test:      ✓ rejects the node_modules linker's nested-directory recipe  339ms
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  Test Files  24 passed (24)
+@midnight-ntwrk/compact-js:test:       Tests  236 passed (236)
+@midnight-ntwrk/compact-js:test:    Start at  12:28:26
+@midnight-ntwrk/compact-js:test:    Duration  2.91s (transform 3.67s, setup 0ms, import 20.49s, tests 9.15s, environment 2ms)
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test: JUNIT report written to compact-js/reports/report/test-report.xml
+@midnight-ntwrk/compact-js:test:  HTML  Report is generated
+@midnight-ntwrk/compact-js:test:        You can run npx vite preview --outDir reports/report to see the test results.
+@midnight-ntwrk/compact-js:test:  % Coverage report from v8
+@midnight-ntwrk/compact-js:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js:test: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+@midnight-ntwrk/compact-js:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js:test: All files          |    84.2 |     70.7 |   80.78 |   84.91 |                   
+@midnight-ntwrk/compact-js:test:  ...ode/src/effect |   41.48 |     8.69 |   46.15 |   41.11 |                   
+@midnight-ntwrk/compact-js:test:   ...leProvider.ts |    12.5 |        0 |       0 |   13.15 | ...92-115,150-172 
+@midnight-ntwrk/compact-js:test:   ...teProvider.ts |    6.66 |        0 |       0 |    6.66 | 93-133            
+@midnight-ntwrk/compact-js:test:   ...figuration.ts |   84.61 |    44.44 |    92.3 |   83.78 | 54,69,77-86       
+@midnight-ntwrk/compact-js:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  compact-js/src    |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  ...-js/src/effect |   94.73 |    93.67 |      92 |   95.37 |                   
+@midnight-ntwrk/compact-js:test:   ...actContext.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   ...actRuntime.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...edContract.ts |      85 |      100 |   66.66 |      85 | 76-78             
+@midnight-ntwrk/compact-js:test:   Contract.ts      |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...ationError.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...EventStore.ts |    98.7 |    97.43 |     100 |     100 | 193               
+@midnight-ntwrk/compact-js:test:   ...ationError.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...tValidator.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...Executable.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...bleRuntime.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...eyLocation.ts |      96 |     92.3 |     100 |   95.83 | 109               
+@midnight-ntwrk/compact-js:test:   ContractLog.ts   |   86.66 |    87.03 |   91.66 |   86.56 | 264-271,470,478   
+@midnight-ntwrk/compact-js:test:   ...ntimeError.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   Ledger.ts        |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...refixError.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...figuration.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   ...nReadError.ts |      60 |      100 |       0 |      75 | 72                
+@midnight-ntwrk/compact-js:test:   ZKManifest.ts    |   98.05 |       98 |     100 |   98.96 | 221               
+@midnight-ntwrk/compact-js:test:   ...ifestError.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  ...ffect/internal |   92.99 |    68.96 |     100 |   94.77 |                   
+@midnight-ntwrk/compact-js:test:   boundary.ts      |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   ...actContext.ts |      90 |       50 |     100 |     100 | 68                
+@midnight-ntwrk/compact-js:test:   ...ntsSurface.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   era.ts           |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   ...reeSurface.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   ...ralSurface.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   executable.ts    |   93.05 |    70.37 |     100 |   94.32 | ...1039,1106,1187 
+@midnight-ntwrk/compact-js:test:   ...Assertions.ts |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  ...t/internal/era |   81.25 |        0 |       0 |   81.25 |                   
+@midnight-ntwrk/compact-js:test:   v8Executable.ts  |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   v8Ledger.ts      |   76.92 |        0 |       0 |   76.92 | 105-109           
+@midnight-ntwrk/compact-js:test:   v8Runtime.ts     |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   v9Executable.ts  |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js:test:   v9Ledger.ts      |   76.92 |        0 |       0 |   76.92 | 103-107           
+@midnight-ntwrk/compact-js:test:   v9Runtime.ts     |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  ...nternal/ledger |   78.43 |    66.66 |      64 |   81.25 |                   
+@midnight-ntwrk/compact-js:test:   binding.ts       |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   conformance.ts   |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   conversions.ts   |      75 |      100 |    64.7 |   78.26 | ...65,181-183,202 
+@midnight-ntwrk/compact-js:test:   current.ts       |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   v8.ts            |   71.42 |       50 |      25 |   76.92 | 168,179,188       
+@midnight-ntwrk/compact-js:test:   v9.ts            |    92.3 |       50 |     100 |   91.66 | 141               
+@midnight-ntwrk/compact-js:test:  ...ternal/runtime |    60.6 |    38.46 |      50 |   62.06 |                   
+@midnight-ntwrk/compact-js:test:   binding.ts       |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   conformance.ts   |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   current.ts       |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   execution.ts     |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   v0_16.ts         |   36.84 |        0 |       0 |   41.17 | 258-288,316-338   
+@midnight-ntwrk/compact-js:test:   v0_21.ts         |   92.85 |    83.33 |     100 |   91.66 | 176               
+@midnight-ntwrk/compact-js:test:  compact-js/src/v8 |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   effect.ts        |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:  compact-js/src/v9 |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   effect.ts        |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js:test: ···· TSTyche 7.2.5 at compact-js
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test: uses TypeScript 6.0.3 with ./test/typetests/tsconfig.json
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/CompactRuntime.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/CompiledContract.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/Contract.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/ContractExecutable.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/EraExecutable.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/Ledger.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/LedgerBinding.tst.ts
+@midnight-ntwrk/compact-js:test: pass ./test/typetests/effect/RuntimeBinding.tst.ts
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test: Targets:    1 passed, 1 total
+@midnight-ntwrk/compact-js:test: Test files: 8 passed, 8 total
+@midnight-ntwrk/compact-js:test: Tests:      91 passed, 91 total
+@midnight-ntwrk/compact-js:test: Assertions: 187 passed, 187 total
+@midnight-ntwrk/compact-js:test: Duration:   1.1s
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  RUN  v4.1.12 compact-js
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/Fixtures.test.ts (4 tests) 2ms
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/LedgerEightExecution.test.ts (5 tests) 25ms
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/LedgerEightAdapter.test.ts (10 tests) 43ms
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/LedgerEightFacade.test.ts (11 tests) 76ms
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/CrossEraRepartition.test.ts (3 tests) 103ms
+@midnight-ntwrk/compact-js:test:  ✓ test/era8/LedgerEightExecutable.test.ts (9 tests) 123ms
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js:test:  Test Files  6 passed (6)
+@midnight-ntwrk/compact-js:test:       Tests  42 passed (42)
+@midnight-ntwrk/compact-js:test:    Start at  12:28:34
+@midnight-ntwrk/compact-js:test:    Duration  682ms (transform 195ms, setup 0ms, import 1.28s, tests 372ms, environment 0ms)
+@midnight-ntwrk/compact-js:test: 
+@midnight-ntwrk/compact-js-node:test: cache miss, executing efeded10d06a7b8c
+@midnight-ntwrk/compact-js-node:test: 
+@midnight-ntwrk/compact-js-node:test:  RUN  v4.1.12 compact-js-node
+@midnight-ntwrk/compact-js-node:test:       Coverage enabled with v8
+@midnight-ntwrk/compact-js-node:test: 
+@midnight-ntwrk/compact-js-node:test:  ✓ test/effect/RuntimeIdentity.test.ts (2 tests) 2ms
+@midnight-ntwrk/compact-js-node:test:  ✓ test/effect/FileSystemContractModuleProvider.test.ts (11 tests) 14ms
+@midnight-ntwrk/compact-js-node:test:  ✓ test/effect/FileSystemContractStateProvider.test.ts (7 tests) 23ms
+@midnight-ntwrk/compact-js-node:test: 
+@midnight-ntwrk/compact-js-node:test:  Test Files  3 passed (3)
+@midnight-ntwrk/compact-js-node:test:       Tests  20 passed (20)
+@midnight-ntwrk/compact-js-node:test:    Start at  12:28:35
+@midnight-ntwrk/compact-js-node:test:    Duration  571ms (transform 219ms, setup 0ms, import 1.17s, tests 40ms, environment 0ms)
+@midnight-ntwrk/compact-js-node:test: 
+@midnight-ntwrk/compact-js-node:test: JUNIT report written to compact-js-node/reports/report/test-report.xml
+@midnight-ntwrk/compact-js-node:test:  HTML  Report is generated
+@midnight-ntwrk/compact-js-node:test:        You can run npx vite preview --outDir reports/report to see the test results.
+@midnight-ntwrk/compact-js-node:test:  % Coverage report from v8
+@midnight-ntwrk/compact-js-node:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-node:test: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+@midnight-ntwrk/compact-js-node:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-node:test: All files          |   63.82 |    76.08 |      50 |   64.44 |                   
+@midnight-ntwrk/compact-js-node:test:  src               |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js-node:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js-node:test:  src/effect        |   63.82 |    76.08 |      50 |   64.44 |                   
+@midnight-ntwrk/compact-js-node:test:   ...leProvider.ts |    97.5 |    92.85 |     100 |   97.36 | 111               
+@midnight-ntwrk/compact-js-node:test:   ...teProvider.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-node:test:   ...figuration.ts |   15.38 |        0 |       0 |   16.21 | 44-97,115-118     
+@midnight-ntwrk/compact-js-node:test:   index.ts         |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js-node:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-node:build: cache hit, suppressing logs 3ccfab30ecef1bbb
+@midnight-ntwrk/compact-js:build: cache hit, suppressing logs f402700e9fc36d69
+@midnight-ntwrk/compact-js-command:test: cache miss, executing ea84de4e15c03816
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  RUN  v4.1.12 compact-js-command
+@midnight-ntwrk/compact-js-command:test:       Coverage enabled with v8
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/ConfigFixtureResolution.test.ts (6 tests) 5ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/json.test.ts (5 tests) 4ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/encodedZswapLocalStateSchema.test.ts (2 tests) 48ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/RuntimeIdentity.test.ts (2 tests) 4ms
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "compact-js/test/contract/managed/cccMinter/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/EraSelection.test.ts (11 tests) 105ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/CompiledContractReflection.test.ts (55 tests) 539ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/ConfigCompilerToolchain.test.ts (2 tests) 1763ms
+@midnight-ntwrk/compact-js-command:test:      ✓ transpiles TypeScript through ts-node  1760ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/MaintainContract.test.ts (1 test) 3603ms
+@midnight-ntwrk/compact-js-command:test:      ✓ should report success with valid setup  3601ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/ConfigCompiler.test.ts (1 test) 3611ms
+@midnight-ntwrk/compact-js-command:test:          ✓ should compile and return module  3608ms
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-coins-q4eQvT/contract-modules-in/3e309b0202c94958b003e12a894df338ef290fa00d2672988acb7fb96916c743/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/MaintainCircuit.test.ts (1 test) 3627ms
+@midnight-ntwrk/compact-js-command:test:      ✓ should report success with valid setup  3625ms
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/Circuit.test.ts:125:6 > Circuit Command > should report success with valid setup
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContractCoins.test.ts:115:6 > Circuit Command (a callee that mints a shielded coin) > --output-zswap-calls holds the callee's coin, which --output-zswap does not
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t1/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/Deploy.test.ts (2 tests) 3713ms
+@midnight-ntwrk/compact-js-command:test:      ✓ should report success with valid setup  3670ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/LedgerEraOption.test.ts (8 tests) 3727ms
+@midnight-ntwrk/compact-js-command:test:      ✓ runs the era this build binds when the option is omitted  3601ms
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:242:6 > Circuit Command (cross-contract calls) > --contract-states-dir produces one call per trace entry (root + each callee)
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/ErrorReporting.test.ts (7 tests) 3763ms
+@midnight-ntwrk/compact-js-command:test:      ✓ reports a misspelled witness instead of exiting silently  3635ms
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/CircuitCrossContractCoins.test.ts (1 test) 3811ms
+@midnight-ntwrk/compact-js-command:test:      ✓ --output-zswap-calls holds the callee's coin, which --output-zswap does not  3721ms
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/Circuit.test.ts:325:6 > Circuit Command > reports a runtime rejection when encoding the resulting zswap local state, after the intent is written
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t2/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/Circuit.test.ts:366:6 > Circuit Command > produces a valid single-call intent for a non-cross-contract circuit
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:262:6 > Circuit Command (cross-contract calls) > each call's operation is resolvable from its source state (root from --input, callee from dir)
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/Circuit.test.ts:410:6 > Circuit Command > should report success with valid ledger parameters
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t3/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:298:6 > Circuit Command (cross-contract calls) > --output-oc writes only the root (middle) updated state
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t4/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/Circuit.test.ts (9 tests) 3976ms
+@midnight-ntwrk/compact-js-command:test:      ✓ should report error for unknown circuit in manifest  3664ms
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:315:6 > Circuit Command (cross-contract calls) > --output-contract-states-dir writes each callee state by address, creating the dir
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t5/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:334:6 > Circuit Command (cross-contract calls) > state-threading round-trip advances v by both increments
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:334:6 > Circuit Command (cross-contract calls) > state-threading round-trip advances v by both increments
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t6/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:352:6 > Circuit Command (cross-contract calls) > --output-result / --output-ps / --output-zswap hold the root's values, not a callee's
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t7/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:377:6 > Circuit Command (cross-contract calls) > --output-zswap-calls writes every call's zswap state, callees first and the root last
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t8/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: Sourcemap for "/tmp/ccc-circuit-J36tgj/t14/contract-modules-in/adebd7c468ddbab68ef88d24b6a172e800ddbcaa2ddf5f7662b192bd142fb541/contract/index.js" points to missing source files
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:509:6 > Circuit Command (cross-contract calls) > a read-only cross-contract circuit (getInner) returns the callee value
+@midnight-ntwrk/compact-js-command:test: []
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: stdout | test/effect/CircuitCrossContract.test.ts:509:6 > Circuit Command (cross-contract calls) > a read-only cross-contract circuit (getInner) returns the callee value
+@midnight-ntwrk/compact-js-command:test: "1"
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  ✓ test/effect/CircuitCrossContract.test.ts (14 tests) 4480ms
+@midnight-ntwrk/compact-js-command:test:      ✓ --contract-states-dir produces one call per trace entry (root + each callee)  3795ms
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  Test Files  16 passed (16)
+@midnight-ntwrk/compact-js-command:test:       Tests  127 passed (127)
+@midnight-ntwrk/compact-js-command:test:    Start at  12:28:37
+@midnight-ntwrk/compact-js-command:test:    Duration  5.93s (transform 1.47s, setup 0ms, import 14.34s, tests 36.78s, environment 1ms)
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test: JUNIT report written to compact-js-command/reports/report/test-report.xml
+@midnight-ntwrk/compact-js-command:test:  HTML  Report is generated
+@midnight-ntwrk/compact-js-command:test:        You can run npx vite preview --outDir reports/report to see the test results.
+@midnight-ntwrk/compact-js-command:test:  % Coverage report from v8
+@midnight-ntwrk/compact-js-command:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-command:test: File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+@midnight-ntwrk/compact-js-command:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-command:test: All files          |   89.54 |    83.12 |      87 |   89.23 |                   
+@midnight-ntwrk/compact-js-command:test:  src               |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js-command:test:   index.ts         |       0 |        0 |       0 |       0 | 27-52             
+@midnight-ntwrk/compact-js-command:test:  src/effect        |   88.37 |    66.66 |   76.47 |    92.5 |                   
+@midnight-ntwrk/compact-js-command:test:   ...Reflection.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   ...ationError.ts |      60 |      100 |       0 |      75 | 50                
+@midnight-ntwrk/compact-js-command:test:   ...igCompiler.ts |      92 |    66.66 |   88.88 |   91.66 | 127,144           
+@midnight-ntwrk/compact-js-command:test:   ConfigError.ts   |      80 |      100 |      50 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   index.ts         |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:  ...ffect/internal |    91.1 |    85.65 |   88.38 |    90.5 |                   
+@midnight-ntwrk/compact-js-command:test:   args.ts          |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   ...uitCommand.ts |   95.78 |    93.61 |    93.1 |   95.78 | 188,285-295,344   
+@midnight-ntwrk/compact-js-command:test:   command.ts       |   75.25 |     67.3 |      75 |   74.19 | ...62-268,283-311 
+@midnight-ntwrk/compact-js-command:test:   ...igProvider.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   ...Reflection.ts |   93.92 |    90.17 |   95.23 |   93.37 | ...08,220,233,260 
+@midnight-ntwrk/compact-js-command:test:   deployCommand.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   ...tateSchema.ts |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   json.ts          |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   ...uitCommand.ts |      85 |      100 |    62.5 |      85 | 72-73,95          
+@midnight-ntwrk/compact-js-command:test:   ...ainCommand.ts |      60 |      100 |       0 |      60 | 45-49             
+@midnight-ntwrk/compact-js-command:test:   ...actCommand.ts |   93.33 |      100 |      80 |   93.33 | 82                
+@midnight-ntwrk/compact-js-command:test:   options.ts       |     100 |    83.33 |     100 |     100 | 248               
+@midnight-ntwrk/compact-js-command:test:  ...t/internal/era |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   binding.ts       |       0 |        0 |       0 |       0 |                   
+@midnight-ntwrk/compact-js-command:test:   eras.ts          |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   registry.ts      |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   v8.ts            |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test:   v9.ts            |     100 |      100 |     100 |     100 |                   
+@midnight-ntwrk/compact-js-command:test: -------------------|---------|----------|---------|---------|-------------------
+@midnight-ntwrk/compact-js-command:test: npm notice
+@midnight-ntwrk/compact-js-command:test: npm notice New major version of npm available! 11.16.0 -> 12.2.2
+@midnight-ntwrk/compact-js-command:test: npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+@midnight-ntwrk/compact-js-command:test: npm notice To update run: npm install -g npm@12.2.2
+@midnight-ntwrk/compact-js-command:test: npm notice
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  RUN  v4.1.12 compact-js-command
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  ✓ test/era8/LedgerEightCommands.test.ts (3 tests) 811ms
+@midnight-ntwrk/compact-js-command:test:      ✓ deploys a ledger 8 contract and writes ledger 8 artifacts  782ms
+@midnight-ntwrk/compact-js-command:test: 
+@midnight-ntwrk/compact-js-command:test:  Test Files  1 passed (1)
+@midnight-ntwrk/compact-js-command:test:       Tests  3 passed (3)
+@midnight-ntwrk/compact-js-command:test:    Start at  12:28:43
+@midnight-ntwrk/compact-js-command:test:    Duration  1.77s (transform 224ms, setup 0ms, import 887ms, tests 811ms, environment 0ms)
+@midnight-ntwrk/compact-js-command:test: 
+
+ Tasks:    5 successful, 5 total
+Cached:    2 cached, 5 total
+  Time:    19.945s 
+
+== era8 junit pass
+
+ RUN  v4.1.12 compact-js
+
+ ✓ test/era8/Fixtures.test.ts (4 tests) 2ms
+ ✓ test/era8/LedgerEightExecution.test.ts (5 tests) 30ms
+ ✓ test/era8/LedgerEightAdapter.test.ts (10 tests) 43ms
+ ✓ test/era8/LedgerEightFacade.test.ts (11 tests) 75ms
+ ✓ test/era8/CrossEraRepartition.test.ts (3 tests) 105ms
+ ✓ test/era8/LedgerEightExecutable.test.ts (9 tests) 136ms
+
+ Test Files  6 passed (6)
+      Tests  42 passed (42)
+   Start at  12:28:45
+   Duration  691ms (transform 181ms, setup 0ms, import 1.28s, tests 391ms, environment 0ms)
+
+JUNIT report written to compact-js/reports/report/test-report-era8.xml
+
+ RUN  v4.1.12 compact-js-command
+
+ ✓ test/era8/LedgerEightCommands.test.ts (3 tests) 820ms
+     ✓ deploys a ledger 8 contract and writes ledger 8 artifacts  793ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  12:28:46
+   Duration  1.75s (transform 228ms, setup 0ms, import 861ms, tests 820ms, environment 0ms)
+
+JUNIT report written to compact-js-command/reports/report/test-report-era8.xml
+== DONE
