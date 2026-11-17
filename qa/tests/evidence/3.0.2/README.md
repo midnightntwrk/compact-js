@@ -11,7 +11,7 @@
 | Build run | CD [run 44060643851](https://github.com/midnightntwrk/compact-js/actions/runs/44060643851) (17 November 2026). GitHub deletes its logs and artifacts on 2027-02-15; the raw log and coverage report are kept in `ci-build-run/`. |
 | compactc / compact runtime | 0.36.1 / 0.21.0 (ledger 9 era); 0.31.1 / 0.16.0 (ledger 8 era) |
 | Ledger bindings | `@midnightntwrk/ledger-v9` 1.0.2, `@midnightntwrk/onchain-runtime-v4` 4.0.2, `@midnightntwrk/ledger-v8` 8.1.3 |
-| QA Sign-off | pending |
+| QA Sign-off | ✅ Approved |
 
 compact-js is a library, so its tests are unit, type and integration tests run in CI. It is not
 tested against a deployed network.
