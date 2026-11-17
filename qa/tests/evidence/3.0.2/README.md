@@ -8,7 +8,7 @@
 | QA Contact | Giuseppe Salvatore (giuseppe.salvatore@shielded.io) |
 | compact-js version | 3.0.2 (`@midnight-ntwrk/compact-js`, `compact-js-node`, `compact-js-command`) |
 | Source | tag `compact-js-v3.0.2`, commit `a2a00d1e47aadf1710d5e451db07d35b6a5f5003` |
-| Build run | CD [run 44060643851](https://github.com/midnightntwrk/compact-js/actions/runs/44060643851) (17 November 2026) |
+| Build run | CD [run 44060643851](https://github.com/midnightntwrk/compact-js/actions/runs/44060643851) (17 November 2026). GitHub deletes its logs and artifacts on 2027-02-15; the raw log and coverage report are kept in `ci-build-run/`. |
 | compactc / compact runtime | 0.36.1 / 0.21.0 (ledger 9 era); 0.31.1 / 0.16.0 (ledger 8 era) |
 | Ledger bindings | `@midnightntwrk/ledger-v9` 1.0.2, `@midnightntwrk/onchain-runtime-v4` 4.0.2, `@midnightntwrk/ledger-v8` 8.1.3 |
 | QA Sign-off | pending |
@@ -32,12 +32,15 @@ Two runs are recorded. Both pass with the same counts.
 
 | Run | What it is | Evidence |
 |---|---|---|
-| **CI build run** | The CD run that built, tested and published the 3.0.2 packages. Its tarballs are byte-identical to the ones on npm. | [`ci-build-run/test-step.log`](ci-build-run/test-step.log) (the "Run tests" step output), [`ci-build-run/package-integrity.md`](ci-build-run/package-integrity.md) |
+| **CI build run** | The CD run that built, tested and published the 3.0.2 packages. Its tarballs are byte-identical to the ones on npm. | [`ci-build-run/test-job.raw.log.gz`](ci-build-run/test-job.raw.log.gz) (the test job log, unedited), [`ci-build-run/test-step.log`](ci-build-run/test-step.log) (readable excerpt of the "Run tests" step), [`ci-build-run/coverage-report-compact-js.zip`](ci-build-run/coverage-report-compact-js.zip), [`ci-build-run/package-integrity.md`](ci-build-run/package-integrity.md) |
 | **Local re-run** | The same commands run again at the tag in Docker `node:24.18.0-bookworm`, with junit output kept. Not the run that built the packages. | [`local-rerun/compact-js-test-report.md`](local-rerun/compact-js-test-report.md), [`local-rerun/junit/`](local-rerun/junit/), [`local-rerun/rerun.log`](local-rerun/rerun.log) |
 
 Line coverage reported by the CI build run: `compact-js-node` 64.44%, `compact-js` 84.91%,
 `compact-js-command` 89.23%. The HTML coverage report is the run's `Coverage Report compact-js`
-artifact.
+artifact, kept unchanged as
+[`ci-build-run/coverage-report-compact-js.zip`](ci-build-run/coverage-report-compact-js.zip)
+(sha256 `82cfc11319797cf6636671f8095f1422f556f75f01d9019389cc938aada84468`, the digest GitHub
+reports for the artifact).
 
 ## Why a re-run
 
@@ -55,11 +58,16 @@ with a junit reporter (the last part of [`local-rerun/rerun.log`](local-rerun/re
   personal GitHub token with `read:packages`, passed only as an environment variable. The fix is
   tracked in [#56](https://github.com/midnightntwrk/compact-js/issues/56).
 - **tstyche has no junit output.** The 91 type tests are counted from the logs only.
-- **Files edited for readability.** `ci-build-run/test-step.log` has its timestamps, ANSI colour
-  codes and `env:` block removed, and the runner path prefix
+- **Raw and edited logs.** [`ci-build-run/test-job.raw.log.gz`](ci-build-run/test-job.raw.log.gz)
+  is the test job log exactly as GitHub returns it (`gh api
+  repos/midnightntwrk/compact-js/actions/jobs/133961363968/logs`; sha256 of the uncompressed
+  log `69cb1eaa3a05a4da3bbaf1b7da05171463949f87bd77e71fce7c0e2c06aecfa1`). GitHub's own `***`
+  masks are the only redaction. `ci-build-run/test-step.log` is a readable excerpt of it:
+  timestamps, ANSI colour codes and the `env:` block removed, runner path prefix
   (`/home/runner/work/compact-js/compact-js/`) cut. `local-rerun/rerun.log` has ANSI codes and
-  the local worktree path removed. Results are unchanged, but the files no longer match the
-  original logs byte for byte.
+  the local worktree path removed. Results are unchanged in every file.
+- **Evidence lives in git, not on the release.** CD does not upload test reports, logs or
+  coverage anywhere permanent, so this folder is the lasting copy.
 
 ## Test Execution Guide
 
