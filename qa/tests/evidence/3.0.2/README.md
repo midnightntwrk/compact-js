@@ -52,7 +52,8 @@ with a junit reporter (the last part of [`local-rerun/rerun.log`](local-rerun/re
 - **Token needed to install.** `.yarnrc.yml` routes the `@midnight-ntwrk` scope to
   `npm.pkg.github.com` and `yarn.lock` has `npm.pkg.github.com` archive URLs, so `yarn install`
   without a token fails with `Invalid authentication (as an anonymous user)`. The re-run used a
-  personal GitHub token with `read:packages`, passed only as an environment variable.
+  personal GitHub token with `read:packages`, passed only as an environment variable. The fix is
+  tracked in [#56](https://github.com/midnightntwrk/compact-js/issues/56).
 - **tstyche has no junit output.** The 91 type tests are counted from the logs only.
 - **Files edited for readability.** `ci-build-run/test-step.log` has its timestamps, ANSI colour
   codes and `env:` block removed, and the runner path prefix
