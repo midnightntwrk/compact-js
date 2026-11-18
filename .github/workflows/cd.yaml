@@ -61,9 +61,14 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      # Checked out with the PAT rather than the job's GITHUB_TOKEN: the changesets action
+      # pushes the Version Packages branch with whatever credential is persisted here, and
+      # a push made with GITHUB_TOKEN triggers no workflows — so the release PR, the one
+      # commit that must be green before it is merged, would arrive with no checks at all.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       # This job never runs npm, so it needs no registry-url, scope or NODE_AUTH_TOKEN.
       - name: Set up Node.js
@@ -128,6 +133,10 @@ jobs:
       contents: write # push release tags and create Releases
       id-token: write # npm Trusted Publishing (OIDC) + provenance
     steps:
+      # Credentials stay persisted here, unlike every other checkout in this repo: the
+      # changesets action pushes a tag per package over git, as does the aggregate tag
+      # below. This job uploads no artifact, so there is nothing for a persisted
+      # credential to leak into.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
           fetch-depth: 0
