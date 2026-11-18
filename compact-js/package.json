@@ -61,6 +61,9 @@
     "fix-exports": "node ../scripts/fix-esm-only-exports.mjs .",
     "verify-exports": "node ../scripts/verify-exports.mjs ."
   },
+  "publishConfig": {
+    "directory": "dist"
+  },
   "files": [
     "dist/"
   ]

@@ -66,8 +66,8 @@ jobs:
       checks: write
       pull-requests: write
     with:
-      # Not used to publish — `changeset publish` packs from the workspace. The zip is
-      # kept because the QA test evidence is built from it (see qa/tests/evidence/).
+      # Not used to publish — `changeset publish` packs each package's `dist/`. The zip
+      # is kept because the QA test evidence is built from it (see qa/tests/evidence/).
       create-package-artifacts: true
     secrets:
       MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}

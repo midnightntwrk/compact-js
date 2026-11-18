@@ -45,6 +45,9 @@
     "verify-exports": "node ../scripts/verify-exports.mjs .",
     "package": "shx rm -rf ./dist/src && node ../scripts/finalize-dist-manifest.mjs ./dist/package.json && (cd ./dist; npm pack)"
   },
+  "publishConfig": {
+    "directory": "dist"
+  },
   "files": [
     "dist/"
   ]
