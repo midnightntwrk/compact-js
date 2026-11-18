@@ -1,12 +1,16 @@
 # Releasing
 
-Versions come from [Changesets](https://github.com/changesets/changesets). Packages are
-published from the **CD** workflow (`.github/workflows/cd.yaml`), which is **manual only**
-(`workflow_dispatch`). Merging to `main` does **not** publish — that only runs CI.
+Versions, changelogs and GitHub Releases all come from
+[Changesets](https://github.com/changesets/changesets). **CD** (`.github/workflows/cd.yaml`)
+runs on every push to `main` and does one of two things:
 
-CD never writes to this repository: it builds, publishes the tarballs and creates the
-GitHub Release. Everything that changes a file — the version bump, the CHANGELOGs, the
-release note — happens in a **release PR** that goes through normal review.
+- **changesets are pending** — it opens or updates the **Version Packages** pull request
+  and publishes nothing.
+- **no changesets remain** (the Version Packages PR has just merged) — it builds, publishes
+  to **GitHub Packages**, tags and creates the GitHub Releases.
+
+So the release is cut by *merging a pull request*, not by dispatching a workflow. Reaching
+**npmjs** is a separate, manual step in another repository — see step 4.
 
 ## 1. Describe the change (every PR)
 
@@ -14,45 +18,65 @@ release note — happens in a **release PR** that goes through normal review.
 yarn changeset
 ```
 
-Pick the semver bump per package, write the summary a consumer will read, and commit the
-generated `.changeset/*.md` file with your change.
+Pick the semver bump, write the summary a consumer will read, and commit the generated
+`.changeset/*.md` file with your change. `check-changeset.yml` fails a PR that has none.
 
-> A release with no changesets is a no-op — `changeset version` has nothing to apply, so
-> nothing is published. If a change should ship, it needs a changeset.
+The summary is the release note: it is what appears under **Minor Changes** / **Major
+Changes** in the package CHANGELOG and in the body of the GitHub Release. Write it for
+someone upgrading, not for the reviewer.
 
-## 2. Prepare the release (release PR)
+The three packages are a `fixed` group, so they always publish at the same version — a bump
+to any of them bumps all three.
 
-On a branch off `main`:
+## 2. Merge the Version Packages PR
 
-```bash
-yarn release:prepare
-```
+CD keeps that PR up to date. It runs `yarn release:prepare`, which is
+`changeset version` plus a lockfile refresh — bumping every workspace `package.json`,
+writing each package's `CHANGELOG.md` and deleting the changesets it consumed.
 
-That runs `changeset version` — which bumps every workspace `package.json`, writes each
-package's `CHANGELOG.md` and deletes the changesets it consumed — and then generates
-`docs/release-notes/<version>.md` from those CHANGELOGs.
+Review it like any other PR. Edits to the CHANGELOG entries land in the published Release
+body, so this is where release-note wording gets fixed.
 
-`changeset version` needs `GITHUB_TOKEN` set to a token with `read:user` and `repo:status`;
-without it `@changesets/changelog-github` cannot resolve PR links and the command fails.
+## 3. Publish to GitHub Packages
 
-The note carries `TODO (owner):` markers for every field no automation can know — the
-summary, known issues, and the proof-server / node / indexer rows. Fill them in by writing
-`docs/release-notes/overlays/<version>.md` (start from
-[`overlays/TEMPLATE.md`](release-notes/overlays/TEMPLATE.md)) and re-running with `--force`,
-or edit the note directly. Open the PR, get it reviewed, merge it.
+Merging that PR leaves `main` with no changesets, which is the signal CD publishes on. It
+runs CI, then `changeset publish`:
 
-## 3. Publish
+- publishes each package, skipping any version already on the registry, so a re-run is a
+  no-op rather than a failure;
+- pushes a `@midnight-ntwrk/<package>@<version>` tag per package;
+- creates one GitHub Release per package, with the body taken from its `CHANGELOG.md`.
+  A version carrying a prerelease part is flagged as a prerelease, so an `rc` never
+  becomes the repository's "Latest" release.
 
-Actions → **CD** → **Run workflow** → *Use workflow from* = `main`.
+CD then adds one aggregate **`compact-js-v<version>`** tag and a matching GitHub Release.
+The three packages are a `fixed` group and always share a version, so this is the release
+as a whole — the form the QA test evidence and the component release note cite, and the
+one to link when a single URL is wanted. It is in addition to the per-package tags and
+Releases, not instead of them. Its body is the same `compact-js/CHANGELOG.md` section, and
+re-running leaves the tag in place and refreshes the notes.
 
-CD reads the version from `compact-js/package.json` and the body from
-`docs/release-notes/<version>.md`. It fails if that note is missing, and warns if it still
-carries TODO markers. The npm dist-tag follows the version: `3.0.2` → `latest`,
-`3.0.2-rc.1` → `rc`, `3.1.0-alpha.4` → `alpha`.
+The npm dist-tag follows the version: a plain `3.0.3` publishes under `latest`, and while
+pre mode is on, `3.0.3-rc.1` publishes under `rc`.
 
-Only branches matching the `release-branches` input of
-`.github/actions/create-package-artifacts` (`main` or `release/compact-js/.*`) produce
-artifacts; CD run from anywhere else skips the publish steps.
+## 4. Mirror to npmjs
+
+**CD stops at GitHub Packages.** Nothing reaches npmjs until someone dispatches
+[`push-npm-package.yml`](https://github.com/midnight-ntwrk/artifacts/actions/workflows/push-npm-package.yml)
+in `midnight-ntwrk/artifacts`, picking the library and typing the version. Run it once per
+package — `compact-js`, `compact-js-node`, `compact-js-command`.
+
+That workflow packs the tarball we published here and re-publishes it to npmjs, so the two
+registries carry byte-identical artifacts. It derives the npmjs dist-tag from the version
+suffix itself and will move `latest` onto the highest-priority prerelease when a package
+has no stable version yet — leave `use_legacy_behavior` at `false` so that logic runs.
+
+Because this dispatch is manual, it is the gate on anything becoming public: CD needs no
+approval step of its own.
+
+> The mirror hard-codes the `@midnight-ntwrk` scope, in both the package lookup and the
+> tarball filename it expects. It has to be taught `@midnightntwrk` before these packages
+> can be renamed — see [#20](https://github.com/midnightntwrk/compact-js/issues/20).
 
 ## Release candidates
 
@@ -60,21 +84,17 @@ artifacts; CD run from anywhere else skips the publish steps.
 yarn changeset pre enter rc   # in its own PR
 ```
 
-While pre mode is on, every `release:prepare` yields `X.Y.Z-rc.N`. Graduate the line with
-`yarn changeset pre exit` in its own PR, then run `release:prepare` once more for the
+While pre mode is on, every Version Packages PR yields `X.Y.Z-rc.N`. Graduate the line with
+`yarn changeset pre exit` in its own PR; the next Version Packages PR then carries the
 stable version.
 
-## Git tags and releases
+## Notes
 
-`gh release create` creates the `compact-js-v<version>` tag server-side from the released
-commit, so there is no tag push. Re-dispatching CD for a version that already has a Release
-updates its notes instead of failing.
-
-## Known limitation
-
-The **Artifacts** section lists each package without its npm `dist.shasum`, because the
-note is written before the packages are published. To add them after a release, re-run
-`node scripts/generate-release-notes.mjs --shasums --force` and open a follow-up PR.
-
-`CHANGELOG.md` at the repository root is frozen history from the pre-Changesets flow; the
-per-package `CHANGELOG.md` files are the live ones.
+- The per-package `CHANGELOG.md` files do not exist yet — the first release creates them.
+  `CHANGELOG.md` at the repository root is frozen history from the pre-Changesets flow.
+- CD only runs on `main`. Maintenance releases from a `release/compact-js/*` branch are not
+  supported; a 2.x patch would otherwise be able to take the `latest` dist-tag.
+- Publishing targets **GitHub Packages** under the `@midnight-ntwrk` scope, using the
+  long-lived `MIDNIGHTCI_PACKAGES_WRITE` token. The scope is being retired org-wide in
+  favour of `@midnightntwrk`; that migration, and the matching change to the npmjs mirror,
+  is [#20](https://github.com/midnightntwrk/compact-js/issues/20).

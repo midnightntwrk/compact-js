@@ -1,19 +1,64 @@
 name: CD
-env:
-  MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  # Opens and updates the "Version Packages" PR. Ungated: the release PR is
+  # refreshed on every push to main, and the human gate is merging it.
+  version:
+    name: Version (release PR)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      # 'false' means the release PR has just merged and there is nothing left to
+      # consume — that, and only that, is a publishable commit.
+      hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
+        with:
+          registry-url: https://npm.pkg.github.com/
+          scope: '@midnight-ntwrk'
+          node-version-file: .nvmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Create / update Release Pull Request
+        id: changesets
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
+        with:
+          version: yarn release:prepare
+          title: 'chore: release'
+          commit: 'chore: version packages'
+          # No `publish` here — publishing is the gated job below.
+          setupGitUser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
   ci:
     name: Build, Lint and Test
+    needs: version
+    if: needs.version.outputs.hasChangesets == 'false'
     uses: ./.github/workflows/ci-base.yaml
     permissions:
       contents: read
@@ -21,118 +66,120 @@ jobs:
       checks: write
       pull-requests: write
     with:
+      # Not used to publish — `changeset publish` packs from the workspace. The zip is
+      # kept because the QA test evidence is built from it (see qa/tests/evidence/).
       create-package-artifacts: true
     secrets:
       MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+  # Publishes straight to npmjs with Trusted Publishing, tags, and creates the GitHub
+  # Releases. `changeset publish` skips any version already on the registry, so a
+  # re-run is a no-op rather than a failure.
   publish:
-    needs: ci
-    name: Publish Packages
+    name: Publish
+    needs: [version, ci]
+    if: needs.version.outputs.hasChangesets == 'false'
     runs-on: ubuntu-latest
+    # Human gate on anything reaching npmjs. The name must match the Trusted Publisher
+    # configured on each package, or the OIDC exchange fails with a 403.
+    environment: npm-publish-stable
     permissions:
-      contents: read
-      packages: write
-    outputs:
-      version: ${{ steps.vars.outputs.version }}
+      contents: write # push release tags and create Releases
+      id-token: write # npm Trusted Publishing (OIDC) + provenance
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
-          persist-credentials: false
+          fetch-depth: 0
 
+      # No NODE_AUTH_TOKEN and no always-auth here: a token in the environment shadows
+      # OIDC, and always-auth writes an empty `_authToken` line into ~/.npmrc, which is
+      # the usual reason Trusted Publishing is silently never attempted.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
-          always-auth: true
-          registry-url: https://npm.pkg.github.com/
-          scope: '@midnight-ntwrk'
+          registry-url: https://registry.npmjs.org
+          scope: '@midnightntwrk'
           node-version-file: .nvmrc
+
+      # Trusted Publishing needs npm >= 11.5.1; the version bundled with .nvmrc's Node is
+      # older, and an older npm does not attempt OIDC at all.
+      - name: Use an npm that supports Trusted Publishing
+        run: npm install -g npm@latest
+
+      # Installing still reads upstream @midnight-ntwrk packages from GitHub Packages.
+      - name: Install dependencies
+        run: yarn install --immutable
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
-      # `changeset version` set this in the release PR; CD never computes or bumps a version.
-      - name: Resolve version
-        id: vars
-        run: |
-          version=$(jq -r '.version' ./compact-js/package.json)
-          if [[ "$version" == *-* ]]; then
-            dist_tag="${version#*-}"
-            dist_tag="${dist_tag%%.*}"
-          else
-            dist_tag=latest
-          fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "dist_tag=${dist_tag}" >> "$GITHUB_OUTPUT"
+      - name: Build and package
+        run: yarn build && yarn package
 
-      - name: Publish Package Artifacts
-        uses: ./.github/actions/publish-package-artifacts
+      # Creates one tag and one GitHub Release per package, with the body taken from
+      # that package's CHANGELOG.md — which `changeset version` wrote from the changesets.
+      # rc versions are flagged as prereleases, so they do not become "Latest".
+      - name: Publish and release
+        id: publish
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
         with:
-          package-archive-name: 'compact-js'
-          working-directory: .
-          auth-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-          dist-tag: ${{ steps.vars.outputs.dist_tag }}
-
-  release:
-    needs: publish
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      # The note is a reviewed artifact of the release PR, so CD reads it and never
-      # writes it. An absent note means the PR skipped `yarn release:prepare`.
-      - name: Locate the release note
-        id: note
+          publish: yarn changeset publish
+          createGithubReleases: true
+          setupGitUser: true
         env:
-          VERSION: ${{ needs.publish.outputs.version }}
-        run: |
-          note="docs/release-notes/${VERSION}.md"
-          if [[ ! -f "$note" ]]; then
-            echo "::error::$note is missing — run 'yarn release:prepare' and merge it before releasing ${VERSION}"
-            exit 1
-          fi
-          todos=$(grep -c 'TODO (owner):' "$note" || true)
-          if [[ "$todos" -gt 0 ]]; then
-            echo "::warning::$note still carries ${todos} 'TODO (owner):' marker(s)"
-          fi
-          {
-            echo "### Release notes — compact-js ${VERSION}"
-            echo
-            echo "\`${todos}\` owner TODO(s) left in \`${note}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "path=${note}" >> "$GITHUB_OUTPUT"
-          echo "tag=compact-js-v${VERSION}" >> "$GITHUB_OUTPUT"
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          NPM_CONFIG_PROVENANCE: 'true'
 
-      - name: Upload release notes artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v5.0.0
-        with:
-          name: Release notes ${{ needs.publish.outputs.version }}
-          path: ${{ steps.note.outputs.path }}
-
-      # `gh release create` creates the tag server-side from --target, so there is no
-      # tag push and nothing to collide on a re-dispatch.
-      - name: Create GitHub Release
+      # The three packages are a `fixed` Changesets group, so they always share a version
+      # and the release has a single identity. This aggregate tag is that identity — the
+      # form the QA test evidence and the component release note cite. It is *in addition*
+      # to the per-package tags above, which stay.
+      - name: Tag and release the version as a whole
+        if: steps.publish.outputs.published == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.note.outputs.tag }}
-          VERSION: ${{ needs.publish.outputs.version }}
-          NOTE: ${{ steps.note.outputs.path }}
+          GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           REPO: ${{ github.repository }}
-          SHA: ${{ github.sha }}
         run: |
-          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
-            echo "::notice::release $TAG already exists — updating its notes"
-            gh release edit "$TAG" \
-              --title "compact-js v${VERSION}" \
-              --notes-file "$NOTE" \
-              --repo "$REPO"
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+          tag="compact-js-v${version}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "::notice::${tag} already exists — leaving it in place"
           else
-            gh release create "$TAG" \
-              --title "compact-js v${VERSION}" \
-              --notes-file "$NOTE" \
-              --target "$SHA" \
-              --repo "$REPO"
+            git tag -a "$tag" -m "compact-js ${version}"
+            git push origin "$tag"
+          fi
+
+          # The section `changeset version` wrote for this version, which is the same
+          # content the per-package Releases carry.
+          node -e '
+            const fs = require("node:fs");
+            const version = process.argv[1];
+            const text = fs.readFileSync("compact-js/CHANGELOG.md", "utf8");
+            const marker = `\n## ${version}\n`;
+            const at = text.indexOf(marker);
+            if (at === -1) throw new Error(`compact-js/CHANGELOG.md has no "## ${version}" section`);
+            const rest = text.slice(at + marker.length);
+            const next = rest.search(/^## /m);
+            fs.writeFileSync("release-body.md", (next === -1 ? rest : rest.slice(0, next)).trim() + "\n");
+          ' "$version"
+
+          # An rc must never become the repository's "Latest" release.
+          flags=()
+          [[ "$version" == *-* ]] && flags=(--prerelease --latest=false)
+
+          # Branch only on a genuine not-found: an auth error or a 5xx must fail the job
+          # rather than being retried as a create that then fails for the wrong reason.
+          set +e
+          error=$(gh release view "$tag" --repo "$REPO" 2>&1 >/dev/null)
+          status=$?
+          set -e
+          if [[ $status -eq 0 ]]; then
+            gh release edit "$tag" --notes-file release-body.md --repo "$REPO" "${flags[@]}"
+          elif grep -qi "release not found" <<<"$error"; then
+            gh release create "$tag" --title "compact-js v${version}" \
+              --notes-file release-body.md --repo "$REPO" "${flags[@]}"
+          else
+            echo "::error::could not query release ${tag}: ${error}"
+            exit 1
           fi

@@ -10,14 +10,17 @@ project in [our documentation](https://github.com/changesets/changesets/blob/mai
 
 ## Quick start
 
-Run `yarn changeset` from this workspace root (`compact-js/`) and follow the
-prompts to record the semver bump (patch / minor / major) and a summary for your
-change. Commit the generated file in `.changeset/` as part of your PR.
+Run `yarn changeset` from the repository root and follow the prompts to record the
+semver bump (patch / minor / major) and a summary for your change. Commit the
+generated file in `.changeset/` as part of your PR.
+
+The three packages are a `fixed` group, so they always publish at one version — a
+bump to any of them bumps all three.
 
 Changesets decide the published version. A release that has none is a no-op, so
 every change that ships needs one — see [`docs/releasing.md`](../docs/releasing.md)
 for how they turn into a release.
 
 The workspace is on a **stable line** (no `pre.json`). To cut release candidates,
-`yarn changeset pre enter rc` in its own PR; versions then bump as `3.0.2-rc.N`
+`yarn changeset pre enter rc` in its own PR; versions then bump as `X.Y.Z-rc.N`
 until `yarn changeset pre exit` graduates the line.

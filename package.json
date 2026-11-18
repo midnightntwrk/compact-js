@@ -36,7 +36,8 @@
     "lint": "eslint",
     "changeset": "changeset",
     "changeset:status": "changeset status --since=origin/main",
-    "release:prepare": "changeset version && yarn install --mode=update-lockfile && node scripts/generate-release-notes.mjs"
+    "changeset:check": "changeset status --since=origin/${BASE_REF:-main} --verbose",
+    "release:prepare": "changeset version && yarn install --mode=update-lockfile"
   },
   "dependencies": {
     "@effect/platform": "^0.97.0",

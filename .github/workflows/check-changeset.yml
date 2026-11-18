@@ -1,0 +1,48 @@
+name: Check for Changeset
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  check-changeset:
+    # Release PRs carry no changeset of their own (they consume them), and
+    # Renovate/Dependabot never author one, so the check would always fail there.
+    if: >-
+      ${{ !startsWith(github.head_ref, 'changeset-release/') &&
+          !startsWith(github.head_ref, 'renovate/') &&
+          !startsWith(github.head_ref, 'dependabot/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
+        with:
+          registry-url: https://npm.pkg.github.com/
+          scope: '@midnight-ntwrk'
+          node-version-file: .nvmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      # Changesets are the only source of versions and release notes, so a PR
+      # without one ships its change unversioned and unmentioned.
+      - name: Verify that a changeset exists
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: yarn changeset status --since="origin/$BASE_REF" --verbose

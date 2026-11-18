@@ -8,67 +8,37 @@ inputs:
   working-directory:
     type: string
     required: true
-  release-branches:
-    type: string
-    description: Alternation of branch-name regexes allowed to produce release artifacts.
-    required: false
-    default: 'main|release/compact-js/.*'
 
 outputs:
   target_version:
     description: The version the packed tarballs carry.
     value: ${{ steps.vars.outputs.target_version }}
-  dist_tag:
-    description: The npm dist-tag that version publishes under.
-    value: ${{ steps.vars.outputs.dist_tag }}
-  on_release_branch:
-    description: Whether this branch is allowed to produce release artifacts.
-    value: ${{ steps.vars.outputs.on_release_branch }}
 
 runs:
   using: "composite"
   steps:
+    # `changeset version` set this in the release PR, so the manifests are
+    # authoritative here and nothing is bumped on the runner.
     - name: Resolve version
       id: vars
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      env:
-        RELEASE_BRANCHES: ${{ inputs.release-branches }}
       run: |
-        branch=$(git rev-parse --abbrev-ref HEAD)
-        if [[ "$branch" =~ ^(${RELEASE_BRANCHES})$ ]]; then
-          on_release_branch=true
-        else
-          on_release_branch=false
-        fi
-
-        # `changeset version` set this in the release PR, so the manifests are
-        # authoritative here and nothing is bumped on the runner.
-        target_version=$(jq -r '.version' compact-js/package.json)
-
-        # 3.0.1 -> latest, 3.0.1-rc.2 -> rc, 3.1.0-alpha.4 -> alpha
-        if [[ "$target_version" == *-* ]]; then
-          dist_tag="${target_version#*-}"
-          dist_tag="${dist_tag%%.*}"
-        else
-          dist_tag=latest
-        fi
-
+        target_version=$(jq -er '.version' compact-js/package.json)
         echo "target_version=${target_version}" >> "$GITHUB_OUTPUT"
-        echo "dist_tag=${dist_tag}" >> "$GITHUB_OUTPUT"
-        echo "on_release_branch=${on_release_branch}" >> "$GITHUB_OUTPUT"
 
+    # The three packages are a `fixed` Changesets group, so a split version means
+    # the release PR was hand-edited or only partly applied.
     - name: Verify manifests agree on the version
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       env:
         TARGET_VERSION: ${{ steps.vars.outputs.target_version }}
       run: |
         for pkg in compact-js compact-js-node compact-js-command; do
-          found=$(jq -r '.version' "$pkg/package.json")
+          found=$(jq -er '.version' "$pkg/package.json")
           if [[ "$found" != "$TARGET_VERSION" ]]; then
-            echo "::error::$pkg is at $found but compact-js is at $TARGET_VERSION — re-run 'yarn release:prepare'"
+            echo "::error::$pkg is at $found but compact-js is at $TARGET_VERSION — the three packages are a 'fixed' group and must share a version"
             exit 1
           fi
         done
@@ -76,20 +46,17 @@ runs:
     - name: Create packages
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       run: yarn package
 
     - name: Create packages archive
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       env:
         ARCHIVE_NAME: ${{ inputs.package-archive-name }}
         TARGET_VERSION: ${{ steps.vars.outputs.target_version }}
       run: find . -type f -name '*.tgz' | zip "$ARCHIVE_NAME-$TARGET_VERSION.zip" -j -@
 
     - name: Upload packages artifact
-      if: ${{ steps.vars.outputs.on_release_branch == 'true' }}
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v5.0.0
       with:
         name: Packages ${{ inputs.package-archive-name }}
