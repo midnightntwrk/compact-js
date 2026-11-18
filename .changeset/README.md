@@ -17,10 +17,11 @@ generated file in `.changeset/` as part of your PR.
 The three packages are a `fixed` group, so they always publish at one version — a
 bump to any of them bumps all three.
 
-Changesets decide the published version. A release that has none is a no-op, so
-every change that ships needs one — see [`docs/releasing.md`](../docs/releasing.md)
-for how they turn into a release.
+Changesets decide the published version, so a PR that changes a published package
+needs one — see [`docs/releasing.md`](../docs/releasing.md) for how they turn into
+a release. When a package changed but nothing changes for consumers, record that
+with `yarn changeset --empty`.
 
-The workspace is on a **stable line** (no `pre.json`). To cut release candidates,
-`yarn changeset pre enter rc` in its own PR; versions then bump as `X.Y.Z-rc.N`
-until `yarn changeset pre exit` graduates the line.
+Pre mode is on when `.changeset/pre.json` exists; versions then bump as
+`X.Y.Z-rc.N`. Enter it with `yarn changeset pre enter rc` and graduate the line
+with `yarn changeset pre exit`, each in its own PR.
