@@ -73,8 +73,8 @@ jobs:
       MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
   # Publishes straight to npmjs with Trusted Publishing, tags, and creates the GitHub
-  # Releases. `changeset publish` skips any version already on the registry, so a
-  # re-run is a no-op rather than a failure.
+  # Releases. `changeset publish` skips any version already on the registry, so re-running
+  # after a partial failure finishes the release rather than repeating it.
   publish:
     name: Publish
     needs: [version, ci]
@@ -134,10 +134,8 @@ jobs:
 
       # The three packages are a `fixed` Changesets group, so they always share a version
       # and the release has a single identity. This aggregate tag is that identity — the
-      # form the QA test evidence and the component release note cite. It is *in addition*
-      # to the per-package tags above, which stay.
+      # form the QA test evidence and the component release note cite.
       - name: Tag and release the version as a whole
-        if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           REPO: ${{ github.repository }}
@@ -146,11 +144,40 @@ jobs:
           version=$(jq -er '.version' compact-js/package.json)
           tag="compact-js-v${version}"
 
-          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+          # Gated on the registry rather than on the publish step's output: that output is
+          # false whenever every version is already on npm, so a re-run after a failure
+          # below would skip this step and leave the release permanently untagged. Queried
+          # over plain HTTP because the ~/.npmrc setup-node writes carries an empty
+          # `_authToken`, which can turn a 404 into a 401.
+          set +e
+          http=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://registry.npmjs.org/@midnightntwrk%2fcompact-js/${version}")
+          reachable=$?
+          set -e
+          [[ $reachable -eq 0 ]] || { echo "::error::could not reach the npm registry"; exit 1; }
+          case "$http" in
+            200) ;;
+            404)
+              echo "::notice::@midnightntwrk/compact-js@${version} is not on npm — nothing to tag"
+              exit 0
+              ;;
+            *) echo "::error::npm registry answered ${http} for ${version}"; exit 1 ;;
+          esac
+
+          # --exit-code reports 2 for "no such ref"; 128 is an auth or network failure and
+          # must not be read as the tag being absent.
+          set +e
+          git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1
+          found=$?
+          set -e
+          if [[ $found -eq 0 ]]; then
             echo "::notice::${tag} already exists — leaving it in place"
-          else
+          elif [[ $found -eq 2 ]]; then
             git tag -a "$tag" -m "compact-js ${version}"
             git push origin "$tag"
+          else
+            echo "::error::could not query tag ${tag} (git ls-remote exit ${found})"
+            exit 1
           fi
 
           # The sections `changeset version` wrote for this version, across all three
