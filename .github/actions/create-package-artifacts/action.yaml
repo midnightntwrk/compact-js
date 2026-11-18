@@ -61,3 +61,14 @@ runs:
       with:
         name: Packages ${{ inputs.package-archive-name }}
         path: ${{ inputs.working-directory }}/${{ inputs.package-archive-name }}-${{ steps.vars.outputs.target_version }}.zip
+
+    # `changeset publish` ships these directories verbatim (publishConfig.directory), so
+    # the release job downloads them rather than rebuilding what CI already tested.
+    - name: Upload dist artifact
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v5.0.0
+      with:
+        name: Dist ${{ inputs.package-archive-name }}
+        path: |
+          ${{ inputs.working-directory }}/compact-js/dist
+          ${{ inputs.working-directory }}/compact-js-node/dist
+          ${{ inputs.working-directory }}/compact-js-command/dist
