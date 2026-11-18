@@ -35,8 +35,6 @@
     "package": "turbo run package",
     "lint": "eslint",
     "changeset": "changeset",
-    "changeset:status": "changeset status --since=origin/main",
-    "changeset:check": "changeset status --since=origin/${BASE_REF:-main} --verbose",
     "release:prepare": "changeset version && yarn install --mode=update-lockfile"
   },
   "dependencies": {

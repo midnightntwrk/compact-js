@@ -9,11 +9,6 @@ inputs:
     type: string
     required: true
 
-outputs:
-  target_version:
-    description: The version the packed tarballs carry.
-    value: ${{ steps.vars.outputs.target_version }}
-
 runs:
   using: "composite"
   steps:
