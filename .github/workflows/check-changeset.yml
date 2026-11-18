@@ -4,45 +4,50 @@ on:
   pull_request:
     branches: [main]
 
+# Keyed on the PR number: `head_ref` collides across forks, where two contributors
+# both pushing `patch-1` would cancel each other's checks.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
   check-changeset:
-    # Release PRs carry no changeset of their own (they consume them), and
-    # Renovate/Dependabot never author one, so the check would always fail there.
-    if: >-
-      ${{ !startsWith(github.head_ref, 'changeset-release/') &&
-          !startsWith(github.head_ref, 'renovate/') &&
-          !startsWith(github.head_ref, 'dependabot/') }}
+    # The Version Packages PR consumes changesets rather than adding one.
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      # This job never runs npm, so it needs no registry-url, scope or NODE_AUTH_TOKEN.
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
-        with:
-          node-version-file: .nvmrc
-
-      - name: Configure Yarn
-        uses: ./.github/actions/configure-yarn
-        with:
-          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      # Changesets are the only source of versions and release notes, so a PR
-      # without one ships its change unversioned and unmentioned.
+      # Deliberately git-only. The previous `changeset status` check had to install the
+      # workspace first, which needs a GitHub Packages token — and a fork PR is given no
+      # secrets, so the check was red for every outside contributor however good their
+      # changesets were.
       - name: Verify that a changeset exists
         env:
-          BASE_REF: ${{ github.base_ref }}
-        run: yarn changeset status --since="origin/$BASE_REF" --verbose
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "${BASE_SHA}...HEAD")
+
+          # `.changeset/README.md` is documentation, not a changeset.
+          if grep -E '^\.changeset/[^/]+\.md$' <<<"$changed" | grep -qv '^\.changeset/README\.md$'; then
+            echo "::notice::changeset found"
+            exit 0
+          fi
+
+          # Nothing a consumer installs changed, so there is nothing to version.
+          if ! grep -qE '^compact-js(-node|-command)?/' <<<"$changed"; then
+            echo "::notice::no published package changed — no changeset needed"
+            exit 0
+          fi
+
+          echo "::error::This PR changes a published package but adds no changeset. Run \`yarn changeset\`, or \`yarn changeset --empty\` if nothing changes for consumers."
+          exit 1
