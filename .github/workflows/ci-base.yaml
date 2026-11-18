@@ -64,15 +64,11 @@ jobs:
           node-version-file: ${{ inputs.node-version-file }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-      # Provisions the Yarn version pinned by each workspace's `packageManager`
-      # field. Without this the runner's Yarn 1.x shim is used instead.
-      - name: Enable corepack
-        run: corepack enable
-      - name: Configure yarn
-        run: |
-          yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
-          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
-          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
       - name: Cache Turbo and Yarn dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

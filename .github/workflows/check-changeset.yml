@@ -26,19 +26,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      # This job never runs npm, so it needs no registry-url, scope or NODE_AUTH_TOKEN.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
-          registry-url: https://npm.pkg.github.com/
-          scope: '@midnight-ntwrk'
           node-version-file: .nvmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Install dependencies
         run: yarn install --immutable
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       # Changesets are the only source of versions and release notes, so a PR
       # without one ships its change unversioned and unmentioned.

@@ -29,19 +29,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      # This job never runs npm, so it needs no registry-url, scope or NODE_AUTH_TOKEN.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
-          registry-url: https://npm.pkg.github.com/
-          scope: '@midnight-ntwrk'
           node-version-file: .nvmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Install dependencies
         run: yarn install --immutable
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Create / update Release Pull Request
         id: changesets
@@ -107,10 +107,13 @@ jobs:
         run: npm install -g npm@latest
 
       # Installing still reads upstream @midnight-ntwrk packages from GitHub Packages.
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
       - name: Install dependencies
         run: yarn install --immutable
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Build and package
         run: yarn build && yarn package
