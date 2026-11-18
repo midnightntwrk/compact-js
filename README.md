@@ -33,7 +33,8 @@ hand-versioned and no tag is pushed by hand.
 
 1. **Every PR that ships a change carries a changeset** — run `yarn changeset`, pick the
    semver bump, and write the summary a consumer will read. That summary becomes the
-   release note. CI fails a PR without one.
+   release note. CI fails a PR that changes a published package without one; use
+   `yarn changeset --empty` when nothing changes for consumers.
 2. **CD opens a "Version Packages" PR** on each push to `main`, applying the pending
    changesets to the manifests and CHANGELOGs.
 3. **Merging that PR cuts the release** — CD publishes to npmjs, tags, and creates the

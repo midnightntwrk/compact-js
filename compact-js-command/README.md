@@ -1,5 +1,12 @@
 # Compact.js (Command Line Utilities)
 
+> [!IMPORTANT]
+> **Renamed at 4.0.0.** This package was `@midnight-ntwrk/compact-js-command` and is now
+> `@midnightntwrk/compact-js-command` — note the missing hyphen — published to npmjs rather
+> than GitHub Packages. Update the dependency and every import, including the one at the top
+> of your `contract.config.ts`: upgrading the CLI while a config still imports
+> `@midnight-ntwrk/compact-js` loads two copies of the library with no warning.
+
 ## Introduction
 
 Provides an opinionated command line interface for Compact.js, allowing `compactc` compiled contracts to be

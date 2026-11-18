@@ -1,5 +1,13 @@
 # Compact.js
 
+> [!IMPORTANT]
+> **Renamed at 4.0.0.** This package was `@midnight-ntwrk/compact-js` and is now
+> `@midnightntwrk/compact-js` — note the missing hyphen — published to npmjs rather than
+> GitHub Packages. Update the dependency and every import, including the one at the top of
+> your `contract.config.ts`. The old name stops at `3.0.2`, and because the two are
+> different packages, using both in one project loads two copies of the library with no
+> warning.
+
 ## Introduction
 
 Compact.js provides a Typescript-based execution environment for smart contracts
