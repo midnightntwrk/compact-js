@@ -74,11 +74,11 @@ That means three things have to agree exactly, or the exchange fails:
 | Environment | `npm-publish-stable` |
 
 A mismatch fails with `403 OIDC token exchange failed`; a missing or expired publisher
-config fails with `404`. Two further traps: Trusted Publishing needs **npm ≥ 11.5.1** (CD
-installs it explicitly, because `.nvmrc`'s bundled npm is older and simply never attempts
-OIDC), and **no `NODE_AUTH_TOKEN` or `always-auth` may be set on the publish step** — a
-token in the environment shadows OIDC, and `always-auth` writes an empty `_authToken` line
-into `~/.npmrc`.
+config fails with `404`. One further trap: `setup-node` with a `registry-url` **always**
+writes an `_authToken=${NODE_AUTH_TOKEN}` line into `~/.npmrc`, so the rule is not to keep
+that line out of the file but to keep a **real token out of `NODE_AUTH_TOKEN`** — one in
+the environment shadows OIDC. Trusted Publishing also needs npm ≥ 11.5.1, which the Node
+pinned in `.nvmrc` already bundles.
 
 Installing is separate and still uses a token: upstream `@midnight-ntwrk` dependencies
 come from GitHub Packages, which rejects anonymous reads

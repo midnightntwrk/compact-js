@@ -132,20 +132,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      # No NODE_AUTH_TOKEN and no always-auth here: a token in the environment shadows
-      # OIDC, and always-auth writes an empty `_authToken` line into ~/.npmrc, which is
-      # the usual reason Trusted Publishing is silently never attempted.
+      # `registry-url` always writes an `_authToken=${NODE_AUTH_TOKEN}` line into ~/.npmrc,
+      # so the rule is not to keep that line out but to keep a real token out of
+      # NODE_AUTH_TOKEN — one in the environment shadows OIDC.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
           registry-url: https://registry.npmjs.org
           scope: '@midnightntwrk'
           node-version-file: .nvmrc
-
-      # Trusted Publishing needs npm >= 11.5.1; the version bundled with .nvmrc's Node is
-      # older, and an older npm does not attempt OIDC at all.
-      - name: Use an npm that supports Trusted Publishing
-        run: npm install -g npm@latest
 
       # Installing still reads upstream @midnight-ntwrk packages from GitHub Packages.
       - name: Configure Yarn
