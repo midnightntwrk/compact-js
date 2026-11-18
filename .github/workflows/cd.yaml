@@ -7,23 +7,59 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  # Is a release outstanding? Answered from the registry rather than from the push
+  # event: while changesets are pending, main still carries the published version, and
+  # merging the Version Packages PR bumps it to one npm has never seen. That stays true
+  # until the publish succeeds, so a failed release can be finished by pushing again.
+  assess:
+    name: Assess
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      needsPublish: ${{ steps.registry.outputs.needs-publish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Look up the current version on npm
+        id: registry
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+          needed=false
+
+          # Any one of the three missing means the release is incomplete. Queried over
+          # plain HTTP so no npm credentials are involved in the decision.
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+            http=$(curl -sS -o /dev/null -w '%{http_code}' \
+              "https://registry.npmjs.org/${name/\//%2f}/${version}")
+            case "$http" in
+              200) ;;
+              404) needed=true ;;
+              *) echo "::error::npm registry answered ${http} for ${name}@${version}"; exit 1 ;;
+            esac
+          done
+
+          echo "::notice::${version} needs publishing: ${needed}"
+          echo "needs-publish=${needed}" >> "$GITHUB_OUTPUT"
+
   # Opens and updates the "Version Packages" PR. Ungated: the release PR is
   # refreshed on every push to main, and the human gate is merging it.
   version:
     name: Version (release PR)
     runs-on: ubuntu-latest
+    # Superseding an in-flight update is correct — the newer push produces the same PR
+    # from newer changesets.
+    concurrency:
+      group: cd-version-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: write
       pull-requests: write
-    outputs:
-      # 'false' means the release PR has just merged and there is nothing left to
-      # consume — that, and only that, is a publishable commit.
-      hasChangesets: ${{ steps.changesets.outputs.hasChangesets }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
@@ -57,8 +93,8 @@ jobs:
 
   ci:
     name: Build, Lint and Test
-    needs: version
-    if: needs.version.outputs.hasChangesets == 'false'
+    needs: assess
+    if: needs.assess.outputs.needsPublish == 'true'
     uses: ./.github/workflows/ci-base.yaml
     permissions:
       contents: read
@@ -77,9 +113,14 @@ jobs:
   # after a partial failure finishes the release rather than repeating it.
   publish:
     name: Publish
-    needs: [version, ci]
-    if: needs.version.outputs.hasChangesets == 'false'
+    needs: [assess, ci]
+    if: needs.assess.outputs.needsPublish == 'true'
     runs-on: ubuntu-latest
+    # Keyed on the commit, so a later push can never cancel a release that is queued
+    # behind the reviewer gate — GitHub keeps only one pending run per group.
+    concurrency:
+      group: cd-publish-${{ github.sha }}
+      cancel-in-progress: false
     # Human gate on anything reaching npmjs. The name must match the Trusted Publisher
     # configured on each package, or the OIDC exchange fails with a 403.
     environment: npm-publish-stable
