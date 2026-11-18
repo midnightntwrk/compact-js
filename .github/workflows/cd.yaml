@@ -153,19 +153,9 @@ jobs:
             git push origin "$tag"
           fi
 
-          # The section `changeset version` wrote for this version, which is the same
-          # content the per-package Releases carry.
-          node -e '
-            const fs = require("node:fs");
-            const version = process.argv[1];
-            const text = fs.readFileSync("compact-js/CHANGELOG.md", "utf8");
-            const marker = `\n## ${version}\n`;
-            const at = text.indexOf(marker);
-            if (at === -1) throw new Error(`compact-js/CHANGELOG.md has no "## ${version}" section`);
-            const rest = text.slice(at + marker.length);
-            const next = rest.search(/^## /m);
-            fs.writeFileSync("release-body.md", (next === -1 ? rest : rest.slice(0, next)).trim() + "\n");
-          ' "$version"
+          # The sections `changeset version` wrote for this version, across all three
+          # CHANGELOGs — the same content the per-package Releases carry.
+          node scripts/release-body.mjs "$version" release-body.md
 
           # An rc must never become the repository's "Latest" release.
           flags=()

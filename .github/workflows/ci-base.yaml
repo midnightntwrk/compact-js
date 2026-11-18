@@ -102,6 +102,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+      # `scripts/` is not a workspace, so turbo does not reach it.
+      - name: Run release-script tests
+        run: yarn test-scripts
+
       - name: Aggregate coverage reports
         run: |
           mkdir -p .nyc_output
