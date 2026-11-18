@@ -39,9 +39,9 @@
  * import. Privacy comes from `package.json` `exports` blocking `./effect/internal/*` instead. See
  * `compact-js`'s `internal/boundary.ts` for why this note does not spell the tag out.
  */
-import type { CompiledContract, Contract, ContractExecutable, Ledger } from '@midnight-ntwrk/compact-js/effect';
-import { type ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
 import type * as SigningKey from '@midnight-ntwrk/platform-js/effect/SigningKey';
+import type { CompiledContract, Contract, ContractExecutable, Ledger } from '@midnightntwrk/compact-js/effect';
+import { type ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { type Effect, type Option } from 'effect';
 
 import { type EncodedZswapLocalStateSchema } from '../encodedZswapLocalStateSchema.js';
@@ -99,7 +99,7 @@ export interface CommandIntent {
  * The ledger-facade members the command handlers call.
  *
  * @remarks
- * Satisfied by every era's `Ledger` — `@midnight-ntwrk/compact-js/v8/effect`'s as much as
+ * Satisfied by every era's `Ledger` — `@midnightntwrk/compact-js/v8/effect`'s as much as
  * `/v9/effect`'s — because it names only what is common to both and keeps the era's own types in
  * `never`/`unknown` positions.
  */

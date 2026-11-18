@@ -18,9 +18,9 @@ import { resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
 import { afterAll, describe, expect, it } from '@effect/vitest';
-import { ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
-import { deployCommand } from '@midnight-ntwrk/compact-js-command/effect';
 import { ModuleResolutionError } from '@midnight-ntwrk/compact-runtime';
+import { ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
+import { deployCommand } from '@midnightntwrk/compact-js-command/effect';
 import { Effect } from 'effect';
 
 import * as InternalCommand from '../../src/effect/internal/command.js';

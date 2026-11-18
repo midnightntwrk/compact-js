@@ -15,7 +15,7 @@
 
 import { type FileSystem, type Path } from '@effect/platform';
 import { type PlatformError } from '@effect/platform/Error';
-import { type CompiledContract, type Contract, type ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import { type CompiledContract, type Contract, type ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { Context, type Effect,type Layer } from 'effect';
 
 import * as internal from './internal/compiledContractReflection.js';

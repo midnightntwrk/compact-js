@@ -100,7 +100,7 @@ describe('ledger 8 facade', () => {
     // on the ledger-v8 package's own class, not on the literal `8` (whose obvious repair when red
     // is to edit the number) and not on the era-8 binding this file already imports (which would
     // be a tautology).
-    const v8Entry = await import('@midnight-ntwrk/compact-js/v8/effect');
+    const v8Entry = await import('@midnightntwrk/compact-js/v8/effect');
     const ledgerV8 = await import('@midnightntwrk/ledger-v8');
 
     expect(v8Entry.Ledger.ContractState).toBe(ledgerV8.ContractState);
@@ -109,7 +109,7 @@ describe('ledger 8 facade', () => {
   });
 
   it('exposes no contract-event surface on the `/v8/effect` entry', async () => {
-    const v8Entry = await import('@midnight-ntwrk/compact-js/v8/effect');
+    const v8Entry = await import('@midnightntwrk/compact-js/v8/effect');
 
     // Era-impossible on ledger 8, so absent rather than present and failing at run time (#388).
     for (const name of ['ContractEventStore', 'ContractLog', 'ContractEventValidationError', 'validateEvents']) {
@@ -118,7 +118,7 @@ describe('ledger 8 facade', () => {
   });
 
   it('offers the boundary wrapper on both halves of the `/v8/effect` entry', async () => {
-    const v8Entry = await import('@midnight-ntwrk/compact-js/v8/effect');
+    const v8Entry = await import('@midnightntwrk/compact-js/v8/effect');
 
     // Without this the era-8 entry is the one place in the package where a WASM rejection is a
     // defect: it escapes the caller's declared error channel, and the CLI (running with
@@ -128,7 +128,7 @@ describe('ledger 8 facade', () => {
   });
 
   it('turns a rejected era 8 runtime call into a typed failure, not a defect', async () => {
-    const v8Entry = await import('@midnight-ntwrk/compact-js/v8/effect');
+    const v8Entry = await import('@midnightntwrk/compact-js/v8/effect');
     const exit = await Effect.runPromiseExit(
       v8Entry.CompactRuntime.tryRuntime('Failed on the era 8 runtime boundary', () => {
         throw new Error('rejected by WASM');

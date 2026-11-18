@@ -29,7 +29,7 @@ the contract and its circuits more convenient, and TypeScript idiomatic.
 ## Ledger eras
 
 The version suffix on an era-pinned entry names the **ledger era** it targets, not this package's
-own version: `@midnight-ntwrk/compact-js/v9` (and `/v9/effect`) targets **ledger 9**, and
+own version: `@midnightntwrk/compact-js/v9` (and `/v9/effect`) targets **ledger 9**, and
 `/v8` (with `/v8/effect`) targets **ledger 8**.
 
 The bound era is inspectable at run time via `Ledger.era`, from any entry.
@@ -75,7 +75,7 @@ The pattern, therefore: give each era's contracts a **resolution scope** whose
 - a bundler alias scoped to that directory;
 - a separate workspace or package per era, each pinning its own runtime.
 
-Pin `@midnight-ntwrk/compact-js` the same way in that scope if you want the full executable surface
+Pin `@midnightntwrk/compact-js` the same way in that scope if you want the full executable surface
 for that era, rather than just the seams `/v8/effect` gives you.
 
 Two things are easy to get wrong:
@@ -128,7 +128,7 @@ contract's `address`.
   matching history then tails new events.
 
 ```ts
-import { ContractEventStore, ContractLog } from '@midnight-ntwrk/compact-js/effect';
+import { ContractEventStore, ContractLog } from '@midnightntwrk/compact-js/effect';
 import { Effect, Stream } from 'effect';
 
 const program = Effect.gen(function* () {

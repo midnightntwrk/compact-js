@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { type Contract } from '@midnight-ntwrk/compact-js/effect';
 import type * as Era9Runtime from '@midnight-ntwrk/compact-runtime';
+import { type Contract } from '@midnightntwrk/compact-js/effect';
 import type * as Era8Runtime from 'compact-runtime-ledger8';
 import { describe, expect, it } from 'tstyche';
 

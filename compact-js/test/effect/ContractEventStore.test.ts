@@ -14,10 +14,10 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import * as ContractEventStore from '@midnight-ntwrk/compact-js/effect/ContractEventStore';
-import * as ContractLog from '@midnight-ntwrk/compact-js/effect/ContractLog';
-import * as MalformedHexPrefixError from '@midnight-ntwrk/compact-js/effect/MalformedHexPrefixError';
 import { ContractAddress } from '@midnight-ntwrk/platform-js';
+import * as ContractEventStore from '@midnightntwrk/compact-js/effect/ContractEventStore';
+import * as ContractLog from '@midnightntwrk/compact-js/effect/ContractLog';
+import * as MalformedHexPrefixError from '@midnightntwrk/compact-js/effect/MalformedHexPrefixError';
 import { Effect, Exit, Stream } from 'effect';
 
 import * as Fixtures from './logEventFixtures.js';

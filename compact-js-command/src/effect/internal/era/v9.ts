@@ -21,7 +21,7 @@
  * `internal/era/v9Executable.ts`. The module is a curated application — the two facades, the two
  * capabilities ledger 9 has, and the four handler factories applied to them.
  *
- * Pinned to `@midnight-ntwrk/compact-js/v9/effect` rather than the unsuffixed entry. The
+ * Pinned to `@midnightntwrk/compact-js/v9/effect` rather than the unsuffixed entry. The
  * distinction is the one the library draws for itself: the unsuffixed entry means "whichever era
  * this build bound", so using it here would make a `--ledger-era 9` invocation silently follow the
  * next era swap while still calling itself 9 (midnight-sdk#387/#388).
@@ -32,11 +32,11 @@
  * import. Privacy comes from `package.json` `exports` blocking `./effect/internal/*` instead. See
  * `compact-js`'s `internal/boundary.ts` for why this note does not spell the tag out.
  */
-import { CompactRuntime, type Contract, type ContractExecutable, Ledger } from '@midnight-ntwrk/compact-js/v9/effect';
+import { CompactRuntime, type Contract, type ContractExecutable, Ledger } from '@midnightntwrk/compact-js/v9/effect';
 import {
   FileSystemContractModuleProvider,
   FileSystemContractStateProvider
-} from '@midnight-ntwrk/compact-js-node/effect';
+} from '@midnightntwrk/compact-js-node/effect';
 
 import * as CircuitCommand from '../circuitCommand.js';
 import * as DeployCommand from '../deployCommand.js';

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CompiledContract, type Contract,ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, type Contract,ContractExecutable } from '@midnightntwrk/compact-js/effect';
 
 // The `.js` extension is load-bearing, not decoration. `ConfigCompiler` transpiles this file and
 // `import()`s the result in the CLI's own process — plain Node ESM, which does no extension

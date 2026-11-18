@@ -16,13 +16,13 @@
 /**
  * The **ledger 9** era-pinned Effect entry (midnight-sdk#387/#388). The `v9` suffix names the
  * ledger era this entry targets — ledger 9 — not this package's own version. Same API as
- * `@midnight-ntwrk/compact-js/effect`.
+ * `@midnightntwrk/compact-js/effect`.
  *
  * This entry **binds ledger 9 itself** (`internal/era/v9Ledger.ts` and `internal/runtime/v0_21.ts`),
  * rather than re-exporting the facades. It used to do the latter, which made it an alias for
  * whatever `internal/ledger/current.ts` bound: advancing that turned `/v9` into an entry for a
  * different era, with nothing to catch it — the `/v9`-versus-root parity tests were comparing an
- * alias with its own target. The unsuffixed `@midnight-ntwrk/compact-js/effect` keeps that
+ * alias with its own target. The unsuffixed `@midnightntwrk/compact-js/effect` keeps that
  * follow-the-build-era behaviour, which is what it is *for*; the two agree today and are meant to
  * diverge the first time `current.ts` advances.
  *

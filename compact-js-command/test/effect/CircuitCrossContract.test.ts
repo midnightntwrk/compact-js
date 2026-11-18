@@ -21,11 +21,11 @@ import { Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
 import { NodeContext } from '@effect/platform-node';
 import { describe, it } from '@effect/vitest';
-import { CompiledContract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
-import { circuitCommand } from '@midnight-ntwrk/compact-js-command/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import { ContractState as RuntimeContractState } from '@midnight-ntwrk/compact-runtime';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
+import { CompiledContract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
+import { circuitCommand } from '@midnightntwrk/compact-js-command/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import {
   type ContractCall,
   ContractDeploy,

@@ -33,7 +33,7 @@
  *
  * Selecting this era makes the *CLI* speak ledger 8 — its intents, its state decoding, its
  * conversions. It cannot make the contract speak it: a `contract.config.ts` targeting this era must
- * import `@midnight-ntwrk/compact-js/v8/effect` (which `invocationHandler` checks, by comparing the
+ * import `@midnightntwrk/compact-js/v8/effect` (which `invocationHandler` checks, by comparing the
  * executable's own era against the selected one), and the compiled artifact it loads resolves
  * `@midnight-ntwrk/compact-runtime` itself — by bare specifier, asserting
  * `checkRuntimeVersion('0.16.0')` on import — so that package must resolve to the 0.16 line where
@@ -46,7 +46,7 @@
  * import. Privacy comes from `package.json` `exports` blocking `./effect/internal/*` instead. See
  * `compact-js`'s `internal/boundary.ts` for why this note does not spell the tag out.
  */
-import { CompactRuntime, type Contract, type ContractExecutable, Ledger } from '@midnight-ntwrk/compact-js/v8/effect';
+import { CompactRuntime, type Contract, type ContractExecutable, Ledger } from '@midnightntwrk/compact-js/v8/effect';
 
 import * as CircuitCommand from '../circuitCommand.js';
 import * as DeployCommand from '../deployCommand.js';

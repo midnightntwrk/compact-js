@@ -18,7 +18,7 @@
  * this entry targets — ledger 8 — not this package's own version.
  *
  * @remarks
- * Same surface as `@midnight-ntwrk/compact-js/v8/effect`; see that module for what this era can
+ * Same surface as `@midnightntwrk/compact-js/v8/effect`; see that module for what this era can
  * and cannot do, and why `ContractExecutable` is not among it yet.
  */
 export * from './effect.js';

@@ -17,7 +17,7 @@ import {
   encodeContractKeyLocation,
   hashVerifierKey,
   parseContractKeyLocation
-} from '@midnight-ntwrk/compact-js/effect/ContractKeyLocation';
+} from '@midnightntwrk/compact-js/effect/ContractKeyLocation';
 import { describe, expect, it } from 'vitest';
 
 const ADDRESS = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';

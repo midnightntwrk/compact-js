@@ -18,9 +18,9 @@ import { resolve } from 'node:path';
 import { Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
 import { describe, it } from '@effect/vitest';
-import { Ledger } from '@midnight-ntwrk/compact-js/effect';
-import { circuitCommand } from '@midnight-ntwrk/compact-js-command/effect';
 import { encodeZswapLocalState } from '@midnight-ntwrk/compact-runtime';
+import { Ledger } from '@midnightntwrk/compact-js/effect';
+import { circuitCommand } from '@midnightntwrk/compact-js-command/effect';
 import {
   Intent,
   LedgerParameters,

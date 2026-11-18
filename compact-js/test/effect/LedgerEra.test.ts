@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import * as rootEntry from '@midnight-ntwrk/compact-js';
-import * as effectEntry from '@midnight-ntwrk/compact-js/effect';
-import { Ledger } from '@midnight-ntwrk/compact-js/effect';
-import * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
-import * as v9Entry from '@midnight-ntwrk/compact-js/v9';
-import * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
 import { CostModel as RuntimeV0_21CostModel } from '@midnight-ntwrk/compact-runtime';
+import * as rootEntry from '@midnightntwrk/compact-js';
+import * as effectEntry from '@midnightntwrk/compact-js/effect';
+import { Ledger } from '@midnightntwrk/compact-js/effect';
+import * as v8EffectEntry from '@midnightntwrk/compact-js/v8/effect';
+import * as v9Entry from '@midnightntwrk/compact-js/v9';
+import * as v9EffectEntry from '@midnightntwrk/compact-js/v9/effect';
 import * as LedgerV8 from '@midnightntwrk/ledger-v8';
 import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { ContractState, LedgerParameters } from '@midnightntwrk/ledger-v9';

@@ -17,9 +17,9 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
-import { Ledger as LedgerEight } from '@midnight-ntwrk/compact-js/v8/effect';
-import { Ledger as LedgerNine } from '@midnight-ntwrk/compact-js/v9/effect';
-import { circuitCommand, deployCommand } from '@midnight-ntwrk/compact-js-command/effect';
+import { Ledger as LedgerEight } from '@midnightntwrk/compact-js/v8/effect';
+import { Ledger as LedgerNine } from '@midnightntwrk/compact-js/v9/effect';
+import { circuitCommand, deployCommand } from '@midnightntwrk/compact-js-command/effect';
 import { Effect } from 'effect';
 import { afterAll, describe, expect, it } from 'vitest';
 

@@ -7,10 +7,9 @@ runs on every push to `main` and does one of two things:
 - **changesets are pending** — it opens or updates the **Version Packages** pull request
   and publishes nothing.
 - **no changesets remain** (the Version Packages PR has just merged) — it builds, publishes
-  to **GitHub Packages**, tags and creates the GitHub Releases.
+  to **npmjs**, tags and creates the GitHub Releases, behind a reviewer gate.
 
-So the release is cut by *merging a pull request*, not by dispatching a workflow. Reaching
-**npmjs** is a separate, manual step in another repository — see step 4.
+So the release is cut by *merging a pull request*, not by dispatching a workflow.
 
 ## 1. Describe the change (every PR)
 
@@ -37,14 +36,15 @@ writing each package's `CHANGELOG.md` and deleting the changesets it consumed.
 Review it like any other PR. Edits to the CHANGELOG entries land in the published Release
 body, so this is where release-note wording gets fixed.
 
-## 3. Publish to GitHub Packages
+## 3. Approve the publish
 
 Merging that PR leaves `main` with no changesets, which is the signal CD publishes on. It
-runs CI, then `changeset publish`:
+runs CI, then waits on the **`npm-publish-stable`** environment. Approve it and
+`changeset publish`:
 
-- publishes each package, skipping any version already on the registry, so a re-run is a
-  no-op rather than a failure;
-- pushes a `@midnight-ntwrk/<package>@<version>` tag per package;
+- publishes each package **to npmjs** under `@midnightntwrk`, skipping any version already
+  on the registry, so a re-run is a no-op rather than a failure;
+- pushes a `@midnightntwrk/<package>@<version>` tag per package;
 - creates one GitHub Release per package, with the body taken from its `CHANGELOG.md`.
   A version carrying a prerelease part is flagged as a prerelease, so an `rc` never
   becomes the repository's "Latest" release.
@@ -59,24 +59,34 @@ re-running leaves the tag in place and refreshes the notes.
 The npm dist-tag follows the version: a plain `3.0.3` publishes under `latest`, and while
 pre mode is on, `3.0.3-rc.1` publishes under `rc`.
 
-## 4. Mirror to npmjs
+## How publishing is authenticated
 
-**CD stops at GitHub Packages.** Nothing reaches npmjs until someone dispatches
-[`push-npm-package.yml`](https://github.com/midnight-ntwrk/artifacts/actions/workflows/push-npm-package.yml)
-in `midnight-ntwrk/artifacts`, picking the library and typing the version. Run it once per
-package — `compact-js`, `compact-js-node`, `compact-js-command`.
+CD publishes to npmjs with **Trusted Publishing**: GitHub mints a short-lived OIDC token
+and npm exchanges it for publish rights. There is no npm token anywhere in the workflow,
+and each package gets a SLSA provenance attestation.
 
-That workflow packs the tarball we published here and re-publishes it to npmjs, so the two
-registries carry byte-identical artifacts. It derives the npmjs dist-tag from the version
-suffix itself and will move `latest` onto the highest-priority prerelease when a package
-has no stable version yet — leave `use_legacy_behavior` at `false` so that logic runs.
+That means three things have to agree exactly, or the exchange fails:
 
-Because this dispatch is manual, it is the gate on anything becoming public: CD needs no
-approval step of its own.
+| | |
+| --- | --- |
+| Repository | `midnightntwrk/compact-js` |
+| Workflow filename | `cd.yaml` |
+| Environment | `npm-publish-stable` |
 
-> The mirror hard-codes the `@midnight-ntwrk` scope, in both the package lookup and the
-> tarball filename it expects. It has to be taught `@midnightntwrk` before these packages
-> can be renamed — see [#20](https://github.com/midnightntwrk/compact-js/issues/20).
+A mismatch fails with `403 OIDC token exchange failed`; a missing or expired publisher
+config fails with `404`. Two further traps: Trusted Publishing needs **npm ≥ 11.5.1** (CD
+installs it explicitly, because `.nvmrc`'s bundled npm is older and simply never attempts
+OIDC), and **no `NODE_AUTH_TOKEN` or `always-auth` may be set on the publish step** — a
+token in the environment shadows OIDC, and `always-auth` writes an empty `_authToken` line
+into `~/.npmrc`.
+
+Installing is separate and still uses a token: upstream `@midnight-ntwrk` dependencies
+come from GitHub Packages, which rejects anonymous reads
+([#56](https://github.com/midnightntwrk/compact-js/issues/56)).
+
+> These packages used to reach npmjs by a manual dispatch of `push-npm-package.yml` in
+> `midnight-ntwrk/artifacts`, which re-published our GitHub Packages tarballs. That path is
+> no longer used, and should not be dispatched for `compact-js*`.
 
 ## Release candidates
 
@@ -94,7 +104,6 @@ stable version.
   `CHANGELOG.md` at the repository root is frozen history from the pre-Changesets flow.
 - CD only runs on `main`. Maintenance releases from a `release/compact-js/*` branch are not
   supported; a 2.x patch would otherwise be able to take the `latest` dist-tag.
-- Publishing targets **GitHub Packages** under the `@midnight-ntwrk` scope, using the
-  long-lived `MIDNIGHTCI_PACKAGES_WRITE` token. The scope is being retired org-wide in
-  favour of `@midnightntwrk`; that migration, and the matching change to the npmjs mirror,
-  is [#20](https://github.com/midnightntwrk/compact-js/issues/20).
+- The packages are `@midnightntwrk/*`. They were `@midnight-ntwrk/*` up to and including
+  `3.0.2`, which is where that scope stops: those versions stay on npmjs as history and
+  receive no further releases.

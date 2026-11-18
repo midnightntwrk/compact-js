@@ -5,7 +5,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "fixed": [["@midnight-ntwrk/compact-js", "@midnight-ntwrk/compact-js-node", "@midnight-ntwrk/compact-js-command"]],
+  "fixed": [["@midnightntwrk/compact-js", "@midnightntwrk/compact-js-node", "@midnightntwrk/compact-js-command"]],
   "linked": [],
   "ignore": []
 }

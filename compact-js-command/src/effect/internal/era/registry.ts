@@ -17,7 +17,7 @@
  * What `--ledger-era` selects.
  *
  * @remarks
- * One {@link EraCommands} per era-pinned entry `@midnight-ntwrk/compact-js` publishes, each holding
+ * One {@link EraCommands} per era-pinned entry `@midnightntwrk/compact-js` publishes, each holding
  * that era's application of the four handler factories. Imported only from `effect/index.ts`, where
  * each `Command` is wired to the handler it wants out of the selected era — so the era is resolved
  * once, at the top of an invocation, and every ledger and compact-runtime call the handler makes
@@ -29,7 +29,7 @@
  * import. Privacy comes from `package.json` `exports` blocking `./effect/internal/*` instead. See
  * `compact-js`'s `internal/boundary.ts` for why this note does not spell the tag out.
  */
-import { type Ledger } from '@midnight-ntwrk/compact-js/effect';
+import { type Ledger } from '@midnightntwrk/compact-js/effect';
 
 import type * as CircuitCommand from '../circuitCommand.js';
 import { type CommandHandler } from '../command.js';

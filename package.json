@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-ntwrk/compact-js-sources",
+  "name": "@midnightntwrk/compact-js-sources",
   "description": "",
   "version": "3.0.2",
   "private": true,
@@ -58,8 +58,8 @@
     "@effect/vitest": "^0.30.0",
     "@effect/workflow": "^0.19.0",
     "@eslint/js": "^10.0.1",
-    "@midnight-ntwrk/compact-js-node": "workspace:*",
     "@midnight-ntwrk/midnight-js-compact": "5.0.0-beta.3",
+    "@midnightntwrk/compact-js-node": "workspace:*",
     "@tsconfig/node22": "^22.0.6",
     "@types/node": "^26.6.2",
     "@vitest/coverage-v8": "^4.1.12",

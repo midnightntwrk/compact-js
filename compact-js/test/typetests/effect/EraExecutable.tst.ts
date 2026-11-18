@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import type * as V8Entry from '@midnight-ntwrk/compact-js/v8/effect';
-import type * as V9Entry from '@midnight-ntwrk/compact-js/v9/effect';
+import type * as V8Entry from '@midnightntwrk/compact-js/v8/effect';
+import type * as V9Entry from '@midnightntwrk/compact-js/v9/effect';
 import type { ContractState as LedgerV8ContractState } from '@midnightntwrk/ledger-v8';
 import type { ContractState as LedgerV9ContractState } from '@midnightntwrk/ledger-v9';
 import { describe, expect, it } from 'tstyche';

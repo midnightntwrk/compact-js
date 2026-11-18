@@ -14,7 +14,7 @@
  */
 
 import { FileSystem, Path } from '@effect/platform';
-import { CompiledContract, Contract, ZKConfiguration, ZKConfigurationReadError } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, Contract, ZKConfiguration, ZKConfigurationReadError } from '@midnightntwrk/compact-js/effect';
 import { Effect, Layer, Option } from 'effect';
 
 const KEYS_FOLDER = 'keys';

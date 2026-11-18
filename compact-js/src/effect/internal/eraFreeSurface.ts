@@ -37,7 +37,7 @@
  * they are era-free at run time yet meaningless on a line that cannot emit events, so they live in
  * `contractEventsSurface.ts` and are composed only by entries whose era supports them.
  *
- * Internal by design: consumers reach these through `@midnight-ntwrk/compact-js/effect` or an
+ * Internal by design: consumers reach these through `@midnightntwrk/compact-js/effect` or an
  * era-pinned entry, and `package.json` `exports` blocks `./effect/internal/*` with `null`. The era
  * entry files under `src/v<N>` are package-internal source, so they may import it.
  *

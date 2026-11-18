@@ -18,7 +18,7 @@
  * era this entry targets — ledger 9 — not this package's own version. Binding to this path
  * records an intent to speak a specific ledger era (e.g. across a hardfork window).
  *
- * Same surface as `@midnight-ntwrk/compact-js/v9/effect`, exactly as `/v8` mirrors `/v8/effect`.
+ * Same surface as `@midnightntwrk/compact-js/v9/effect`, exactly as `/v8` mirrors `/v8/effect`.
  *
  * This used to be `export * from '../index.js'` — the *root* barrel, which resolves both seams'
  * `current.ts`. That made this entry an alias for whichever era the build bound, so repointing

@@ -14,8 +14,8 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import { validateEvents } from '@midnight-ntwrk/compact-js/effect';
-import * as ContractEventValidationError from '@midnight-ntwrk/compact-js/effect/ContractEventValidationError';
+import { validateEvents } from '@midnightntwrk/compact-js/effect';
+import * as ContractEventValidationError from '@midnightntwrk/compact-js/effect/ContractEventValidationError';
 import { Effect } from 'effect';
 
 /**

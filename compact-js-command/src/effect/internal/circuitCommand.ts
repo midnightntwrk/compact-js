@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { type Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
 import { type PlatformError } from '@effect/platform/Error';
-import { Contract, ContractKeyLocation, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import { Contract, ContractKeyLocation, ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { Array, Console, Effect, Option } from 'effect';
 
 import * as CompiledContractReflection from '../CompiledContractReflection.js';

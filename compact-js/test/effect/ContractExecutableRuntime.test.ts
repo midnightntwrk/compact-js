@@ -17,13 +17,13 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { describe, expect,it } from '@effect/vitest';
+import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import {
   CompiledContract,
   ContractExecutable,
   ContractExecutableRuntime
-} from '@midnight-ntwrk/compact-js/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
-import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
+} from '@midnightntwrk/compact-js/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import { ConfigProvider, Effect, Layer } from 'effect';
 
 import { CounterContract } from '../contract';

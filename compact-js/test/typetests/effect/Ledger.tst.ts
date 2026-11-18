@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { type CompactRuntime, type ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
-import type * as v8EffectEntry from '@midnight-ntwrk/compact-js/v8/effect';
-import type * as v9EffectEntry from '@midnight-ntwrk/compact-js/v9/effect';
 import type { SignatureKind } from '@midnight-ntwrk/platform-js/effect/SigningKey';
+import { type CompactRuntime, type ContractRuntimeError, Ledger } from '@midnightntwrk/compact-js/effect';
+import type * as v8EffectEntry from '@midnightntwrk/compact-js/v8/effect';
+import type * as v9EffectEntry from '@midnightntwrk/compact-js/v9/effect';
 import type {
   ContractAction as LedgerV8ContractAction,
   DustActions as LedgerV8DustActions,

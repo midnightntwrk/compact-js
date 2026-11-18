@@ -24,7 +24,7 @@
 // purpose is to be broken, so sharing it with the suites that expect a working counter would be a
 // trap. `ErrorReporting.test.ts` removes the transpiled sibling it leaves behind.
 
-import { CompiledContract, type Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, type Contract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
 
 import { Contract as C_ } from '../../../../compact-js/test/contract/managed/counter/contract/index.js';
 

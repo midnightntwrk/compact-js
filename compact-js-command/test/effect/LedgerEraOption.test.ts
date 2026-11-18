@@ -18,7 +18,7 @@ import { resolve } from 'node:path';
 import { Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
 import { describe, it } from '@effect/vitest';
-import { circuitCommand, deployCommand, maintainCommand } from '@midnight-ntwrk/compact-js-command/effect';
+import { circuitCommand, deployCommand, maintainCommand } from '@midnightntwrk/compact-js-command/effect';
 import { sampleSigningKey } from '@midnightntwrk/ledger-v9';
 import { Effect } from 'effect';
 
@@ -147,7 +147,7 @@ const expectEraMismatchReported = <A, E, R>(
     expect(output).toMatch(/executable against ledger era 9/);
     expect(output).toMatch(/--ledger-era selected 8/);
     // ...and both ways out, since either decision is a legitimate one to change.
-    expect(output).toMatch(/@midnight-ntwrk\/compact-js\/v8\/effect/);
+    expect(output).toMatch(/@midnightntwrk\/compact-js\/v8\/effect/);
     expect(output).toMatch(/--ledger-era 9/);
   });
 

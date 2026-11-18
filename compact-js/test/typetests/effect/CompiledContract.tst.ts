@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { type CompactContext,CompiledContract, type Contract } from '@midnight-ntwrk/compact-js/effect';
+import { type CompactContext,CompiledContract, type Contract } from '@midnightntwrk/compact-js/effect';
 import { describe, expect, it } from 'tstyche';
 
 import { Contract as Contract_ } from '../../contract/managed/counter/contract';

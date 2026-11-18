@@ -17,7 +17,7 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 
-import { FileSystemContractModuleProvider } from '@midnight-ntwrk/compact-js-node/effect';
+import { FileSystemContractModuleProvider } from '@midnightntwrk/compact-js-node/effect';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 // One address per test: an imported module is cached by URL, so reusing a path would hand a later

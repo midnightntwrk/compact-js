@@ -14,7 +14,7 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import { ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import { ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { Cause, Clock, Effect, Exit, Option } from 'effect';
 
 import * as CircuitCommand from '../../src/effect/internal/circuitCommand.js';

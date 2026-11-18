@@ -14,7 +14,6 @@
  */
 
 import { describe, it } from '@effect/vitest';
-import { ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
 import {
   ChargedState as RuntimeChargedState,
   ContractOperation as RuntimeContractOperation,
@@ -22,6 +21,7 @@ import {
   QueryContext as RuntimeQueryContext,
   StateValue as RuntimeStateValue
 } from '@midnight-ntwrk/compact-runtime';
+import { ContractRuntimeError, Ledger } from '@midnightntwrk/compact-js/effect';
 import { Cause, Effect, Exit, Option } from 'effect';
 
 const ADDRESS = '0a2d0e34db258f640dc2ec410fb0e4eea9cd6f9661ba6a86f0c35a708e1b811a';

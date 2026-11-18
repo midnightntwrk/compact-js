@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CompiledContract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
 
 import { Contract as C_ } from '../../../../compact-js/test/contract/managed/cccMiddle/contract/index.js';
 

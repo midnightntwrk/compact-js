@@ -14,7 +14,7 @@
  */
 
 import { type Command } from '@effect/cli';
-import { type ContractExecutable, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import { type ContractExecutable, ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { type ConfigError, Effect } from 'effect';
 
 import { type ConfigCompiler } from '../ConfigCompiler.js';

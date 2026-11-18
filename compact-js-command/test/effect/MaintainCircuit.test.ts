@@ -17,7 +17,7 @@ import { resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
 import { describe, it } from '@effect/vitest';
-import { maintainCommand } from '@midnight-ntwrk/compact-js-command/effect';
+import { maintainCommand } from '@midnightntwrk/compact-js-command/effect';
 import { sampleSigningKey } from '@midnightntwrk/ledger-v9';
 import { Effect } from 'effect';
 

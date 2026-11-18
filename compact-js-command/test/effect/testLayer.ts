@@ -15,7 +15,7 @@
 
 import { type FileSystem } from '@effect/platform';
 import { NodeContext } from '@effect/platform-node';
-import { ConfigCompiler } from '@midnight-ntwrk/compact-js-command/effect';
+import { ConfigCompiler } from '@midnightntwrk/compact-js-command/effect';
 import { Console, Effect, Layer } from 'effect';
 
 import * as MockConsole from './MockConsole.js';

@@ -28,7 +28,7 @@ contract, and the ZK file assets including prover and verifier keys.
 An example configuration file for the canonical "Counter" contract is shown below:
 
 ```ts
-import { CompiledContract, type Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, type Contract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
 // `compactc` emits `contract/index.js`. The extension is required: Compact.js transpiles this file
 // and then imports the result with plain Node ESM, which does no extension guessing for relative
 // specifiers.
