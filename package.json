@@ -32,6 +32,7 @@
     "test-ledger-era-9": "turbo run test-ledger-era-9",
     "test-ledger-era-8": "turbo run test-ledger-era-8",
     "test-scripts": "vitest run --project scripts --coverage.enabled=false --reporter=default",
+    "check-packaging": "node scripts/check-packaging.mjs",
     "package": "turbo run package",
     "lint": "eslint",
     "changeset": "changeset",
@@ -42,6 +43,7 @@
     "effect": "^3.22.1"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "2.31.1",
     "@commitlint/cli": "^21.2.2",
@@ -71,6 +73,7 @@
     "eslint-plugin-unused-imports": "^4.4.1",
     "husky": "^9.0.0",
     "prettier": "^3.6.0",
+    "publint": "^0.3.25",
     "shx": "^0.4.0",
     "tstyche": "^7.2.5",
     "turbo": "^2.10.10",
