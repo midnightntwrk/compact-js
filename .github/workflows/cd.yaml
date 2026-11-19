@@ -8,10 +8,9 @@ on:
 permissions: {}
 
 jobs:
-  # Is a release outstanding? Answered from the registry rather than from the push
-  # event: while changesets are pending, main still carries the published version, and
-  # merging the Version Packages PR bumps it to one npm has never seen. That stays true
-  # until the publish succeeds, so a failed release can be finished by pushing again.
+  # Pending changesets must be versioned before publishing, including when a renamed
+  # package does not exist on npm yet. Once versioned, query the registry so a failed
+  # or partial release can be finished by pushing again.
   assess:
     name: Assess
     runs-on: ubuntu-latest
@@ -28,6 +27,14 @@ jobs:
         id: registry
         run: |
           set -euo pipefail
+          for changeset in .changeset/*.md; do
+            if [[ -f "$changeset" && "$changeset" != .changeset/README.md ]]; then
+              echo "::notice::Pending changesets must be versioned before publishing"
+              echo "needs-publish=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
           version=$(jq -er '.version' compact-js/package.json)
           needed=false
 
