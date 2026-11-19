@@ -133,6 +133,33 @@ jobs:
       contents: write # push release tags and create Releases
       id-token: write # npm Trusted Publishing (OIDC) + provenance
     steps:
+      # `environment:` on its own does not guarantee a human gate. GitHub creates a missing
+      # environment on first use with **no** protection rules, so if the Trusted Publishers
+      # are configured before the environment is, the next push publishes unreviewed. This
+      # runs before anything is published, and fails closed.
+      - name: Require a reviewer gate on this environment
+        env:
+          GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          set +e
+          rules=$(gh api "repos/${REPO}/environments/npm-publish-stable" \
+            --jq '[.protection_rules[].type] | join(",")' 2>&1)
+          lookup=$?
+          set -e
+
+          if [[ $lookup -ne 0 ]]; then
+            echo "::error::could not read the npm-publish-stable environment: ${rules}"
+            exit 1
+          fi
+
+          echo "protection rules: ${rules:-none}"
+          if [[ "$rules" != *required_reviewers* ]]; then
+            echo "::error::npm-publish-stable has no required reviewers, so this publish is not gated by a human. Configure reviewers on the environment before releasing."
+            exit 1
+          fi
+
       # Credentials stay persisted here, unlike every other checkout in this repo: the
       # changesets action pushes a tag per package over git, as does the aggregate tag
       # below. This job uploads no artifact, so there is nothing for a persisted

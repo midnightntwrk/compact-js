@@ -98,6 +98,12 @@ Installing is separate and still uses a token: upstream `@midnight-ntwrk` depend
 come from GitHub Packages, which rejects anonymous reads
 ([#56](https://github.com/midnightntwrk/compact-js/issues/56)).
 
+Naming an `environment:` is not by itself a human gate: GitHub creates a missing
+environment on first use with **no** protection rules, so configuring the Trusted
+Publishers before the environment exists would let the next push publish unreviewed. The
+publish job's first step therefore refuses to run unless `npm-publish-stable` has required
+reviewers.
+
 ## Release candidates
 
 ```bash
