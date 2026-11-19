@@ -183,6 +183,33 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           NPM_CONFIG_PROVENANCE: 'true'
 
+      # npm gives a package's *first* publish the `latest` dist-tag whatever the version,
+      # so a release candidate published under a name npm has not seen before becomes the
+      # version `npm install` hands out. OIDC cannot move a dist-tag, so this reports
+      # rather than repairs.
+      - name: Check the latest dist-tag
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+
+            # The registry is read through a CDN, so a just-published tag can lag.
+            for attempt in 1 2 3; do
+              latest=$(curl -sS "https://registry.npmjs.org/${name/\//%2f}" | jq -r '."dist-tags".latest // empty')
+              [[ -n "$latest" ]] && break
+              sleep 5
+            done
+
+            if [[ "$version" == *-* && "$latest" == "$version" ]]; then
+              echo "::error::${name}: prerelease ${version} holds the 'latest' dist-tag. Run: npm dist-tag rm ${name} latest"
+              exit 1
+            elif [[ "$version" != *-* && "$latest" != "$version" ]]; then
+              echo "::warning::${name}: 'latest' is ${latest:-unset}, not the ${version} just published"
+            fi
+          done
+
       # The three packages are a `fixed` Changesets group, so they always share a version
       # and the release has a single identity. This aggregate tag is that identity — the
       # form the QA test evidence and the component release note cite.

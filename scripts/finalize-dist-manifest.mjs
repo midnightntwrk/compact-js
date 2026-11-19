@@ -113,6 +113,26 @@ manifest.files = readdirSync(dirname(resolve(target)), { withFileTypes: true })
   .map((e) => (e.isDirectory() ? `${e.name}/` : e.name))
   .sort();
 
+// An export pointing outside `files` resolves to a file npm never packed, which only
+// shows up once a consumer installs the tarball.
+const packed = (path) => {
+  const relative = path.replace(/^\.\//, '');
+  return manifest.files.some((entry) => (entry.endsWith('/') ? relative.startsWith(entry) : relative === entry));
+};
+
+const unpacked = [
+  ...new Set(
+    Object.values(manifest.exports ?? {})
+      .flatMap((conditions) => (typeof conditions === 'string' ? [conditions] : Object.values(conditions ?? {})))
+      .filter((path) => typeof path === 'string' && !packed(path))
+  )
+];
+
+if (unpacked.length > 0) {
+  console.error(`${target} exports paths that "files" does not pack: ${unpacked.join(', ')}`);
+  process.exit(1);
+}
+
 const serialized = JSON.stringify(manifest, null, 2) + '\n';
 if (serialized.includes('/dist/cjs/')) {
   console.error(`${target} still references ./dist/cjs after rewriting`);
