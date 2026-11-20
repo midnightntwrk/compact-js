@@ -19,9 +19,9 @@ import { FileSystem } from '@effect/platform';
 import { type PlatformError } from '@effect/platform/Error';
 import { NodeContext } from '@effect/platform-node';
 import { describe, it } from '@effect/vitest';
-import { Contract, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
-import * as CompiledContract from '@midnight-ntwrk/compact-js/effect/CompiledContract';
-import { CompiledContractReflection } from '@midnight-ntwrk/compact-js-command/effect';
+import { Contract, ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
+import * as CompiledContract from '@midnightntwrk/compact-js/effect/CompiledContract';
+import { CompiledContractReflection } from '@midnightntwrk/compact-js-command/effect';
 import { Effect, Layer, String } from 'effect';
 
 import { ensureRemovePath } from './cleanup.js';

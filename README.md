@@ -28,43 +28,19 @@ the contract and its circuits more convenient, and TypeScript idiomatic.
 
 ## Release Process
 
-Releases are automated via GitHub Actions triggered by git tags. To release:
+Releases are driven by [Changesets](https://github.com/changesets/changesets). Nothing is
+hand-versioned and no tag is pushed by hand.
 
-### Step 1: Determine the new version
-Decide on the version:
-- **Patch** (2.5.1): Bug fixes only
-- **Minor** (2.6.0): New features, backwards compatible
-- **Major** (3.0.0): Breaking changes
+1. **Every PR that ships a change carries a changeset** — run `yarn changeset`, pick the
+   semver bump, and write the summary a consumer will read. That summary becomes the
+   release note. CI fails a PR that changes a published package without one; use
+   `yarn changeset --empty` when nothing changes for consumers.
+2. **CD opens a "Version Packages" PR** on each push to `main`, applying the pending
+   changesets to the manifests and CHANGELOGs.
+3. **Merging that PR cuts the release** — CD publishes to npmjs, tags, and creates the
+   GitHub Releases, behind a reviewer gate.
 
-### Step 2: Update versions on main
-Update the version in all four `package.json` files:
-- Root: `/package.json`
-- `compact-js/package.json`
-- `compact-js-node/package.json`
-- `compact-js-command/package.json`
+The three packages are a `fixed` group and always publish at the same version.
 
-```bash
-git checkout main
-git pull origin main
-# Edit all package.json files with new version
-git add -A
-git commit -m "chore: bump to 2.5.1"
-git push origin main
-```
-
-### Step 3: Create and push the release tag
-```bash
-git tag -a cjs-2.5.1 -m "Release 2.5.1"
-git push origin cjs-2.5.1
-```
-
-That's it! The GitHub Action will automatically:
-- Build all packages
-- Run tests
-- Publish to npm
-- Create a GitHub release
-
-### Notes
-- **Tag format**: `cjs-X.Y.Z` (e.g., `cjs-2.5.1`)
-- **All three packages release together** at the same version
-- Releases happen directly from `main`—no release branches needed
+Full detail, including release candidates and how publishing is authenticated, is in
+[`docs/releasing.md`](docs/releasing.md).

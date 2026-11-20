@@ -14,7 +14,7 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import { type CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
+import { type CompactRuntime } from '@midnightntwrk/compact-js/effect';
 import { Effect } from 'effect';
 
 import {

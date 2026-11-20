@@ -17,18 +17,18 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { beforeEach,describe, expect, it } from '@effect/vitest';
-import {
-  CompiledContract,
-  Contract,
-  ContractExecutable,
-  Ledger} from '@midnight-ntwrk/compact-js/effect';
-import * as ContractConfigurationError from '@midnight-ntwrk/compact-js/effect/ContractConfigurationError';
-import * as ContractRuntimeError from '@midnight-ntwrk/compact-js/effect/ContractRuntimeError';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import { ContractState, sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import * as ContractAddress from '@midnight-ntwrk/platform-js/effect/ContractAddress';
 import * as SigningKey from '@midnight-ntwrk/platform-js/effect/SigningKey';
+import {
+  CompiledContract,
+  Contract,
+  ContractExecutable,
+  Ledger} from '@midnightntwrk/compact-js/effect';
+import * as ContractConfigurationError from '@midnightntwrk/compact-js/effect/ContractConfigurationError';
+import * as ContractRuntimeError from '@midnightntwrk/compact-js/effect/ContractRuntimeError';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import {
   ContractDeploy,
   ContractState as LedgerContractState,

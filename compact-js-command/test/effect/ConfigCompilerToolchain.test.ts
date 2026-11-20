@@ -29,7 +29,7 @@ import { create } from 'ts-node';
  * `Cannot read properties of undefined (reading 'fileExists')` before it reaches any command.
  *
  * The bound therefore has to be declared by this package: a consumer installing
- * `@midnight-ntwrk/compact-js-command` gets `ts-node` and whatever `typescript` we let their
+ * `@midnightntwrk/compact-js-command` gets `ts-node` and whatever `typescript` we let their
  * package manager pick. The repository's root `devDependency` does not travel with the published
  * package and so cannot stand in for it.
  */

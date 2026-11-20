@@ -33,7 +33,7 @@
  * barrel here and live in `contractEventsSurface.ts`, composed only by entries whose era can emit
  * events. `LedgerEra.test.ts` asserts both halves of that.
  *
- * Internal by design: consumers reach these through `@midnight-ntwrk/compact-js/effect` or an
+ * Internal by design: consumers reach these through `@midnightntwrk/compact-js/effect` or an
  * era-pinned entry, and `package.json` `exports` blocks `./effect/internal/*` with `null`. The
  * era entry files under the `src/v<N>` directories are package-internal source, so they may
  * import it.

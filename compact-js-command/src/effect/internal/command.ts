@@ -19,9 +19,9 @@ import { type PlatformError } from '@effect/platform/Error';
 import { NodeContext } from '@effect/platform-node';
 import * as Ansi from '@effect/printer-ansi/Ansi';
 import * as Doc from '@effect/printer-ansi/AnsiDoc';
-import { type ContractExecutable, ContractExecutableRuntime, type ContractRuntimeError, type ZKConfiguration } from '@midnight-ntwrk/compact-js/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
+import { type ContractExecutable, ContractExecutableRuntime, type ContractRuntimeError, type ZKConfiguration } from '@midnightntwrk/compact-js/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import { ConfigError as EffectConfigError, type ConfigProvider, Console, DateTime, Duration, Effect, Layer } from 'effect';
 
 import * as CompiledContractReflection from '../CompiledContractReflection.js';
@@ -97,7 +97,7 @@ export interface Intents {
 /**
  * Builds the shared intent operations for one era.
  *
- * @param ledger The era's `Ledger` facade — `@midnight-ntwrk/compact-js/v8/effect`'s or
+ * @param ledger The era's `Ledger` facade — `@midnightntwrk/compact-js/v8/effect`'s or
  * `/v9/effect`'s. The era arrives as an argument here exactly as it does in `compact-js`'s
  * `internal/executable.ts`; nothing in this module names one.
  *
@@ -410,7 +410,7 @@ const checkEra = (
     : ConfigError.make(
         `The contract configuration '${configFilePath}' builds its executable against ledger era ` +
           `${executable.era.ledger}, but --ledger-era selected ${selected}. Import ` +
-          `'@midnight-ntwrk/compact-js/v${selected}/effect' in the configuration, or run with ` +
+          `'@midnightntwrk/compact-js/v${selected}/effect' in the configuration, or run with ` +
           `--ledger-era ${executable.era.ledger}.`
       );
 

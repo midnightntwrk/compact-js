@@ -1,0 +1,53 @@
+name: Check for Changeset
+
+on:
+  pull_request:
+    branches: [main]
+
+# Keyed on the PR number: `head_ref` collides across forks, where two contributors
+# both pushing `patch-1` would cancel each other's checks.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  check-changeset:
+    # The Version Packages PR consumes changesets rather than adding one.
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Deliberately git-only. The previous `changeset status` check had to install the
+      # workspace first, which needs a GitHub Packages token — and a fork PR is given no
+      # secrets, so the check was red for every outside contributor however good their
+      # changesets were.
+      - name: Verify that a changeset exists
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "${BASE_SHA}...HEAD")
+
+          # `.changeset/README.md` is documentation, not a changeset.
+          if grep -E '^\.changeset/[^/]+\.md$' <<<"$changed" | grep -qv '^\.changeset/README\.md$'; then
+            echo "::notice::changeset found"
+            exit 0
+          fi
+
+          # Nothing a consumer installs changed, so there is nothing to version.
+          if ! grep -qE '^compact-js(-node|-command)?/' <<<"$changed"; then
+            echo "::notice::no published package changed — no changeset needed"
+            exit 0
+          fi
+
+          echo "::error::This PR changes a published package but adds no changeset. Run \`yarn changeset\`, or \`yarn changeset --empty\` if nothing changes for consumers."
+          exit 1

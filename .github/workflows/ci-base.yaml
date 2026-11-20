@@ -37,9 +37,10 @@ jobs:
       pull-requests: write
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Load environment variables
         run: |
@@ -56,23 +57,18 @@ jobs:
           password: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
-          always-auth: true
           registry-url: https://npm.pkg.github.com/
           scope: '@midnight-ntwrk'
           node-version-file: ${{ inputs.node-version-file }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-      # Provisions the Yarn version pinned by each workspace's `packageManager`
-      # field. Without this the runner's Yarn 1.x shim is used instead.
-      - name: Enable corepack
-        run: corepack enable
-      - name: Configure yarn
-        run: |
-          yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
-          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "$MIDNIGHTCI_PACKAGES_WRITE"
-          yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
       - name: Cache Turbo and Yarn dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -106,6 +102,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+      # `scripts/` is not a workspace, so turbo does not reach it.
+      - name: Run release-script tests
+        run: yarn test-scripts
+
+      # Lints the generated dist manifests, which are what gets published and what no
+      # in-repo import resolves through.
+      - name: Check packaging
+        run: yarn package && yarn check-packaging
+
       - name: Aggregate coverage reports
         run: |
           mkdir -p .nyc_output
@@ -121,7 +126,7 @@ jobs:
           zip -r coverage-compact-js.zip coverage*
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # ratchet:actions/upload-artifact@v7.0.2
         with:
           name: Coverage Report compact-js
           path: coverage-compact-js.zip

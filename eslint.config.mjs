@@ -27,7 +27,7 @@ const LEDGER_SEAM_PATTERN = {
     '@midnight-ntwrk/ledger-v*/**'
   ],
   message:
-    'Import ledger types through the `Ledger` facade (@midnight-ntwrk/compact-js/effect); ' +
+    'Import ledger types through the `Ledger` facade (@midnightntwrk/compact-js/effect); ' +
     'only compact-js/src/effect/internal/ledger/* may bind an era package directly.'
 };
 
@@ -49,7 +49,7 @@ const RUNTIME_SEAM_PATTERN = {
     'compact-runtime-ledger8/**'
   ],
   message:
-    'Import runtime types through the `CompactRuntime` facade (@midnight-ntwrk/compact-js/effect); ' +
+    'Import runtime types through the `CompactRuntime` facade (@midnightntwrk/compact-js/effect); ' +
     'only compact-js/src/effect/internal/runtime/* may bind a runtime line directly.'
 };
 

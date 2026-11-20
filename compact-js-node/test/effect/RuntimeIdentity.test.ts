@@ -14,8 +14,8 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import { CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
 import { ContractState, versionString } from '@midnight-ntwrk/compact-runtime';
+import { CompactRuntime } from '@midnightntwrk/compact-js/effect';
 
 /**
  * This package reaches compact-runtime through compact-js and pins it only for its own tests, so

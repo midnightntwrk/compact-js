@@ -19,16 +19,16 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { describe, expect,it } from '@effect/vitest';
+import { ContractState, decodeRawTokenType, encodeRawTokenType, rawTokenType } from '@midnight-ntwrk/compact-runtime';
+import { CoinPublicKey, ContractAddress, DomainSeparator } from '@midnight-ntwrk/platform-js';
+import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import {
   CompiledContract,
   Contract,
   ContractExecutable,
   ContractExecutableRuntime
-} from '@midnight-ntwrk/compact-js/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
-import { ContractState, decodeRawTokenType, encodeRawTokenType, rawTokenType } from '@midnight-ntwrk/compact-runtime';
-import { CoinPublicKey, ContractAddress, DomainSeparator } from '@midnight-ntwrk/platform-js';
-import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
+} from '@midnightntwrk/compact-js/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import { ContractDeploy, ContractState as LedgerContractState } from '@midnightntwrk/ledger-v9';
 import { ConfigProvider, Effect, Layer } from 'effect';
 

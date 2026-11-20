@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { CompactRuntime, type ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
 import type {
   AlignedValue as RuntimeAlignedValue,
   CallContext as RuntimeCallContext,
@@ -32,6 +31,7 @@ import type {
   WitnessContext as RuntimeWitnessContext,
   ZswapLocalState as RuntimeZswapLocalState
 } from '@midnight-ntwrk/compact-runtime';
+import { CompactRuntime, type ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import type { Effect } from 'effect';
 import { describe, expect, it } from 'tstyche';
 

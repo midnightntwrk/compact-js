@@ -28,4 +28,6 @@ logs
 .states
 .eslintcache
 .rollup.cache
+# Release-note drafts from the `release-notes` plugin skill.
+.rn-drafts/
 .DS_Store

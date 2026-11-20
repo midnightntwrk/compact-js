@@ -16,14 +16,14 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { type CompactRuntime, ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
+import { type CompactRuntime, ContractRuntimeError, Ledger } from '@midnightntwrk/compact-js/effect';
 import { Cause, Effect, Exit } from 'effect';
 
 /**
  * The ledger conversions this provider needs to turn on-disk bytes into a runtime contract state.
  *
  * @remarks
- * Structural, so that **any** era entry's `Ledger` satisfies it — `@midnight-ntwrk/compact-js/effect`
+ * Structural, so that **any** era entry's `Ledger` satisfies it — `@midnightntwrk/compact-js/effect`
  * (the bound era) or an era-pinned one such as `/v9/effect`. The provider used to reach the bound
  * facade directly, which reads as harmless while one era exists and is not: a cross-contract state
  * provider is handed to a *circuit context*, and that context belongs to whichever era the caller

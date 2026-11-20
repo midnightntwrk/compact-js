@@ -17,10 +17,10 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
-import { CompiledContract, ContractExecutable } from '@midnight-ntwrk/compact-js/v8/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import * as ContractAddress from '@midnight-ntwrk/platform-js/effect/ContractAddress';
+import { CompiledContract, ContractExecutable } from '@midnightntwrk/compact-js/v8/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { sampleContractAddress } from 'compact-runtime-ledger8';
 import { ConfigProvider, Effect, Layer } from 'effect';

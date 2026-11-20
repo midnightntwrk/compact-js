@@ -43,7 +43,7 @@
  *
  * @example
  * ```ts
- * import { CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
+ * import { CompactRuntime } from '@midnightntwrk/compact-js/effect';
  * import { Effect } from 'effect';
  *
  * // Through the wrapper, not bare: the facade resolves the binding, it does not make the call

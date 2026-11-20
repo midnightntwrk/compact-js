@@ -14,8 +14,8 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import * as ContractEventStore from '@midnight-ntwrk/compact-js/effect/ContractEventStore';
-import * as ContractLog from '@midnight-ntwrk/compact-js/effect/ContractLog';
+import * as ContractEventStore from '@midnightntwrk/compact-js/effect/ContractEventStore';
+import * as ContractLog from '@midnightntwrk/compact-js/effect/ContractLog';
 import { Chunk, Deferred, Effect, Fiber, Stream } from 'effect';
 
 import * as Fixtures from './logEventFixtures.js';

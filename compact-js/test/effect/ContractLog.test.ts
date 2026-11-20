@@ -14,7 +14,7 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import * as ContractLog from '@midnight-ntwrk/compact-js/effect/ContractLog';
+import * as ContractLog from '@midnightntwrk/compact-js/effect/ContractLog';
 import { Option } from 'effect';
 
 import * as Fixtures from './logEventFixtures.js';

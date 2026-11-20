@@ -17,11 +17,11 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { beforeEach, describe, expect, it } from '@effect/vitest';
-import { CompiledContract, Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
-import { ZKFileConfiguration } from '@midnight-ntwrk/compact-js-node/effect';
 import { ContractState } from '@midnight-ntwrk/compact-runtime';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import * as ContractAddress from '@midnight-ntwrk/platform-js/effect/ContractAddress';
+import { CompiledContract, Contract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
+import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import { ContractDeploy, ContractState as LedgerContractState } from '@midnightntwrk/ledger-v9';
 import { ConfigProvider, Effect, Layer, TestClock } from 'effect';
 

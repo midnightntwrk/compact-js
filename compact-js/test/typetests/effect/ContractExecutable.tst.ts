@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { CompiledContract, Contract, ContractExecutable, ZKConfiguration } from '@midnight-ntwrk/compact-js/effect';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
+import { CompiledContract, Contract, ContractExecutable, ZKConfiguration } from '@midnightntwrk/compact-js/effect';
 import { Context, Effect, Layer } from 'effect';
 import { describe, expect, it } from 'tstyche';
 

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { CompactRuntime, ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
 import { ContractState, encodeZswapLocalState, sampleContractAddress, versionString } from '@midnight-ntwrk/compact-runtime';
+import { CompactRuntime, ContractRuntimeError, Ledger } from '@midnightntwrk/compact-js/effect';
 import { Cause, Effect, Exit, Option } from 'effect';
 import { describe, expect, it } from 'vitest';
 

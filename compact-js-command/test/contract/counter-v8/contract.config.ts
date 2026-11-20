@@ -20,7 +20,7 @@
 // the era 8 ones (`managed-v8`, built by `yarn compact-v8` in `compact-js`), because a 0.21
 // artifact can never run on 0.16.
 
-import { CompiledContract, type Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/v8/effect';
+import { CompiledContract, type Contract, ContractExecutable } from '@midnightntwrk/compact-js/v8/effect';
 
 import { Contract as C_ } from '../../../../compact-js/test/contract/managed-v8/counter/contract/index.js';
 

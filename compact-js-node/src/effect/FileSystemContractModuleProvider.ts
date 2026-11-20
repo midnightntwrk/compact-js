@@ -17,7 +17,7 @@ import { existsSync, lstatSync, statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { CompactRuntime } from '@midnight-ntwrk/compact-js/effect';
+import { CompactRuntime } from '@midnightntwrk/compact-js/effect';
 
 /**
  * What resolution reads off a callee's module. A copy of runtime 0.21's list, because the runtime

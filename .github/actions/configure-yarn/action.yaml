@@ -1,0 +1,27 @@
+name: 'Configure Yarn'
+description: 'Provisions the pinned Yarn and authenticates it against GitHub Packages'
+
+inputs:
+  github-packages-token:
+    description: Token with read access to the @midnight-ntwrk packages on npm.pkg.github.com.
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    # Provisions the Yarn version pinned by each workspace's `packageManager` field.
+    # Without this the runner's Yarn 1.x shim is used instead.
+    - name: Enable corepack
+      shell: bash
+      run: corepack enable
+
+    # Scoped rather than a global YARN_NPM_AUTH_TOKEN, which Yarn would also offer to
+    # registry.npmjs.org when resolving the @midnightntwrk scope.
+    - name: Authenticate Yarn against GitHub Packages
+      shell: bash
+      env:
+        GITHUB_PACKAGES_TOKEN: ${{ inputs.github-packages-token }}
+      run: |
+        yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "$GITHUB_PACKAGES_TOKEN"
+        yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "$GITHUB_PACKAGES_TOKEN"
+        yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true

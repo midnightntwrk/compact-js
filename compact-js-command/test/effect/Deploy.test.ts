@@ -17,8 +17,8 @@ import { resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
 import { describe, it } from '@effect/vitest';
-import { deployCommand } from '@midnight-ntwrk/compact-js-command/effect';
 import { encodeZswapLocalState } from '@midnight-ntwrk/compact-runtime';
+import { deployCommand } from '@midnightntwrk/compact-js-command/effect';
 import { Effect } from 'effect';
 import { afterEach, vi } from 'vitest';
 

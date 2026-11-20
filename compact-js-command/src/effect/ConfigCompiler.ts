@@ -39,7 +39,7 @@ export declare namespace ConfigCompiler {
    * @remarks
    * `contractExecutable` is described **era-agnostically** ({@link EraBinding.CommandExecutable}),
    * not as the bound era's `ContractExecutable`. A configuration fixes its own era by importing
-   * `@midnight-ntwrk/compact-js/v8/effect` or `/v9/effect`, and the CLI selects its era separately
+   * `@midnightntwrk/compact-js/v8/effect` or `/v9/effect`, and the CLI selects its era separately
    * with `--ledger-era`; naming one era here would declare a configuration written against the
    * other to be the wrong type, which is backwards. Both are accepted, and
    * `internal/command.ts`'s `invocationHandler` reconciles the two choices at run time.

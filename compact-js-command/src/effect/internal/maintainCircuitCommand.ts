@@ -15,7 +15,7 @@
 
 import { type Command } from '@effect/cli';
 import { FileSystem } from '@effect/platform';
-import { Contract, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
+import { Contract, ContractRuntimeError } from '@midnightntwrk/compact-js/effect';
 import { Effect, Option } from 'effect';
 
 import * as InternalArgs from './args.js';

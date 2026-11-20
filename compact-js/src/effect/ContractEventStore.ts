@@ -26,7 +26,7 @@
  *
  * @example
  * ```ts
- * import { ContractExecutable, ContractLog, ContractEventStore } from '@midnight-ntwrk/compact-js/effect';
+ * import { ContractExecutable, ContractLog, ContractEventStore } from '@midnightntwrk/compact-js/effect';
  * import { Effect } from 'effect';
  *
  * const program = Effect.gen(function* () {

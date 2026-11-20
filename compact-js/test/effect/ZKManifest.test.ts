@@ -14,7 +14,7 @@
  */
 
 import { describe, expect, it } from '@effect/vitest';
-import { ZKManifest, ZKManifestError } from '@midnight-ntwrk/compact-js/effect';
+import { ZKManifest, ZKManifestError } from '@midnightntwrk/compact-js/effect';
 import { Effect } from 'effect';
 
 /** A well-formed 64-char lower-case hex SHA-256 digest for use in fixtures. */

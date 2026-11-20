@@ -17,9 +17,9 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { ContractRuntimeError, Ledger } from '@midnight-ntwrk/compact-js/effect';
-import { FileSystemContractStateProvider } from '@midnight-ntwrk/compact-js-node/effect';
 import { ContractState as RuntimeContractState } from '@midnight-ntwrk/compact-runtime';
+import { ContractRuntimeError, Ledger } from '@midnightntwrk/compact-js/effect';
+import { FileSystemContractStateProvider } from '@midnightntwrk/compact-js-node/effect';
 import { ContractOperation, ContractState as LedgerContractState } from '@midnightntwrk/ledger-v9';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

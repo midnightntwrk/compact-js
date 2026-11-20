@@ -4,9 +4,12 @@
 
 ## Release Notes
 
-<!-- Compact.js uses Conventional Commits for automatic changelog generation.
-CHANGELOGs are generated from commit messages during release. -->
+<!-- Versions and release notes come from Changesets, not from commit messages. Run
+`yarn changeset`, pick the semver bump, and write the summary a consumer will read — it
+becomes the release note. A PR that changes a published package fails CI without one; use
+`yarn changeset --empty` when nothing changes for consumers. See docs/releasing.md. -->
 
+- [ ] This PR carries a changeset (`yarn changeset`), or changes nothing a consumer can see
 - [ ] My commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) format
   - Use `feat:` for new features
   - Use `fix:` for bug fixes

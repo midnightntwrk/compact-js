@@ -34,11 +34,11 @@
  * import. Privacy comes from `package.json` `exports` blocking `./effect/internal/*` instead. See
  * `compact-js`'s `internal/boundary.ts` for why this note does not spell the tag out.
  */
-import { Ledger } from '@midnight-ntwrk/compact-js/effect';
+import { Ledger } from '@midnightntwrk/compact-js/effect';
 
 /**
  * The ledger eras this CLI can select. One entry per `internal/era/v<N>.ts`, and per era-pinned
- * entry `@midnight-ntwrk/compact-js` publishes.
+ * entry `@midnightntwrk/compact-js` publishes.
  */
 export const SELECTABLE_LEDGER_ERAS = [8, 9] as const;
 
@@ -47,7 +47,7 @@ export type SelectableLedgerEra = (typeof SELECTABLE_LEDGER_ERAS)[number];
 
 /**
  * The era an invocation gets when `--ledger-era` is not given: the era this build *binds*, which is
- * also the era a `contract.config.ts` gets from the unsuffixed `@midnight-ntwrk/compact-js/effect`.
+ * also the era a `contract.config.ts` gets from the unsuffixed `@midnightntwrk/compact-js/effect`.
  * Defaulting to anything else would change the meaning of every existing configuration.
  */
 export const DEFAULT_LEDGER_ERA: SelectableLedgerEra = Ledger.era.ledger;

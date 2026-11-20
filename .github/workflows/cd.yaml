@@ -1,19 +1,112 @@
 name: CD
-env:
-  MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
+  # Pending changesets must be versioned before publishing, including when a renamed
+  # package does not exist on npm yet. Once versioned, query the registry so a failed
+  # or partial release can be finished by pushing again.
+  assess:
+    name: Assess
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      needsPublish: ${{ steps.registry.outputs.needs-publish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Look up the current version on npm
+        id: registry
+        run: |
+          set -euo pipefail
+          for changeset in .changeset/*.md; do
+            if [[ -f "$changeset" && "$changeset" != .changeset/README.md ]]; then
+              echo "::notice::Pending changesets must be versioned before publishing"
+              echo "needs-publish=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          version=$(jq -er '.version' compact-js/package.json)
+          needed=false
+
+          # Any one of the three missing means the release is incomplete. Queried over
+          # plain HTTP so no npm credentials are involved in the decision.
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+            http=$(curl -sS -o /dev/null -w '%{http_code}' \
+              "https://registry.npmjs.org/${name/\//%2f}/${version}")
+            case "$http" in
+              200) ;;
+              404) needed=true ;;
+              *) echo "::error::npm registry answered ${http} for ${name}@${version}"; exit 1 ;;
+            esac
+          done
+
+          echo "::notice::${version} needs publishing: ${needed}"
+          echo "needs-publish=${needed}" >> "$GITHUB_OUTPUT"
+
+  # Opens and updates the "Version Packages" PR. Ungated: the release PR is
+  # refreshed on every push to main, and the human gate is merging it.
+  version:
+    name: Version (release PR)
+    runs-on: ubuntu-latest
+    # Superseding an in-flight update is correct — the newer push produces the same PR
+    # from newer changesets.
+    concurrency:
+      group: cd-version-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # Checked out with the PAT rather than the job's GITHUB_TOKEN: the changesets action
+      # pushes the Version Packages branch with whatever credential is persisted here, and
+      # a push made with GITHUB_TOKEN triggers no workflows — so the release PR, the one
+      # commit that must be green before it is merged, would arrive with no checks at all.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      # This job never runs npm, so it needs no registry-url, scope or NODE_AUTH_TOKEN.
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Create / update Release Pull Request
+        id: changesets
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
+        with:
+          version: yarn release:prepare
+          title: 'chore: release'
+          commit: 'chore: version packages'
+          # No `publish` here — publishing is the gated job below.
+          setupGitUser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
   ci:
     name: Build, Lint and Test
+    needs: assess
+    if: needs.assess.outputs.needsPublish == 'true'
     uses: ./.github/workflows/ci-base.yaml
     permissions:
       contents: read
@@ -21,82 +114,204 @@ jobs:
       checks: write
       pull-requests: write
     with:
+      # The publish job ships these exact builds; the zip additionally feeds the QA test
+      # evidence (see qa/tests/evidence/).
       create-package-artifacts: true
     secrets:
       MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
+  # Publishes straight to npmjs with Trusted Publishing, tags, and creates the GitHub
+  # Releases. `changeset publish` skips any version already on the registry, so re-running
+  # after a partial failure finishes the release rather than repeating it.
   publish:
-    needs: ci
-    name: Publish Packages
+    name: Publish
+    needs: [assess, ci]
+    if: needs.assess.outputs.needsPublish == 'true'
     runs-on: ubuntu-latest
+    # Keyed on the commit, so a later push can never cancel a release that is queued
+    # behind the reviewer gate — GitHub keeps only one pending run per group.
+    concurrency:
+      group: cd-publish-${{ github.sha }}
+      cancel-in-progress: false
+    # Human gate on anything reaching npmjs. The name must match the Trusted Publisher
+    # configured on each package, or the OIDC exchange fails with a 403.
+    environment: npm-publish-stable
     permissions:
-      contents: read
-      packages: write
-    outputs:
-      version: ${{ steps.extract_version.outputs.version }}
+      contents: write # push release tags and create Releases
+      id-token: write # npm Trusted Publishing (OIDC) + provenance
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v4
-        with:
-          always-auth: true
-          registry-url: https://npm.pkg.github.com/
-          scope: '@midnight-ntwrk'
-          node-version-file: .nvmrc
+      # `environment:` on its own does not guarantee a human gate. GitHub creates a missing
+      # environment on first use with **no** protection rules, so if the Trusted Publishers
+      # are configured before the environment is, the next push publishes unreviewed. This
+      # runs before anything is published, and fails closed.
+      - name: Require a reviewer gate on this environment
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-
-      - name: Publish Package Artifacts
-        uses: ./.github/actions/publish-package-artifacts
-        with:
-          package-archive-name: 'compact-js'
-          working-directory: .
-          auth-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
-
-      - name: Extract version for release
-        id: extract_version
-        run: |
-          version=$(jq -r '.version' ./compact-js/package.json)
-          base_version=$(echo "$version" | sed 's/-alpha.*//')
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "base_version=${base_version}" >> "$GITHUB_OUTPUT"
-
-  release:
-    needs: publish
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # ratchet:actions/checkout@v5
-
-      - name: Create git tag
-        env:
-          VERSION: ${{ needs.publish.outputs.version }}
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          base_version=$(echo "$VERSION" | sed 's/-alpha.*//')
-          git tag -a "compact-js-v${base_version}" -m "Release compact-js-v${base_version}"
-          git push origin "compact-js-v${base_version}"
-
-      - name: Extract changelog
-        id: changelog
-        run: |
-          # Extract the latest release notes from CHANGELOG.md (between first and second ## heading)
-          changelog=$(sed -n '/^## \[/,/^## \[/{/^## \[/!p;}' ./CHANGELOG.md | head -n -1 | sed '/^$/d' | sed ':a;N;$!ba;s/\n/\\n/g')
-          echo "body=$changelog" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ needs.publish.outputs.version }}
-          NOTES: ${{ steps.changelog.outputs.body }}
+          GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           REPO: ${{ github.repository }}
         run: |
-          base_version=$(echo "$VERSION" | sed 's/-alpha.*//')
-          gh release create "compact-js-v${base_version}" \
-            --title "compact-js v${base_version}" \
-            --notes "$NOTES" \
-            --repo "$REPO"
+          set -euo pipefail
+          set +e
+          rules=$(gh api "repos/${REPO}/environments/npm-publish-stable" \
+            --jq '[.protection_rules[].type] | join(",")' 2>&1)
+          lookup=$?
+          set -e
+
+          if [[ $lookup -ne 0 ]]; then
+            echo "::error::could not read the npm-publish-stable environment: ${rules}"
+            exit 1
+          fi
+
+          echo "protection rules: ${rules:-none}"
+          if [[ "$rules" != *required_reviewers* ]]; then
+            echo "::error::npm-publish-stable has no required reviewers, so this publish is not gated by a human. Configure reviewers on the environment before releasing."
+            exit 1
+          fi
+
+      # Credentials stay persisted here, unlike every other checkout in this repo: the
+      # changesets action pushes a tag per package over git, as does the aggregate tag
+      # below. This job uploads no artifact, so there is nothing for a persisted
+      # credential to leak into.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      # `registry-url` always writes an `_authToken=${NODE_AUTH_TOKEN}` line into ~/.npmrc,
+      # so the rule is not to keep that line out but to keep a real token out of
+      # NODE_AUTH_TOKEN — one in the environment shadows OIDC.
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
+        with:
+          registry-url: https://registry.npmjs.org
+          scope: '@midnightntwrk'
+          node-version-file: .nvmrc
+
+      # Installing still reads upstream @midnight-ntwrk packages from GitHub Packages.
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+        with:
+          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # Exactly what the `ci` job built and tested. Rebuilding here would be a third build
+      # of the same commit, and would need ci-base's compactc setup — `.github/env/global.env`,
+      # a ghcr login and a token for fetch-compactc — none of which this job has, so it
+      # would either fail after the approval or ship a differently compiled artifact.
+      - name: Download the built packages
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
+        with:
+          name: Dist compact-js
+
+      # Creates one tag and one GitHub Release per package, with the body taken from
+      # that package's CHANGELOG.md — which `changeset version` wrote from the changesets.
+      # rc versions are flagged as prereleases, so they do not become "Latest".
+      - name: Publish and release
+        id: publish
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
+        with:
+          publish: yarn changeset publish
+          createGithubReleases: true
+          setupGitUser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      # npm gives a package's *first* publish the `latest` dist-tag whatever the version,
+      # so a release candidate published under a name npm has not seen before becomes the
+      # version `npm install` hands out. OIDC cannot move a dist-tag, so this reports
+      # rather than repairs.
+      - name: Check the latest dist-tag
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+
+            # The registry is read through a CDN, so a just-published tag can lag.
+            for attempt in 1 2 3; do
+              latest=$(curl -sS "https://registry.npmjs.org/${name/\//%2f}" | jq -r '."dist-tags".latest // empty')
+              [[ -n "$latest" ]] && break
+              sleep 5
+            done
+
+            if [[ "$version" == *-* && "$latest" == "$version" ]]; then
+              echo "::error::${name}: prerelease ${version} holds the 'latest' dist-tag. Run: npm dist-tag rm ${name} latest"
+              exit 1
+            elif [[ "$version" != *-* && "$latest" != "$version" ]]; then
+              echo "::warning::${name}: 'latest' is ${latest:-unset}, not the ${version} just published"
+            fi
+          done
+
+      # The three packages are a `fixed` Changesets group, so they always share a version
+      # and the release has a single identity. This aggregate tag is that identity — the
+      # form the QA test evidence and the component release note cite.
+      - name: Tag and release the version as a whole
+        env:
+          GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+          tag="compact-js-v${version}"
+
+          # Gated on the registry rather than on the publish step's output: that output is
+          # false whenever every version is already on npm, so a re-run after a failure
+          # below would skip this step and leave the release permanently untagged. Queried
+          # over plain HTTP because the ~/.npmrc setup-node writes carries an empty
+          # `_authToken`, which can turn a 404 into a 401.
+          set +e
+          http=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://registry.npmjs.org/@midnightntwrk%2fcompact-js/${version}")
+          reachable=$?
+          set -e
+          [[ $reachable -eq 0 ]] || { echo "::error::could not reach the npm registry"; exit 1; }
+          case "$http" in
+            200) ;;
+            404)
+              echo "::notice::@midnightntwrk/compact-js@${version} is not on npm — nothing to tag"
+              exit 0
+              ;;
+            *) echo "::error::npm registry answered ${http} for ${version}"; exit 1 ;;
+          esac
+
+          # --exit-code reports 2 for "no such ref"; 128 is an auth or network failure and
+          # must not be read as the tag being absent.
+          set +e
+          git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1
+          found=$?
+          set -e
+          if [[ $found -eq 0 ]]; then
+            echo "::notice::${tag} already exists — leaving it in place"
+          elif [[ $found -eq 2 ]]; then
+            git tag -a "$tag" -m "compact-js ${version}"
+            git push origin "$tag"
+          else
+            echo "::error::could not query tag ${tag} (git ls-remote exit ${found})"
+            exit 1
+          fi
+
+          # The sections `changeset version` wrote for this version, across all three
+          # CHANGELOGs — the same content the per-package Releases carry.
+          node scripts/release-body.mjs "$version" release-body.md
+
+          # An rc must never become the repository's "Latest" release.
+          flags=()
+          [[ "$version" == *-* ]] && flags=(--prerelease --latest=false)
+
+          # Branch only on a genuine not-found: an auth error or a 5xx must fail the job
+          # rather than being retried as a create that then fails for the wrong reason.
+          set +e
+          error=$(gh release view "$tag" --repo "$REPO" 2>&1 >/dev/null)
+          status=$?
+          set -e
+          if [[ $status -eq 0 ]]; then
+            gh release edit "$tag" --notes-file release-body.md --repo "$REPO" "${flags[@]}"
+          elif grep -qi "release not found" <<<"$error"; then
+            gh release create "$tag" --title "compact-js v${version}" \
+              --notes-file release-body.md --repo "$REPO" "${flags[@]}"
+          else
+            echo "::error::could not query release ${tag}: ${error}"
+            exit 1
+          fi

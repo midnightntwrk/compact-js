@@ -17,7 +17,7 @@ import { resolve } from 'node:path';
 
 import { NodeContext } from '@effect/platform-node';
 import { describe, expect,it } from '@effect/vitest';
-import { ConfigCompiler } from '@midnight-ntwrk/compact-js-command/effect';
+import { ConfigCompiler } from '@midnightntwrk/compact-js-command/effect';
 import { Effect, Layer } from 'effect';
 
 import { useConfigFixture } from './configFixture.js';

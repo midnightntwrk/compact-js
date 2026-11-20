@@ -1,5 +1,12 @@
 # Compact.js (Command Line Utilities)
 
+> [!IMPORTANT]
+> **Renamed at 4.0.0.** This package was `@midnight-ntwrk/compact-js-command` and is now
+> `@midnightntwrk/compact-js-command` — note the missing hyphen — published to npmjs rather
+> than GitHub Packages. Update the dependency and every import, including the one at the top
+> of your `contract.config.ts`: upgrading the CLI while a config still imports
+> `@midnight-ntwrk/compact-js` loads two copies of the library with no warning.
+
 ## Introduction
 
 Provides an opinionated command line interface for Compact.js, allowing `compactc` compiled contracts to be
@@ -28,7 +35,7 @@ contract, and the ZK file assets including prover and verifier keys.
 An example configuration file for the canonical "Counter" contract is shown below:
 
 ```ts
-import { CompiledContract, type Contract, ContractExecutable } from '@midnight-ntwrk/compact-js/effect';
+import { CompiledContract, type Contract, ContractExecutable } from '@midnightntwrk/compact-js/effect';
 // `compactc` emits `contract/index.js`. The extension is required: Compact.js transpiles this file
 // and then imports the result with plain Node ESM, which does no extension guessing for relative
 // specifiers.

@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-ntwrk/compact-js",
+  "name": "@midnightntwrk/compact-js",
   "version": "3.0.2",
   "description": "Typescript-based execution environment for smart contracts compiled with the Compact language",
   "type": "module",
@@ -60,6 +60,9 @@
     "compact-ccc-mint-caller": "run-compactc ./test/contract/cccMintCaller.compact ./test/contract/managed/cccMintCaller",
     "fix-exports": "node ../scripts/fix-esm-only-exports.mjs .",
     "verify-exports": "node ../scripts/verify-exports.mjs ."
+  },
+  "publishConfig": {
+    "directory": "dist"
   },
   "files": [
     "dist/"

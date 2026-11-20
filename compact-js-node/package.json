@@ -1,5 +1,5 @@
 {
-  "name": "@midnight-ntwrk/compact-js-node",
+  "name": "@midnightntwrk/compact-js-node",
   "version": "3.0.2",
   "description": "Platform specific types and utilities for working with the Compact language on a Node.js runtime",
   "type": "module",
@@ -26,7 +26,7 @@
     "@midnightntwrk/ledger-v9": "^1.0.2"
   },
   "peerDependencies": {
-    "@midnight-ntwrk/compact-js": "workspace:^"
+    "@midnightntwrk/compact-js": "workspace:^"
   },
   "repository": {
     "type": "git",
@@ -44,6 +44,9 @@
     "fix-exports": "node ../scripts/fix-esm-only-exports.mjs .",
     "verify-exports": "node ../scripts/verify-exports.mjs .",
     "package": "shx rm -rf ./dist/src && node ../scripts/finalize-dist-manifest.mjs ./dist/package.json && (cd ./dist; npm pack)"
+  },
+  "publishConfig": {
+    "directory": "dist"
   },
   "files": [
     "dist/"
