@@ -72,7 +72,8 @@ export default {
   config: {
     keys: {
       coinPublic: '...',
-      signing: '...'
+      signing: '...',
+      signingKind: 'schnorr'
     },
     network: 'undeployed'
   }
@@ -101,6 +102,7 @@ Defaults to the Midnight MainNet if not specified. Its value can also be specifi
                  [-p ...]
                  [-n ...]
                  [-s | --signing ...]
+                 [--signing-kind ...]
                  [--output ...]
                  [--output-ps ...]
                  [--output-zswap ...]
@@ -114,10 +116,17 @@ respectively, both formatted as JSON.
 
 #### Options
 
-- `-s | --signing key`. An optional public BIP-340 signing key, hex encoded.  
-If not provided, a sample signing key is used in order to create a valid Contract Maintenance Authority (CMA) but it
-will not be available for use in future maintenance operations. Its value can also be specified using an environment
-variable named `KEYS_SIGNING`.
+- `-s | --signing key`. An optional **secret** signing key, hex encoded, 32 bytes in length.  
+This is the key the Contract Maintenance Authority (CMA) is derived from, and the one you will need to sign later
+maintenance operations, so keep it secret and keep it. If not provided, a sample signing key is used in order to
+create a valid CMA but it will not be available for use in future maintenance operations. Its value can also be
+specified using an environment variable named `KEYS_SIGNING`.
+- `--signing-kind schnorr|ecdsa`. The signature scheme the `--signing` key is used with.  
+Defaults to `'schnorr'`. Its value can also be specified using an environment variable named `KEYS_SIGNING_KIND`, or
+as `keys.signingKind` in the Contract Configuration file; the command line option takes precedence over both. Ledger 9
+accepts either scheme for a maintenance authority, ledger 8 accepts `schnorr` only and rejects `ecdsa` by name. The
+scheme applies to a key you supply: with no `--signing` key at all, the sampled key uses the selected era's default
+scheme regardless of this option.
 - `--output pathToStateOutput`. The file path to where the serialized `Intent` data should be written.  
 Defaults to `'output.bin'` in the current working folder.
 - `--output-ps pathToPrivateStateOutput`. The file path to where the private state data should be written.  
@@ -184,6 +193,40 @@ is written, named by its address.
 - `--output-zswap-calls pathToZswapCallsOutput`. The file path to where the local Zswap state of every call is written
 as JSON, callees first and the root last. A callee's shielded coins appear only here, because `--output-zswap` holds
 the root's. A contract called more than once appears once per call, each time with all of its coins so far.
+
+### `maintain contract` Command
+
+```
+<binName> maintain contract [-c ...]
+                            [-p ...]
+                            [-n ...]
+                            [-s | --signing ...]
+                            [--signing-kind ...]
+                            [--new-signing-kind ...]
+                            --input ...
+                            [--output ...]
+                            contractAddress,
+                            newSigningKey
+```
+
+This command replaces a contract's Contract Maintenance Authority with one derived from `newSigningKey`, and writes
+the resulting signed maintenance update to the `--output` file path as a serialized `Intent`.
+
+A rotation names two keys, and they need not use the same signature scheme. `--signing` is the **current** authority
+key, which signs the update; `newSigningKey` is the **new** authority key being installed.
+
+#### Options
+
+- `-s | --signing key` and `--signing-kind schnorr|ecdsa`. The current authority's secret signing key and its scheme,
+as described for the `deploy` command. Unlike `deploy` there is no sampled fallback, so an invocation that configures
+no key at all fails with `Signing key required to authorize contract maintenance update`.
+- `--new-signing-kind schnorr|ecdsa`. The signature scheme the new authority key is used with.  
+Defaults to `'schnorr'`. Note that nothing validates that the key really is one of the named scheme — both schemes use
+32-byte scalars, and a valid verifying key can be derived from the same bytes under either — so naming the wrong
+scheme installs an authority that your signer cannot later maintain the contract with.
+- `--input pathToStateInput`. The required file path to the serialized state data of the contract being maintained.
+- `--output pathToStateOutput`. The file path to where the serialized `Intent` data should be written.  
+Defaults to `'output.bin'` in the current working folder.
 
 ### Contract Arguments
 
