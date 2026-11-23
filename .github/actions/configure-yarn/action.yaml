@@ -1,10 +1,5 @@
 name: 'Configure Yarn'
-description: 'Provisions the pinned Yarn and authenticates it against GitHub Packages'
-
-inputs:
-  github-packages-token:
-    description: Token with read access to the @midnight-ntwrk packages on npm.pkg.github.com.
-    required: true
+description: 'Provisions the pinned Yarn'
 
 runs:
   using: 'composite'
@@ -15,13 +10,5 @@ runs:
       shell: bash
       run: corepack enable
 
-    # Scoped rather than a global YARN_NPM_AUTH_TOKEN, which Yarn would also offer to
-    # registry.npmjs.org when resolving the @midnightntwrk scope.
-    - name: Authenticate Yarn against GitHub Packages
-      shell: bash
-      env:
-        GITHUB_PACKAGES_TOKEN: ${{ inputs.github-packages-token }}
-      run: |
-        yarn config set 'npmScopes.midnight-ntwrk.npmAuthToken' "$GITHUB_PACKAGES_TOKEN"
-        yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAuthToken' "$GITHUB_PACKAGES_TOKEN"
-        yarn config set 'npmRegistries["https://npm.pkg.github.com"].npmAlwaysAuth' true
+    # No registry credential is configured here on purpose: every dependency now resolves
+    # anonymously from npmjs, so a clean clone installs with no token (#56).

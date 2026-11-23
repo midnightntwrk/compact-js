@@ -19,7 +19,7 @@ const DIST_IMPORT_PATTERN = {
 const LEDGER_SEAM_PATTERN = {
   // Both scope spellings, and their subpaths: `*` does not cross `/`, and the
   // hyphenated `@midnight-ntwrk/ledger-v8` is resolvable in this workspace via
-  // `@midnight-ntwrk/wallet-sdk-address-format`.
+  // `@midnightntwrk/wallet-sdk-address-format`, which still depends on it under that scope.
   group: [
     '@midnightntwrk/ledger-v*',
     '@midnightntwrk/ledger-v*/**',
