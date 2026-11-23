@@ -94,8 +94,8 @@ that line out of the file but to keep a **real token out of `NODE_AUTH_TOKEN`** 
 the environment shadows OIDC. Trusted Publishing also needs npm ≥ 11.5.1, which the Node
 pinned in `.nvmrc` already bundles.
 
-Installing is separate and still uses a token: upstream `@midnight-ntwrk` dependencies
-come from GitHub Packages, which rejects anonymous reads
+Installing is separate and needs no token: every dependency, upstream `@midnight-ntwrk`
+ones included, resolves anonymously from npmjs
 ([#56](https://github.com/midnightntwrk/compact-js/issues/56)).
 
 Naming an `environment:` is not by itself a human gate: GitHub creates a missing

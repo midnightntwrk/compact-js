@@ -21,7 +21,7 @@ import pkg from 'json5';
 import TS from 'typescript';
 const { parse, stringify } = pkg;
 
-import { MidnightBech32m, UnshieldedAddress } from '@midnight-ntwrk/wallet-sdk-address-format';
+import { MidnightBech32m, UnshieldedAddress } from '@midnightntwrk/wallet-sdk-address-format';
 
 import * as CompiledContractReflection from "../CompiledContractReflection.js";
 

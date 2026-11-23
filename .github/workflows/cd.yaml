@@ -85,8 +85,6 @@ jobs:
 
       - name: Configure Yarn
         uses: ./.github/actions/configure-yarn
-        with:
-          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -185,11 +183,8 @@ jobs:
           scope: '@midnightntwrk'
           node-version-file: .nvmrc
 
-      # Installing still reads upstream @midnight-ntwrk packages from GitHub Packages.
       - name: Configure Yarn
         uses: ./.github/actions/configure-yarn
-        with:
-          github-packages-token: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
       - name: Install dependencies
         run: yarn install --immutable
