@@ -185,6 +185,36 @@ describe('ContractExecutable', () => {
       })
     );
 
+    it.effect('names the scheme and length, never the key, when the verifying key cannot be derived', () =>
+      Effect.gen(function* () {
+        // 35 bytes: accepted by `SigningKey.Value` (32..=35) but rejected by the ledger, which
+        // reads exactly 32. That gap is the realistic way a well-formed key reaches this failure.
+        const overlongSigningKey = `${VALID_SIGNING_KEY}aabbcc`;
+        const contract = counterContract.pipe(
+          ContractExecutable.provide(
+            testLayer(
+              new Map([
+                ['KEYS_COIN_PUBLIC', VALID_COIN_PUBLIC_KEY],
+                ['KEYS_SIGNING', overlongSigningKey]
+              ])
+            )
+          )
+        );
+        const error = yield* contract.initialize(initialPS).pipe(Effect.flip);
+
+        if (!ContractConfigurationError.isConfigurationError(error)) {
+          return expect.fail(`expected a ContractConfigurationError, got ${error}`);
+        }
+        expect(error.message).toContain("'schnorr'");
+        expect(error.message).toContain('35 bytes');
+        // The signing key is secret, so no part of it may appear — neither in the message nor in
+        // the ledger rejection carried as its cause. Matching the 32-byte prefix rather than the
+        // whole value also catches a leak that prints only the part the ledger could read.
+        expect(error.message).not.toContain(VALID_SIGNING_KEY);
+        expect(String(error.cause)).not.toContain(VALID_SIGNING_KEY);
+      })
+    );
+
     it.effect('should fail with an invalid CoinPublicKey', () =>
       Effect.gen(function* () {
         const contract = counterContract.pipe(

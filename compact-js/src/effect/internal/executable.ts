@@ -1186,7 +1186,11 @@ export const makeExecutable = <
       } catch (err: unknown) {
         return Either.left(
           ContractConfigurationError.make(
-            `Failed to create a signature verifying key for signing key '${signingKey}'`,
+            // Scheme and byte length, never the value: this is a *secret* key. The length is what
+            // makes the message actionable — the realistic failure here is a key the brand admits
+            // (32..=35 bytes) but the ledger rejects, reported as 'Not all bytes read'.
+            `Failed to create a signature verifying key for a '${signingKey.tag}' signing key of ` +
+              `${signingKey.value.length / 2} bytes`,
             contractState,
             err
           )

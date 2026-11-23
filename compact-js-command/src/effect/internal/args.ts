@@ -31,7 +31,10 @@ export const contractAddress = Args.text({ name: 'contract_address' }).pipe(
 );
 
 export const signingKey = Args.text({ name: 'signing_key' }).pipe(
-  Args.withDescription('A signing key, hex-encoded.'),
+  Args.withDescription(
+    'A secret signing key, hex-encoded, for the new maintenance authority. Its signature scheme is given by ' +
+      '--new-signing-kind.'
+  ),
   Args.withSchema(Schema.String.pipe(Schema.fromBrand(SigningKey.Value)).annotations({ title: 'signing_key' }))
 );
 
