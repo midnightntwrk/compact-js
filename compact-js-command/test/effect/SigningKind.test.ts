@@ -27,9 +27,8 @@ import {
   type PreBinding,
   type PreProof,
   ReplaceAuthority,
-  type SignatureEnabled,
-  sampleSigningKey
-} from '@midnightntwrk/ledger-v9';
+  sampleSigningKey,
+  type SignatureEnabled} from '@midnightntwrk/ledger-v9';
 import { Effect, Layer, Option } from 'effect';
 import { vi } from 'vitest';
 
