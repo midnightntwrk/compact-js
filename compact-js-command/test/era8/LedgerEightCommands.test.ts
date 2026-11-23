@@ -108,6 +108,30 @@ describeWithFixture('the CLI targeting ledger 8', () => {
     expect(asNine._tag).toBe('Failure');
   }, 60_000);
 
+  it('refuses a signing scheme ledger 8 has no representation for', async () => {
+    // Any 32 bytes will do: the era's allowlist rejects the *scheme* before the value reaches a
+    // ledger call, which is the point — ledger 8 keys are bare BIP-340 hex with no tag to carry an
+    // ECDSA discriminant at all.
+    const lines = await Effect.gen(function* () {
+      yield* deployCli([
+        'node', 'deploy.ts',
+        '--ledger-era', '8',
+        '-c', CONFIG_FILEPATH,
+        '-s', '7'.repeat(64),
+        '--signing-kind', 'ecdsa',
+        '--output', OUTPUT_FILEPATH,
+        '--output-ps', OUTPUT_PS_FILEPATH,
+        '--output-zswap', OUTPUT_ZSWAP_FILEPATH
+      ]);
+      return yield* MockConsole.getLines({ stripAnsi: true });
+    }).pipe(Effect.provide(testLayer), Effect.runPromise);
+
+    // The option parses — 'ecdsa' is a scheme platform-js knows — and is refused by the selected
+    // era, naming what it will accept instead.
+    expect(lines.join('\n')).toMatch(/Unsupported signature scheme 'ecdsa'/);
+    expect(lines.join('\n')).toMatch(/supported schemes are: schnorr/);
+  }, 60_000);
+
   it('refuses the options ledger 8 cannot honour, by name', async () => {
     const lines = await Effect.gen(function* () {
       yield* circuitCli([

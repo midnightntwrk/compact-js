@@ -38,7 +38,9 @@ export type Options = Command.Command.ParseConfig<typeof Options>;
 /** @internal */
 export const Options = {
   ...InternalMaintainCommand.Options,
-  signingKey: InternalOptions.signingKey
+  signingKey: InternalOptions.signingKey,
+  signingKind: InternalOptions.signingKind,
+  newSigningKind: InternalOptions.newSigningKind
 };
 
 /**
@@ -54,7 +56,7 @@ export const makeHandler: (
 ) => InternalCommand.CommandHandler<Args & Options> = (ledger) => {
   const { tryLedger, newIntent, serializeIntent } = InternalCommand.makeIntents(ledger);
 
-  return ({ address, inputFilePath, newSigningKey, outputFilePath }, moduleSpec) =>
+  return ({ address, inputFilePath, newSigningKey, newSigningKind, outputFilePath }, moduleSpec) =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const {
@@ -64,7 +66,15 @@ export const makeHandler: (
         .readFile(inputFilePath)
         .pipe(Effect.flatMap(ledger.contractStateFromBytes));
       const result = yield* contractModule.contractExecutable.replaceContractMaintenanceAuthority(
-        Option.some(SigningKey.make(newSigningKey)),
+        // Era default rather than `SigningKey.make`'s own: an untagged key took platform-js's
+        // constant, installing a Schnorr authority for a caller rotating to ECDSA — a mismatch the
+        // raw bytes hide until an ECDSA-only signer fails to maintain the contract.
+        Option.some(
+          SigningKey.make(
+            newSigningKey,
+            Option.getOrElse(newSigningKind, () => ledger.era.defaultCmaSignatureKind)
+          )
+        ),
         {
           address,
           contractState: yield* ledger.toRuntimeContractState(ledgerContractState as never)

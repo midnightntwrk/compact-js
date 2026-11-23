@@ -39,6 +39,7 @@ export type Options = Command.Command.ParseConfig<typeof Options>;
 export const Options = {
   ...InternalMaintainCommand.Options,
   signingKey: InternalOptions.signingKey,
+  signingKind: InternalOptions.signingKind,
 }
 
 /**

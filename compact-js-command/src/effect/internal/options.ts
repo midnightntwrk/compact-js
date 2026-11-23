@@ -102,8 +102,48 @@ export const coinPublicKey = Options.text('coin-public').pipe(
 /** @internal */
 export const signingKey = Options.text('signing').pipe(
   Options.withAlias('s'),
-  Options.withDescription('A public BIP-340 signing key, hex encoded.'),
+  Options.withDescription(
+    'A secret signing key, hex encoded, for the signature scheme given by --signing-kind. Used to create, and ' +
+      'later to sign for, the contract maintenance authority.'
+  ),
   Options.withSchema(Schema.String.pipe(Schema.fromBrand(SigningKey.Value)).annotations({ title: 'signing' })),
+  Options.optional
+);
+
+/**
+ * The signature scheme of the {@link signingKey}.
+ *
+ * @remarks
+ * Optional rather than defaulted on purpose: absence must reach the provider as a *missing* value
+ * so that `KEYS_SIGNING_KIND` and the contract configuration — both honoured by platform-js all
+ * along — are still consulted. A default here would silently outrank them.
+ *
+ * @internal
+ */
+export const signingKind = Options.choice('signing-kind', SigningKey.SignatureKinds).pipe(
+  Options.withDescription(
+    `The signature scheme of the --signing key (${SigningKey.SignatureKinds.join(', ')}). Defaults to ` +
+      `'${SigningKey.DefaultSignatureKind}'. A scheme the selected ledger era does not admit for a maintenance ` +
+      'authority is rejected by name.'
+  ),
+  Options.optional
+);
+
+/**
+ * The signature scheme of the *new* authority key `maintain contract` installs — a second key, and
+ * not necessarily the same scheme as the {@link signingKind} that signs the update.
+ *
+ * @remarks
+ * Absence resolves against the selected era's `defaultCmaSignatureKind` at the call rather than
+ * being defaulted here, so the key is never tagged with a scheme the era cannot verify.
+ *
+ * @internal
+ */
+export const newSigningKind = Options.choice('new-signing-kind', SigningKey.SignatureKinds).pipe(
+  Options.withDescription(
+    `The signature scheme of the new authority key (${SigningKey.SignatureKinds.join(', ')}). Defaults to the ` +
+      "selected ledger era's own default, which is 'schnorr' for every era this build selects."
+  ),
   Options.optional
 );
 
@@ -238,6 +278,7 @@ export type ConfigOptionInput = Command.Command.ParseConfig<{
 export type AllConfigurableOptionInputs = Command.Command.ParseConfig<{
   coinPublicKey: typeof coinPublicKey;
   signingKey: typeof signingKey;
+  signingKind: typeof signingKind;
 }>;
 
 export const asConfigProvider: (
@@ -246,6 +287,7 @@ export const asConfigProvider: (
   ConfigProvider.fromJson({
     keys: {
       coinPublic: Option.getOrUndefined(configurableOptions.coinPublicKey ?? Option.none()),
-      signing: Option.getOrUndefined(configurableOptions.signingKey ?? Option.none())
+      signing: Option.getOrUndefined(configurableOptions.signingKey ?? Option.none()),
+      signingKind: Option.getOrUndefined(configurableOptions.signingKind ?? Option.none())
     }
   });
