@@ -92,7 +92,6 @@ export {
   type Op,
   type QueryContext,
   type RunningCost,
-  sampleSigningKey,
   signatureVerifyingKey,
   type StateValue,
   type WitnessContext,
