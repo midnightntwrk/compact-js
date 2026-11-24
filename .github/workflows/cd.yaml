@@ -211,6 +211,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           NPM_CONFIG_PROVENANCE: 'true'
+          # First publish only: npm needs a package to exist before a Trusted Publisher can be added. Remove after.
+          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_NPMJS_TOKEN }}
 
       # npm gives a package's *first* publish the `latest` dist-tag whatever the version,
       # so a release candidate published under a name npm has not seen before becomes the
