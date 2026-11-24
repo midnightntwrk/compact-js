@@ -1,6 +1,6 @@
 {
   "name": "@midnightntwrk/compact-js-command",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Command line utilities for working with smart contracts compiled with the Compact language",
   "type": "module",
   "exports": {
