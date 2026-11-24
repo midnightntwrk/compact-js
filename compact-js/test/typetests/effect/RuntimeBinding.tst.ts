@@ -137,6 +137,14 @@ describe('RuntimeBinding — signature drift', () => {
 });
 
 describe('RuntimeBinding — era-varying signing key', () => {
+  it('keeps the raw sampleSigningKey off both bindings', () => {
+    // Re-exporting it publishes an era-varying signature on the facade: v4 takes a `kind` and
+    // returns a tagged key, v3 takes nothing and returns bare hex. `makeSampleSigningKey` is the
+    // only way across, and 0.21 shipped the raw name on `/v9/effect` alone (midnightntwrk/compact-js#64).
+    expect<typeof V0_21>().type.not.toHaveProperty('sampleSigningKey');
+    expect<typeof V0_16>().type.not.toHaveProperty('sampleSigningKey');
+  });
+
   it('reads a hex value on both eras despite the native shapes differing', () => {
     // onchain-runtime-v3 types `SigningKey` as a bare hex `string`; v4 tags it (`{ tag, value }`)
     // and `sampleSigningKey` gained a `kind` parameter. The keys themselves stay native — they
