@@ -73,11 +73,45 @@ pre mode is on, `3.0.3-rc.1` publishes under `rc`. One exception matters while t
 **first** publish whatever the version, so the first release under a new name must not be a
 release candidate. Check `npm dist-tag ls` after it.
 
+## The first publish of a new package name
+
+**Trusted Publishing cannot make a package's first publish.** A trusted publisher is
+attached to a package that already exists on the registry, so for a name npm has never
+seen there is nothing to attach it to and nothing to exchange the OIDC token against. npm
+answers the `PUT` with **404** — not 403, because it will not confirm that an unknown name
+exists — which reads as if the release, rather than the authentication, were at fault.
+This is [npm/cli#8544](https://github.com/npm/cli/issues/8544); npm has no equivalent of
+PyPI's pending publishers.
+
+That costs one token-authenticated publish per name, which CD makes itself. Nothing about
+how a release is triggered changes: it is still the merge of the Version Packages PR, and
+a publish that failed is still retried by re-running the job.
+
+1. Put a granular access token with publish rights on the **`npm-publish-stable`**
+   environment as **`NPM_TOKEN`**.
+2. Re-run the publish job. CD asks the registry whether any of the three names is unknown
+   to it and uses the token only for that, so the token path opens and closes on a
+   registry fact rather than on anyone's say-so. Everything else is unchanged — same
+   reviewer gate, same artifacts, same provenance.
+3. Attach the trusted publishers. The run prints the three commands; each is
+   `npm trust github <name> --file cd.yaml --repo midnightntwrk/compact-js --env npm-publish-stable --allow-publish -y`,
+   run as an npm account with publish rights. CD cannot do this itself — npm takes the
+   configuration only from an authenticated account, never from the OIDC identity it
+   governs.
+4. **Delete the `NPM_TOKEN` secret.** Every later release goes through OIDC, and a token
+   left in that variable would shadow it.
+
+This is a per-*name* cost, not a per-release one. It was paid for `@midnightntwrk/compact-js`,
+`-node` and `-command` at 4.0.0, and is owed again only if a fourth package is ever added.
+If a first publish is ever left to a laptop instead, CD will not tag it: once the registry
+has the version, `assess` reports nothing to publish and the job never runs again.
+
 ## How publishing is authenticated
 
 CD publishes to npmjs with **Trusted Publishing**: GitHub mints a short-lived OIDC token
-and npm exchanges it for publish rights. There is no npm *publish* token anywhere in the
-workflow, and each package gets a SLSA provenance attestation.
+and npm exchanges it for publish rights. Outside a new name's first publish there is no
+npm *publish* token anywhere in the workflow, and each package gets a SLSA provenance
+attestation.
 
 That means three things have to agree exactly, or the exchange fails:
 
@@ -87,12 +121,13 @@ That means three things have to agree exactly, or the exchange fails:
 | Workflow filename | `cd.yaml` |
 | Environment | `npm-publish-stable` |
 
-A mismatch fails with `403 OIDC token exchange failed`; a missing or expired publisher
-config fails with `404`. One further trap: `setup-node` with a `registry-url` **always**
-writes an `_authToken=${NODE_AUTH_TOKEN}` line into `~/.npmrc`, so the rule is not to keep
-that line out of the file but to keep a **real token out of `NODE_AUTH_TOKEN`** — one in
-the environment shadows OIDC. Trusted Publishing also needs npm ≥ 11.5.1, which the Node
-pinned in `.nvmrc` already bundles.
+A mismatch fails with `403 OIDC token exchange failed`; a missing, expired or not-yet-made
+publisher config fails with `404`. One further trap: `setup-node` with a `registry-url`
+**always** writes an `_authToken=${NODE_AUTH_TOKEN}` line into `~/.npmrc`, so the rule is
+not to keep that line out of the file but to keep a **real token out of `NODE_AUTH_TOKEN`**
+— one in the environment shadows OIDC, which is why the workflow sets it only for a new
+name's first publish and empty otherwise. Trusted Publishing also needs npm ≥ 11.5.1, which the
+Node pinned in `.nvmrc` already bundles.
 
 Installing is separate and needs no token: every dependency, upstream `@midnight-ntwrk`
 ones included, resolves anonymously from npmjs
@@ -121,8 +156,18 @@ stable version.
 - CD only runs on `main`. Maintenance releases from a `release/compact-js/*` branch are not
   supported; a 2.x patch would otherwise be able to take the `latest` dist-tag.
 - The packages are `@midnightntwrk/*`. They were `@midnight-ntwrk/*` up to and including
-  `3.0.2`, which is where that scope stops: those versions stay on npmjs as history, are
-  deprecated in favour of the new names, and receive no further releases.
+  `3.0.2`, which is where that scope stops: those versions stay on npmjs as history and
+  receive no further releases. Pointing them at the new names is a one-off done by hand,
+  because deprecating is an account action and OIDC cannot make one:
+
+  ```bash
+  for p in compact-js compact-js-node compact-js-command; do
+    npm deprecate "@midnight-ntwrk/$p@<=3.0.2" "moved to @midnightntwrk/$p"
+  done
+  ```
+
+  The old scope's stale `rc` and `alpha` dist-tags (`3.0.1-rc.2`, `2.4.0-alpha.23`) can go
+  the same way, with `npm dist-tag rm`.
 - **We do not mirror to the old scope**, which is where this differs from midnight-wallet —
   its `cd.yml` still runs `publish-alias.mjs` after every publish because it kept both
   scopes live. We are retiring the dashed scope instead, so there is no alias step to port.

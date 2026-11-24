@@ -118,9 +118,10 @@ jobs:
     secrets:
       MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
-  # Publishes straight to npmjs with Trusted Publishing, tags, and creates the GitHub
-  # Releases. `changeset publish` skips any version already on the registry, so re-running
-  # after a partial failure finishes the release rather than repeating it.
+  # Publishes straight to npmjs with Trusted Publishing — bar a new name's first publish,
+  # which npm does not let OIDC make — then tags and creates the GitHub Releases.
+  # `changeset publish` skips any version already on the registry, so re-running after a
+  # partial failure finishes the release rather than repeating it.
   publish:
     name: Publish
     needs: [assess, ci]
@@ -173,9 +174,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      # `registry-url` always writes an `_authToken=${NODE_AUTH_TOKEN}` line into ~/.npmrc,
-      # so the rule is not to keep that line out but to keep a real token out of
-      # NODE_AUTH_TOKEN — one in the environment shadows OIDC.
+      # A trusted publisher is attached to a package that already exists, so OIDC cannot
+      # make a name's *first* publish: there is nothing to exchange the token against, and
+      # npm answers the PUT with 404 (npm/cli#8544). That costs one token-authenticated
+      # publish per name, which this detects rather than asks for — a name npm has never
+      # seen is a registry fact, and it stops being true the moment the name exists.
+      - name: Decide how this publish authenticates
+        id: auth
+        run: |
+          set -euo pipefail
+          unseen=false
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+            http=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/${name/\//%2f}")
+            case "$http" in
+              200) ;;
+              404) echo "::notice::${name} is new to npm"; unseen=true ;;
+              *) echo "::error::npm registry answered ${http} for ${name}"; exit 1 ;;
+            esac
+          done
+
+          echo "::notice::first publish of a new name: ${unseen}"
+          echo "bootstrap=${unseen}" >> "$GITHUB_OUTPUT"
+
+      # `secrets` is not a context step `if:` can read, so the presence check is in the body.
+      - name: Require a token for a first publish
+        if: steps.auth.outputs.bootstrap == 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ -n "${NPM_TOKEN:-}" ]] || {
+            echo "::error::A package here is new to npm, which Trusted Publishing cannot publish. Add an NPM_TOKEN secret to the npm-publish-stable environment and re-run this job; see docs/releasing.md."
+            exit 1
+          }
+
+      # `registry-url` always writes an `_authToken=${NODE_AUTH_TOKEN}` line into ~/.npmrc.
+      # Outside that first publish the variable must stay empty: a real token in it shadows
+      # OIDC, and would silently cost every published package its provenance-by-OIDC path.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
         with:
@@ -211,6 +247,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
           NPM_CONFIG_PROVENANCE: 'true'
+          # Empty on every release but a new name's first, which is what leaves OIDC in charge.
+          NODE_AUTH_TOKEN: ${{ steps.auth.outputs.bootstrap == 'true' && secrets.NPM_TOKEN || '' }}
+
+      # A name published for the first time above has no trusted publisher yet, and nothing
+      # in this workflow can attach one — npm takes that configuration only from an
+      # authenticated account, never from the OIDC identity it governs.
+      - name: Say what a first publish still needs
+        if: steps.auth.outputs.bootstrap == 'true'
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+            echo "::notice::npm trust github ${name} --file cd.yaml --repo ${REPO} --env npm-publish-stable --allow-publish -y"
+          done
+          echo "::warning::Run those three commands as an npm account with publish rights, then delete the NPM_TOKEN secret. Later releases need neither."
 
       # npm gives a package's *first* publish the `latest` dist-tag whatever the version,
       # so a release candidate published under a name npm has not seen before becomes the
