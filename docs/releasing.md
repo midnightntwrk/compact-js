@@ -34,7 +34,23 @@ Changes** in the package CHANGELOG and in the body of the GitHub Release. Write 
 someone upgrading, not for the reviewer.
 
 The three packages are a `fixed` group, so they always publish at the same version — a bump
-to any of them bumps all three.
+to any of them bumps all three, at the largest bump any of them asked for.
+
+That last clause is where the bump you write can turn into a larger one than you expect.
+`compact-js-node` declares `compact-js` as a **peerDependency**, and Changesets bumps a peer
+dependent by a *major* when its dependency takes anything above a patch — a changed peer
+range is breaking for whoever is satisfying it. Left alone, a `minor` on `compact-js` would
+make `compact-js-node` major, and the `fixed` group would carry both the other packages to
+the same major. `.changeset/config.json` therefore sets
+
+```json
+"___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": { "onlyUpdatePeerDependentsWhenOutOfRange": true }
+```
+
+which restricts that major to the case where it is true: the peer range is `workspace:^`,
+so a minor stays inside it and only a real major leaves it. The option name is Changesets'
+own, and unflattering, but it is the documented way to express this. Verify a surprising
+bump against the Version Packages PR rather than against the changeset alone.
 
 ## 2. Merge the Version Packages PR
 
