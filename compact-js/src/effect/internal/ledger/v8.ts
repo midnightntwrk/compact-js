@@ -129,11 +129,11 @@ const CostModel = LedgerCostModel as unknown as { initialCostModel(): CostModel 
 
 export { CostModel };
 
-/**
- * The contract operation (verifier key) version this era's ledger expects. Same literal as v9: v8
- * accepts only `'v3'`, and v9 accepts `'v3' | 'v4'` but compact-js emits `'v3'`.
- */
+/** The version this era inserts at. `'v3'` is the only one v8 accepts; v9 binds `'v4'`. */
 const CONTRACT_OPERATION_VERSION = 'v3';
+
+// One entry, since `'v3'` is the whole of this era's version space. See the v9 twin.
+const CONTRACT_OPERATION_VERSIONS = ['v3'] as const;
 
 /**
  * Ledger 8 CMA keys are BIP-340 only — the era has no tagged-key concept, so there is exactly one
@@ -170,6 +170,13 @@ if (!era.supportsCmaSignatureKind(era.defaultCmaSignatureKind)) {
   );
 }
 
+// Mirrors v9 again: inserts must land in a slot a removal sweeps.
+if (!CONTRACT_OPERATION_VERSIONS.includes(CONTRACT_OPERATION_VERSION)) {
+  throw new Error(
+    `ledger ${era.ledger} era binding: the era's operation version '${CONTRACT_OPERATION_VERSION}' is not among the versions it can hold`
+  );
+}
+
 /**
  * Creates the {@link ContractOperationVersion} for this era.
  *
@@ -186,6 +193,15 @@ export const makeContractOperationVersion = (): ContractOperationVersion =>
  */
 export const makeVersionedVerifierKey = (verifierKey: Uint8Array): ContractOperationVersionedVerifierKey =>
   new ContractOperationVersionedVerifierKey(CONTRACT_OPERATION_VERSION, verifierKey);
+
+/**
+ * Every {@link ContractOperationVersion} this era can hold a key at — one, since v8 predates the
+ * second proof system. See the v9 twin.
+ *
+ * @category constructors
+ */
+export const contractOperationVersions = (): readonly ContractOperationVersion[] =>
+  CONTRACT_OPERATION_VERSIONS.map((version) => new ContractOperationVersion(version));
 
 /**
  * Adapts a platform-js signing key to ledger 8's `SigningKey`.

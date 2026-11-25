@@ -165,6 +165,8 @@ describe('Ledger facade type surface', () => {
     expect(Ledger.makeVersionedVerifierKey).type.toBe<
       (verifierKey: Uint8Array) => Ledger.ContractOperationVersionedVerifierKey
     >();
+    // The set a removal sweeps, built per call so importing an era entry compiles no WASM.
+    expect(Ledger.contractOperationVersions).type.toBe<() => readonly Ledger.ContractOperationVersion[]>();
   });
 });
 
