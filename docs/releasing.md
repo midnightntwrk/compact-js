@@ -70,8 +70,10 @@ re-running leaves the tag in place and refreshes the notes.
 The npm dist-tag follows the version: a plain `3.0.3` publishes under `latest`, and while
 pre mode is on, `3.0.3-rc.1` publishes under `rc`. One exception matters while the
 `@midnightntwrk` names are still new: a package npm has never seen takes `latest` on its
-**first** publish whatever the version, so the first release under a new name must not be a
-release candidate. Check `npm dist-tag ls` after it.
+**first** publish whatever the version, and Changesets agrees with it — a package it finds
+no regular release for is published to `latest` even in pre mode. Nothing downstream can
+repair that, because OIDC cannot move a dist-tag, so CD refuses to publish a prerelease
+under a name that has no stable version on npm rather than reporting it afterwards.
 
 ## How publishing is authenticated
 
@@ -104,22 +106,66 @@ Publishers before the environment exists would let the next push publish unrevie
 publish job's first step therefore refuses to run unless `npm-publish-stable` has required
 reviewers.
 
-## Release candidates
+## Two prerelease channels
+
+They differ in what the version is *on the way to*.
+
+| | rc | canary |
+| --- | --- | --- |
+| Version | `5.0.0-rc.0` — becomes `5.0.0` | `0.0.0-canary-<sha>` — becomes nothing |
+| dist-tag | `rc` | `canary`, or whatever was dispatched |
+| Changelog, tags, Releases | yes, as for a stable release | none |
+| Cut by | merging a Version Packages PR | dispatching CD on a branch |
+| Afterwards | graduated to the stable version | discarded |
+
+Neither is reachable from a stable range, so a consumer on `^4.0.0` resolves to neither.
+
+### Release candidates
 
 ```bash
 yarn changeset pre enter rc   # in its own PR
 ```
 
-While pre mode is on, every Version Packages PR yields `X.Y.Z-rc.N`. Graduate the line with
+While pre mode is on, every Version Packages PR yields `X.Y.Z-rc.N` and CD publishes it
+under the `rc` dist-tag, leaving `latest` where it is. Graduate the line with
 `yarn changeset pre exit` in its own PR; the next Version Packages PR then carries the
-stable version.
+stable version, which is built from *every* changeset the line accumulated — pre mode keeps
+the changeset files rather than consuming them, and `pre.json` records which have been
+applied so far. That is also how CD tells an rc that is ready to publish from one that is
+still waiting on a version bump.
+
+### Canaries
+
+Dispatch **CD** from the branch, with a dist-tag (`canary` by default):
+
+```bash
+gh workflow run cd.yaml --ref my-branch -f dist-tag=canary
+```
+
+That builds and tests the branch as `0.0.0-<tag>-<commit sha>` and publishes it under that
+dist-tag. The `0.0.0` base is deliberate: it keeps a canary out of every range, which is
+also why a canary is never promoted — the change lands on `main` and is released normally.
+Install one by exact version, or by tag:
+
+```bash
+npm install @midnightntwrk/compact-js@canary
+```
+
+A canary needs a pending changeset to version, and it goes through the same
+`npm-publish-stable` reviewer gate as a release, because it reaches the same registry. It
+writes no changelog entry, no git tag and no GitHub Release.
 
 ## Notes
 
 - A package's `CHANGELOG.md` is written by the first `changeset version` that bumps it.
   `CHANGELOG.md` at the repository root is frozen history from the pre-Changesets flow.
-- CD only runs on `main`. Maintenance releases from a `release/compact-js/*` branch are not
-  supported; a 2.x patch would otherwise be able to take the `latest` dist-tag.
+- CD *releases* only from `main`. Maintenance releases from a `release/compact-js/*` branch
+  are not supported; a 2.x patch would otherwise be able to take the `latest` dist-tag. A
+  canary is the one thing CD will publish from another branch, and it is version-fenced out
+  of `latest` rather than trusted not to take it.
+- The canary jobs live in `cd.yaml` rather than a workflow of their own because npm binds a
+  Trusted Publisher to a workflow **filename** — a `canary.yaml` would need three more
+  publisher entries before it could publish at all.
 - The packages are `@midnightntwrk/*`. They were `@midnight-ntwrk/*` up to and including
   `3.0.2`, which is where that scope stops: those versions stay on npmjs as history, are
   deprecated in favour of the new names, and receive no further releases.
