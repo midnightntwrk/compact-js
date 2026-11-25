@@ -251,9 +251,11 @@ To add a new era (e.g. ledger 10 paired with runtime 0.22):
 
 1. Extend the `LedgerMajor` and `RuntimeLine` unions in `internal/era.ts`.
 2. Create `internal/ledger/v10.ts` mirroring `v9.ts`: the curated re-export list, its own
-   `CONTRACT_OPERATION_VERSION`, and an `Era` descriptor — declaring the paired
-   `runtime: '0.22'` — with a **re-verified** CMA signature-scheme allowlist (verify each scheme
-   end-to-end before listing it).
+   `CONTRACT_OPERATION_VERSION`, its own `CONTRACT_OPERATION_VERSIONS` (every version the era can
+   hold a key at, including the older ones — `removeContractOperation` sweeps all of them, because
+   `ContractOperation.verifierKey` exposes only the latest and a missed version leaves the circuit
+   callable), and an `Era` descriptor — declaring the paired `runtime: '0.22'` — with a
+   **re-verified** CMA signature-scheme allowlist (verify each scheme end-to-end before listing it).
 3. Create `internal/runtime/v0_22.ts` mirroring `v0_21.ts`: the curated re-export list and its
    `line`.
 4. Register both bindings in `internal/ledger/conformance.ts` and `internal/runtime/conformance.ts`.

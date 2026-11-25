@@ -44,6 +44,10 @@ const CONTRACT_EVENT_EXPORTS = [
 const NETWORK_ID = 'undeployed';
 const TRANSACTION_TTL = new Date('2030-01-01T00:00:00Z');
 
+// Structural in the era, so one helper reads both entries' facades.
+const versionsOf = (ledger: { contractOperationVersions: () => readonly { readonly version: string }[] }) =>
+  ledger.contractOperationVersions().map((v) => v.version);
+
 describe('Ledger era seam', () => {
   it('describes the ledger 9 era', () => {
     expect(Ledger.era.ledger).toBe(9);
@@ -62,6 +66,13 @@ describe('Ledger era seam', () => {
 
   it('constructs era-versioned values without leaking the version literal', () => {
     expect(Ledger.makeContractOperationVersion().version).toBe('v4');
+  });
+
+  it('enumerates every operation version it can hold a key at, not just the one it inserts at', () => {
+    // A removal sweeps these. Ledger 9 holds both, and `ContractOperation.verifierKey` exposes
+    // only the latest — so a sweep is the only way to decommission a circuit outright (#68).
+    expect(versionsOf(Ledger)).toEqual(['v3', 'v4']);
+    expect(versionsOf(Ledger)).toContain(Ledger.makeContractOperationVersion().version);
   });
 });
 
@@ -132,6 +143,11 @@ describe('the ledger 8 entry', () => {
     expect(v8EffectEntry.Ledger.era.ledger).toBe(8);
     expect(v8EffectEntry.Ledger.era.runtime).toBe('0.16');
     expect(v8EffectEntry.CompactRuntime.line).toBe('0.16');
+  });
+
+  it('holds a key at one operation version only', () => {
+    // v8 predates the second proof system, so its sweep is a single version.
+    expect(versionsOf(v8EffectEntry.Ledger)).toEqual(['v3']);
   });
 
   it('exposes every era-free module, so era-agnostic code compiles against either entry', () => {

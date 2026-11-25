@@ -323,13 +323,50 @@ describe('ContractExecutable', () => {
 
         expect(result.public.maintenanceUpdate).toBeDefined();
         expect(result.public.maintenanceUpdate.counter).toEqual(deployment.initialState.maintenanceAuthority.counter);
-        expect((result.public.maintenanceUpdate.updates[0] as VerifierKeyRemove).operation).toEqual('increment');
-        // The era's operation version must reach the constructed update, not just the constructor:
-        // a removal at the wrong version silently targets a key the ledger does not hold.
-        expect((result.public.maintenanceUpdate.updates[0] as VerifierKeyRemove).version.version).toEqual(
-          Ledger.makeContractOperationVersion().version
-        );
+        const removals = result.public.maintenanceUpdate.updates as VerifierKeyRemove[];
+        expect(removals.map((removal) => removal.operation)).toEqual(['increment', 'increment']);
         expect(result.private.signingKey).toEqual(SigningKey.make(VALID_SIGNING_KEY));
+      })
+    );
+
+    it.effect('removeContractOperation should remove every version the era can hold a key at', () =>
+      Effect.gen(function* () {
+        // #68, and the upgrade case beyond it. The ledger keys verifier keys by version and exposes
+        // only the latest, so a contract deployed pre-0.36 and upgraded since holds a key at `v3`
+        // that nothing can read back. Targeting one version leaves the circuit callable.
+        const result = yield* contract.removeContractOperation(
+          Contract.ProvableCircuitId<CounterContract>('increment'),
+          {
+            address: ContractAddress.ContractAddress(deployment.address),
+            contractState: asContractState(deployment.initialState),
+          }
+        );
+
+        const removals = result.public.maintenanceUpdate.updates as VerifierKeyRemove[];
+        expect(removals.map((removal) => removal.version.version)).toEqual(
+          Ledger.contractOperationVersions().map((version) => version.version)
+        );
+        // Covering the insert version alone is what the defect did; the sweep must be wider.
+        expect(removals.length).toBeGreaterThan(1);
+      })
+    );
+
+    it.effect('removeContractOperation should fail when the state holds no key for the circuit', () =>
+      Effect.gen(function* () {
+        // A state file for the wrong contract: this used to build a well-formed no-op update.
+        const exit = yield* contract
+          .removeContractOperation(Contract.ProvableCircuitId<CounterContract>('increment'), {
+            address: ContractAddress.ContractAddress(deployment.address),
+            contractState: new ContractState(),
+          })
+          .pipe(Effect.exit);
+
+        expect(Exit.isFailure(exit) && Cause.isDie(exit.cause)).toBe(false);
+        const failure = Exit.isFailure(exit) ? Option.getOrUndefined(Cause.failureOption(exit.cause)) : undefined;
+        expect(ContractConfigurationError.isConfigurationError(failure)).toBe(true);
+        expect((failure as ContractConfigurationError.ContractConfigurationError).message).toMatch(
+          /no operation for circuit 'increment'/
+        );
       })
     );
 
