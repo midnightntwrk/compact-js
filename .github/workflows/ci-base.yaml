@@ -25,6 +25,11 @@ on:
         description: A flag indicating whether the compiled packages should be created and attached to the build.
         required: false
         default: false
+      snapshot-tag:
+        type: string
+        description: Version the workspace as a throwaway snapshot under this name before building, instead of at the version the manifests carry.
+        required: false
+        default: ''
 
 jobs:
   ci:
@@ -82,6 +87,27 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install
+
+      # A canary ships the branch as it stands, so the manifests have to carry its
+      # version before the build copies them into each `dist/`. `{commit}` rather than
+      # the default `{datetime}`: the publish job re-runs this on the same commit and
+      # has to arrive at the same version. Snapshot mode commits nothing.
+      - name: Version as a snapshot
+        if: ${{ inputs.snapshot-tag != '' }}
+        env:
+          SNAPSHOT_TAG: ${{ inputs.snapshot-tag }}
+        run: |
+          set -euo pipefail
+          yarn changeset version --snapshot "$SNAPSHOT_TAG" --snapshot-prerelease-template '{tag}-{commit}'
+
+          # With nothing to version the command succeeds and changes nothing, which would
+          # otherwise build the released version under a canary name and publish nothing.
+          version=$(jq -er '.version' compact-js/package.json)
+          if [[ "$version" != 0.0.0-"$SNAPSHOT_TAG"-* ]]; then
+            echo "::error::versioning left ${version} rather than a ${SNAPSHOT_TAG} snapshot — this branch has no pending changeset to build one from"
+            exit 1
+          fi
+          echo "::notice::building ${version}"
 
       - name: Run build
         run: yarn build --cache-dir ./turbo

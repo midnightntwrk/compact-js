@@ -42,5 +42,9 @@ hand-versioned and no tag is pushed by hand.
 
 The three packages are a `fixed` group and always publish at the same version.
 
-Full detail, including release candidates and how publishing is authenticated, is in
+Two prerelease channels sit beside that, neither of which can take the `latest` dist-tag:
+**release candidates** (`X.Y.Z-rc.N`, under `rc`, graduated to the stable version) and
+**canaries** (`0.0.0-canary-<sha>`, under `canary`, built from a branch and discarded).
+
+Full detail, including both channels and how publishing is authenticated, is in
 [`docs/releasing.md`](docs/releasing.md).
