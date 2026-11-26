@@ -14,7 +14,9 @@
         "../scripts/verify-exports.mjs",
         "../scripts/compact-if-stale.mjs"
       ],
-      "outputs": ["dist/**", "build/**", "src/**/managed/**"]
+      // No build script writes `build/src` — it is `test-typecheck`'s project-reference emit, and
+      // caching it restores a stale copy over tsc's own output on the next run.
+      "outputs": ["dist/**", "build/**", "!build/src/**", "src/**/managed/**"]
     },
     "clean": {
       "cache": false

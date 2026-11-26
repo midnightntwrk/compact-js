@@ -39,8 +39,11 @@ import type * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
 export const ERA8_COUNTER = resolve(import.meta.dirname, '../contract/managed-v8/counter');
 
 // `describe.skip` when the fixture is absent — safe only because `Fixtures.test.ts` does not skip,
-// so a CI leg that cannot run compactc fails there rather than reporting nothing.
-export const describeWithFixture = existsSync(resolve(ERA8_COUNTER, 'contract/index.js'))
+// so a CI leg that cannot run compactc fails there rather than reporting nothing. The annotation is
+// load-bearing: the inferred union names vitest internals that declaration emit cannot write.
+export const describeWithFixture: typeof describe.skip = existsSync(
+  resolve(ERA8_COUNTER, 'contract/index.js')
+)
   ? describe
   : describe.skip;
 
