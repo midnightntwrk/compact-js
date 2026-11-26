@@ -48,8 +48,8 @@ type AssertShared<_Names extends never> = void;
 
 // Distributes over the union, where a bare `keyof` would intersect: the two together are "present
 // on some era" minus "present on every era".
-type AnyName<Entries> = Entries extends unknown ? keyof Entries : never;
-type Divergent<Entries, Gated = never> = Exclude<AnyName<Entries>, keyof Entries | Gated>;
+type AnyName<Surfaces> = Surfaces extends unknown ? keyof Surfaces : never;
+type Divergent<Surfaces, Gated = never> = Exclude<AnyName<Surfaces>, keyof Surfaces | Gated>;
 
 /**
  * The one capability an era entry may withhold: ledger 8 cannot emit contract events at all —
