@@ -273,7 +273,14 @@ To add a new era (e.g. ledger 10 paired with runtime 0.22):
    would follow), and `EraLaziness.test.ts` counts `WebAssembly.Module` compilations in a child
    process (what a *process* actually pays). Both need the new era listed, and the second needs its
    ledger and onchain-runtime package names — including the scope spelling, which is not consistent
-   across eras.
+   across eras. Those two measure what an entry *costs*; what it *offers* is `internal/era/
+   conformance.ts`, which is where the new entry joins the four surface unions. `keyof` of a union
+   is the intersection of its members' keys, so from that point the era shares every value export
+   with the others or names the difference in `EraGatedEntryName` with the era fact behind it —
+   a member on one era and not another is a build error rather than a review miss (#65). Its
+   type-only counterpart, since `keyof` cannot see an `export { type … }`, is
+   `EraSurfaceParity.test.ts`: add the era to `ERA_SOURCES`, and an `ERA_GATED` entry for any type
+   it withholds.
 7. Repoint **both** `internal/ledger/current.ts` and `internal/runtime/current.ts` at the new
    bindings. `CompactRuntime.test.ts` fails a half-completed swap: it checks the
    `Ledger.era.runtime` ↔ `CompactRuntime.line` pairing and anchors `line` to the installed

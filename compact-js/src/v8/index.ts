@@ -19,6 +19,6 @@
  *
  * @remarks
  * Same surface as `@midnightntwrk/compact-js/v8/effect`; see that module for what this era can
- * and cannot do, and why `ContractExecutable` is not among it yet.
+ * and cannot do.
  */
 export * from './effect.js';
