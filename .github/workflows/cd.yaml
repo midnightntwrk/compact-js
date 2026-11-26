@@ -116,7 +116,7 @@ jobs:
 
       - name: Create / update Release Pull Request
         id: changesets
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # ratchet:changesets/action@v2.1.2
         with:
           version: yarn release:prepare
           title: 'chore: release'
@@ -248,7 +248,7 @@ jobs:
       # rc versions are flagged as prereleases, so they do not become "Latest".
       - name: Publish and release
         id: publish
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # ratchet:changesets/action@v1.9.0
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # ratchet:changesets/action@v2.1.2
         with:
           publish: yarn changeset publish
           createGithubReleases: true
