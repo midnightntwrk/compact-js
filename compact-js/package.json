@@ -1,6 +1,6 @@
 {
   "name": "@midnightntwrk/compact-js",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Typescript-based execution environment for smart contracts compiled with the Compact language",
   "type": "module",
   "exports": {
