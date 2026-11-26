@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 import { NodeContext } from '@effect/platform-node';
 import * as Configuration from '@midnight-ntwrk/platform-js/effect/Configuration';
 import * as ContractAddress from '@midnight-ntwrk/platform-js/effect/ContractAddress';
@@ -24,7 +21,9 @@ import { ZKFileConfiguration } from '@midnightntwrk/compact-js-node/effect';
 import * as LedgerV9 from '@midnightntwrk/ledger-v9';
 import { sampleContractAddress } from 'compact-runtime-ledger8';
 import { ConfigProvider, Effect, Layer } from 'effect';
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
+
+import { describeWithFixture, ERA8_COUNTER, type Era8CounterContract, loadEra8Counter } from './counterFixture.js';
 
 /**
  * **A ledger 8 call, re-partitioned under ledger 9** — the case midnight-sdk#400 exists for.
@@ -57,14 +56,7 @@ import { describe, expect, it } from 'vitest';
  * redirect to its own era-8 subtree and reaches ledger 9 through the facade as usual; only the
  * *names* differ, since everything crossing below is plain data or bytes.
  */
-const ERA8_COUNTER = resolve(import.meta.dirname, '../contract/managed-v8/counter');
-const FIXTURE_PRESENT = existsSync(resolve(ERA8_COUNTER, 'contract/index.js'));
-const describeWithFixture = FIXTURE_PRESENT ? describe : describe.skip;
-
 const VALID_COIN_PUBLIC_KEY = 'd2dc8d175c0ef7d1f7e5b7f32bd9da5fcd4c60fa1b651f1d312986269c2d3c79';
-
-/** The private state the era 8 counter fixture is compiled against. */
-type CounterPrivateState = { readonly count: number };
 
 const testLayer = Layer.mergeAll(ZKFileConfiguration.layer(ERA8_COUNTER), Configuration.layer).pipe(
   Layer.provideMerge(NodeContext.layer),
@@ -78,16 +70,11 @@ const testLayer = Layer.mergeAll(ZKFileConfiguration.layer(ERA8_COUNTER), Config
 );
 
 const loadExecutable = async () => {
-  const { Contract } = (await import(resolve(ERA8_COUNTER, 'contract/index.js'))) as {
-    Contract: new (witnesses: Record<string, unknown>) => never;
-  };
-  return CompiledContract.make('Era8Counter', Contract).pipe(
+  const { Contract } = await loadEra8Counter();
+  return CompiledContract.make<Era8CounterContract>('Era8Counter', Contract).pipe(
     CompiledContract.withWitnesses({
-      private_increment: ({ privateState }: { privateState: CounterPrivateState }) => [
-        { count: privateState.count + 1 },
-        []
-      ]
-    } as never),
+      private_increment: ({ privateState }) => [{ count: privateState.count + 1 }, []]
+    }),
     CompiledContract.withCompiledFileAssets(ERA8_COUNTER),
     ContractExecutable.make,
     ContractExecutable.provide(testLayer)
@@ -100,7 +87,7 @@ const executeOnLedgerEight = async () => {
   const deployed = await Effect.runPromise(executable.initialize({ count: 0 }));
   const address = ContractAddress.ContractAddress(sampleContractAddress());
   const result = await Effect.runPromise(
-    executable.circuit('increment', {
+    executable.circuit(executable.circuitId('increment'), {
       address,
       contractState: deployed.public.contractState,
       privateState: deployed.private.privateState
