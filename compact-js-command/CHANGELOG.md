@@ -1,5 +1,13 @@
 # @midnightntwrk/compact-js-command
 
+## 4.1.0
+
+### Patch Changes
+
+- Updated dependencies [[`ce74075`](https://github.com/midnightntwrk/compact-js/commit/ce74075139afc4544a76b2cc022f3bb3e943f897)]:
+  - @midnightntwrk/compact-js@4.1.0
+  - @midnightntwrk/compact-js-node@4.1.0
+
 ## 4.0.0
 
 ### Major Changes

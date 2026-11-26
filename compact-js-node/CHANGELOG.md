@@ -1,5 +1,7 @@
 # @midnightntwrk/compact-js-node
 
+## 4.1.0
+
 ## 4.0.0
 
 ### Major Changes
