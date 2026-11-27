@@ -251,9 +251,11 @@ To add a new era (e.g. ledger 10 paired with runtime 0.22):
 
 1. Extend the `LedgerMajor` and `RuntimeLine` unions in `internal/era.ts`.
 2. Create `internal/ledger/v10.ts` mirroring `v9.ts`: the curated re-export list, its own
-   `CONTRACT_OPERATION_VERSION`, and an `Era` descriptor — declaring the paired
-   `runtime: '0.22'` — with a **re-verified** CMA signature-scheme allowlist (verify each scheme
-   end-to-end before listing it).
+   `CONTRACT_OPERATION_VERSION`, its own `CONTRACT_OPERATION_VERSIONS` (every version the era can
+   hold a key at, including the older ones — `removeContractOperation` sweeps all of them, because
+   `ContractOperation.verifierKey` exposes only the latest and a missed version leaves the circuit
+   callable), and an `Era` descriptor — declaring the paired `runtime: '0.22'` — with a
+   **re-verified** CMA signature-scheme allowlist (verify each scheme end-to-end before listing it).
 3. Create `internal/runtime/v0_22.ts` mirroring `v0_21.ts`: the curated re-export list and its
    `line`.
 4. Register both bindings in `internal/ledger/conformance.ts` and `internal/runtime/conformance.ts`.
@@ -271,7 +273,14 @@ To add a new era (e.g. ledger 10 paired with runtime 0.22):
    would follow), and `EraLaziness.test.ts` counts `WebAssembly.Module` compilations in a child
    process (what a *process* actually pays). Both need the new era listed, and the second needs its
    ledger and onchain-runtime package names — including the scope spelling, which is not consistent
-   across eras.
+   across eras. Those two measure what an entry *costs*; what it *offers* is `internal/era/
+   conformance.ts`, which is where the new entry joins the four surface unions. `keyof` of a union
+   is the intersection of its members' keys, so from that point the era shares every value export
+   with the others or names the difference in `EraGatedEntryName` with the era fact behind it —
+   a member on one era and not another is a build error rather than a review miss (#65). Its
+   type-only counterpart, since `keyof` cannot see an `export { type … }`, is
+   `EraSurfaceParity.test.ts`: add the era to `ERA_SOURCES`, and an `ERA_GATED` entry for any type
+   it withholds.
 7. Repoint **both** `internal/ledger/current.ts` and `internal/runtime/current.ts` at the new
    bindings. `CompactRuntime.test.ts` fails a half-completed swap: it checks the
    `Ledger.era.runtime` ↔ `CompactRuntime.line` pairing and anchors `line` to the installed

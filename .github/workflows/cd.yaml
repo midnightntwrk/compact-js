@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+  # Canaries only. A release is still cut by merging the Version Packages PR, never
+  # by dispatching this workflow.
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: npm dist-tag to publish the canary under.
+        type: string
+        default: canary
+        required: true
 
 permissions: {}
 
@@ -13,6 +22,7 @@ jobs:
   # or partial release can be finished by pushing again.
   assess:
     name: Assess
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,8 +37,22 @@ jobs:
         id: registry
         run: |
           set -euo pipefail
+
+          # In pre mode `changeset version` leaves the changeset files in place and
+          # records the ones it has applied in pre.json, so presence alone does not mean
+          # "unversioned" — reading it that way would make every rc release wait forever.
+          # Only `pre` counts: under `exit` those same files are pending again, because
+          # the next `changeset version` replays all of them into the stable release.
+          applied=''
+          if [[ -f .changeset/pre.json ]] && [[ "$(jq -r '.mode' .changeset/pre.json)" == pre ]]; then
+            applied=$(jq -r '.changesets[]? // empty' .changeset/pre.json)
+          fi
+
           for changeset in .changeset/*.md; do
-            if [[ -f "$changeset" && "$changeset" != .changeset/README.md ]]; then
+            [[ -f "$changeset" ]] || continue
+            name=$(basename "$changeset" .md)
+            [[ "$name" == README ]] && continue
+            if ! grep -qxF "$name" <<<"$applied"; then
               echo "::notice::Pending changesets must be versioned before publishing"
               echo "needs-publish=false" >> "$GITHUB_OUTPUT"
               exit 0
@@ -58,6 +82,7 @@ jobs:
   # refreshed on every push to main, and the human gate is merging it.
   version:
     name: Version (release PR)
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     # Superseding an in-flight update is correct — the newer push produces the same PR
     # from newer changesets.
@@ -198,6 +223,26 @@ jobs:
         with:
           name: Dist compact-js
 
+      # npm gives a package's *first* publish the `latest` dist-tag whatever the version,
+      # and Changesets agrees with it: a package it finds no regular release for is
+      # published to `latest` even in pre mode. Nothing downstream can undo that — OIDC
+      # cannot move a dist-tag — so the only place to catch it is before the publish.
+      - name: Refuse a prerelease that would take the latest dist-tag
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+          [[ "$version" == *-* ]] || exit 0
+
+          for workspace in compact-js compact-js-node compact-js-command; do
+            name=$(jq -er '.name' "$workspace/package.json")
+            stable=$(curl -sS "https://registry.npmjs.org/${name/\//%2f}" \
+              | jq -r '[((.versions // {}) | keys[]) | select(contains("-") | not)] | length')
+            if [[ "$stable" == "0" ]]; then
+              echo "::error::${name} has no stable release on npm, so publishing ${version} would hand the prerelease the 'latest' dist-tag. Ship a stable version under this name first."
+              exit 1
+            fi
+          done
+
       # Creates one tag and one GitHub Release per package, with the body taken from
       # that package's CHANGELOG.md — which `changeset version` wrote from the changesets.
       # rc versions are flagged as prereleases, so they do not become "Latest".
@@ -310,3 +355,147 @@ jobs:
             echo "::error::could not query release ${tag}: ${error}"
             exit 1
           fi
+
+  # The three jobs below publish a canary: a throwaway build of the dispatched branch at
+  # version 0.0.0-<tag>-<sha>, under its own dist-tag, with no changelog, no git tag and
+  # no Release. The 0.0.0 base is what makes it unreachable — no stable range resolves to
+  # it — and is also why a canary is never promoted; the change lands and ships normally.
+
+  # Ahead of the build rather than beside the publish, so a typo costs seconds instead of
+  # a full CI run and a reviewer's approval.
+  canary-tag:
+    name: Check the canary dist-tag
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Reject a dist-tag consumers resolve by default
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: |
+          set -euo pipefail
+          case "$DIST_TAG" in
+            latest | rc | next | beta)
+              echo "::error::'${DIST_TAG}' is a release channel, not a canary tag"
+              exit 1
+              ;;
+          esac
+          [[ "$DIST_TAG" =~ ^[a-z][a-z0-9-]*$ ]] || {
+            echo "::error::'${DIST_TAG}' is not a usable dist-tag"
+            exit 1
+          }
+
+  canary-build:
+    name: Build, Lint and Test (canary)
+    needs: canary-tag
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/ci-base.yaml
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    with:
+      create-package-artifacts: true
+      snapshot-tag: ${{ inputs.dist-tag }}
+    secrets:
+      MIDNIGHTCI_PACKAGES_WRITE: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+
+  # Lives in this workflow rather than its own because npm binds a Trusted Publisher to a
+  # workflow *filename*; a canary.yaml would 403 until three more publishers were added.
+  canary:
+    name: Publish canary
+    needs: canary-build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: cd-canary-${{ github.sha }}
+      cancel-in-progress: false
+    environment: npm-publish-stable
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      # Same fail-closed check the stable publish makes, for the same reason: GitHub
+      # creates a missing environment with no protection rules, and this job reaches npm.
+      - name: Require a reviewer gate on this environment
+        env:
+          GH_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          set +e
+          rules=$(gh api "repos/${REPO}/environments/npm-publish-stable" \
+            --jq '[.protection_rules[].type] | join(",")' 2>&1)
+          lookup=$?
+          set -e
+
+          if [[ $lookup -ne 0 ]]; then
+            echo "::error::could not read the npm-publish-stable environment: ${rules}"
+            exit 1
+          fi
+
+          echo "protection rules: ${rules:-none}"
+          if [[ "$rules" != *required_reviewers* ]]; then
+            echo "::error::npm-publish-stable has no required reviewers, so this publish is not gated by a human. Configure reviewers on the environment before releasing."
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # ratchet:actions/setup-node@v7.1.0
+        with:
+          registry-url: https://registry.npmjs.org
+          scope: '@midnightntwrk'
+          node-version-file: .nvmrc
+
+      - name: Configure Yarn
+        uses: ./.github/actions/configure-yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # `changeset publish` ships the dist/ directories but reads the version it decides
+      # on — and tags — from the workspace manifests, so this has to reproduce exactly
+      # what the build baked in. Same command, same commit, hence the same version.
+      - name: Re-derive the snapshot version
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: yarn changeset version --snapshot "$DIST_TAG" --snapshot-prerelease-template '{tag}-{commit}'
+
+      - name: Download the built packages
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # ratchet:actions/download-artifact@v8.0.2
+        with:
+          name: Dist compact-js
+
+      - name: Verify the built manifests carry that version
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: |
+          set -euo pipefail
+          version=$(jq -er '.version' compact-js/package.json)
+          if [[ "$version" != 0.0.0-"$DIST_TAG"-* ]]; then
+            echo "::error::versioning left ${version} rather than a ${DIST_TAG} snapshot"
+            exit 1
+          fi
+
+          for workspace in compact-js compact-js-node compact-js-command; do
+            source_version=$(jq -er '.version' "$workspace/package.json")
+            dist_version=$(jq -er '.version' "$workspace/dist/package.json")
+            if [[ "$source_version" != "$dist_version" ]]; then
+              echo "::error::${workspace}/dist was built at ${dist_version} but this job derived ${source_version} — the snapshot version is not reproducible across jobs"
+              exit 1
+            fi
+          done
+
+      - name: Publish
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+          NPM_CONFIG_PROVENANCE: 'true'
+          # First publish only: npm needs a package to exist before a Trusted Publisher can be added. Remove after.
+          NODE_AUTH_TOKEN: ${{ secrets.MIDNIGHTCI_NPMJS_TOKEN }}
+        run: yarn changeset publish --tag "$DIST_TAG" --no-git-tag

@@ -55,6 +55,12 @@ export interface LedgerBinding {
     readonly rawVk: Uint8Array;
   };
   /**
+   * Every operation version the era can hold a verifier key at. Era knowledge, like the version
+   * literal itself, and what a removal sweeps — `makeContractOperationVersion` names only the one
+   * the era inserts at.
+   */
+  readonly contractOperationVersions: () => readonly { readonly version: string }[];
+  /**
    * Adapts a platform-js signing key to this era's ledger `SigningKey`. Owned by the binding
    * rather than by the facade because the *shape* is era-varying — ledger 8 signs with a bare hex
    * string, ledger 9 with `{ tag, value }` — and `Era` describes which schemes an era allows, not
@@ -208,6 +214,12 @@ export type LedgerBindingViolations<M extends LedgerBinding> =
       ReturnType<M['makeContractOperationVersion']>,
       ConstructorParameters<M['VerifierKeyRemove']>[1],
       'VerifierKeyRemove must accept the version makeContractOperationVersion produces'
+    >
+  // The versions a removal actually sweeps, so a new era cannot ship with only the fixed constant.
+  | Requires<
+      ReturnType<M['contractOperationVersions']>[number],
+      ConstructorParameters<M['VerifierKeyRemove']>[1],
+      'VerifierKeyRemove must accept the versions contractOperationVersions produces'
     >
   // The state-conversion chain in `Ledger.fromRuntimeQueryContext`: decode -> charge -> query.
   | Requires<

@@ -7,5 +7,8 @@
   "updateInternalDependencies": "patch",
   "fixed": [["@midnightntwrk/compact-js", "@midnightntwrk/compact-js-node", "@midnightntwrk/compact-js-command"]],
   "linked": [],
-  "ignore": []
+  "ignore": [],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }

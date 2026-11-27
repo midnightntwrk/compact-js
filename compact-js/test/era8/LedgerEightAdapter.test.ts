@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 import { sampleContractAddress } from 'compact-runtime-ledger8';
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 
 import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
+import { describeWithFixture, loadEra8Counter } from './counterFixture.js';
 
 /**
  * The ledger 8 **execution adapter**: the seam that lets one `ContractExecutable` drive both
@@ -42,29 +40,13 @@ import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
  * mutates in place, so reading it afterwards would report the final state as the initial one), and
  * that the metadata survives the generated contract's `{ ...contextOrig }` spread.
  */
-const ERA8_COUNTER = resolve(import.meta.dirname, '../contract/managed-v8/counter');
-const FIXTURE_PRESENT = existsSync(resolve(ERA8_COUNTER, 'contract/index.js'));
-
-const describeWithFixture = FIXTURE_PRESENT ? describe : describe.skip;
-
 describeWithFixture('ledger 8 execution adapter', () => {
   const CIRCUIT_ID = 'increment';
 
   const setup = async () => {
-    const module = (await import(resolve(ERA8_COUNTER, 'contract/index.js'))) as {
-      Contract: new (witnesses: Record<string, unknown>) => {
-        initialState: (context: unknown) => {
-          currentContractState: V0_16.ContractState;
-          currentPrivateState: unknown;
-        };
-        circuits: Record<
-          string,
-          (context: unknown) => V0_16.CircuitResults<unknown, unknown> & { readonly proofData: V0_16.ProofData }
-        >;
-      };
-    };
+    const module = await loadEra8Counter();
     const contract = new module.Contract({
-      private_increment: ({ privateState }: { privateState: unknown }) => [privateState, []]
+      private_increment: ({ privateState }) => [privateState, []]
     });
     const constructorContext = V0_16.createConstructorContext({ count: 0 }, '0'.repeat(64));
     const { currentContractState, currentPrivateState } = contract.initialState(constructorContext);

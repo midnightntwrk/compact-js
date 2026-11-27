@@ -88,6 +88,7 @@ export interface ExecutableLedger {
   readonly ReplaceAuthority: new (authority: never) => unknown;
   readonly VerifierKeyInsert: new (circuitId: never, key: never) => unknown;
   readonly VerifierKeyRemove: new (circuitId: never, version: never) => unknown;
+  readonly contractOperationVersions: () => readonly unknown[];
   readonly fromPlatformSigningKey: (
     signingKey: SigningKey.SigningKey,
     contractState?: any
@@ -98,7 +99,6 @@ export interface ExecutableLedger {
   readonly fromRuntimeQueryContext: (
     queryContext: never
   ) => Effect.Effect<unknown, ContractRuntimeError.ContractRuntimeError>;
-  readonly makeContractOperationVersion: () => unknown;
   readonly makeVersionedVerifierKey: (verifierKey: never) => unknown;
   readonly partitionTranscripts: (preTranscripts: never, parameters: never) => readonly unknown[];
   readonly signData: (signingKey: never, data: never) => unknown;
@@ -489,6 +489,10 @@ const DEFAULT_SIGNATURE_INDEX = 0n;
 const authorityCounterOf = (contractState: unknown): bigint =>
   (contractState as { maintenanceAuthority: { counter: bigint } }).maintenanceAuthority.counter;
 
+// Narrowed here for the same reason as the counter above; every line spells this identically.
+const hasOperation = (contractState: unknown, circuitId: string): boolean =>
+  (contractState as { operation(id: string): unknown }).operation(circuitId) !== undefined;
+
 /**
  * Builds the contract-execution API for one era pair.
  *
@@ -563,6 +567,44 @@ export const makeExecutable = <
             `Expected ${trace.length} transcript partition pairs, received: ${partitioned.length}`
           );
     });
+
+  // One removal per version the era can hold a key at, not one at the era's insert version. The
+  // ledger keys verifier keys by version and exposes only the *latest* through
+  // `ContractOperation.verifierKey`, with no way to enumerate the rest — so a circuit deployed on
+  // one proof system and upgraded on another keeps an older key nothing can read back, and removing
+  // a single version leaves it callable (midnightntwrk/compact-js#68). Removing a version the
+  // contract does not hold is accepted, which is what made that defect silent.
+  //
+  // The `operation()` read is guarded apart from the enclosing `createUpdateFn` try so that a
+  // second-instantiation fault does not report as the insert path's rejected verifier key.
+  const removalUpdates = (
+    { address, contractState }: ContractContext<L, R>,
+    provableCircuitId: string
+  ): Either.Either<unknown[], ContractConfigurationError.ContractConfigurationError> =>
+    Either.try({
+      try: () => hasOperation(contractState, provableCircuitId),
+      catch: (err: unknown) =>
+        ContractConfigurationError.make(
+          `Failed to read the operation for circuit '${provableCircuitId}' from the contract state for '${address}'`,
+          contractState,
+          err
+        )
+    }).pipe(
+      Either.flatMap((present) =>
+        present
+          ? Either.right(
+              ledger
+                .contractOperationVersions()
+                .map((version) => new ledger.VerifierKeyRemove(provableCircuitId as never, version as never))
+            )
+          : Either.left(
+              ContractConfigurationError.make(
+                `Contract state for '${address}' has no operation for circuit '${provableCircuitId}' to remove.`,
+                contractState
+              )
+            )
+      )
+    );
 
   class ContractExecutableImpl<C extends Contract.Contract<PS>, PS, E, Rq> implements ContractExecutable<
     L,
@@ -983,14 +1025,7 @@ export const makeExecutable = <
         Effect.flatMap(({ keyConfig }) =>
           Effect.gen(this, function* () {
             return yield* this.createSignedMaintenanceUpdate(
-              () => {
-                return Either.right([
-                  new ledger.VerifierKeyRemove(
-                    provableCircuitId as never,
-                    ledger.makeContractOperationVersion() as never
-                  )
-                ]);
-              },
+              () => removalUpdates(contractContext, provableCircuitId),
               keyConfig,
               contractContext
             );

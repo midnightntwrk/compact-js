@@ -116,6 +116,12 @@ export { CostModel };
 const CONTRACT_OPERATION_VERSION = 'v4';
 
 /**
+ * Every version this era can hold a key at — `'v3'` for ZKIR v2 (`verifier-key[v6]`) keys, `'v4'`
+ * for ZKIR v3 (`verifier-key[v7]`). A contract may hold one at each.
+ */
+const CONTRACT_OPERATION_VERSIONS = ['v3', 'v4'] as const;
+
+/**
  * The signature schemes verified end-to-end against the ledger 9 CMA path (`signData` and
  * `signatureVerifyingKey`). Add a scheme here only once it has been verified end-to-end; an
  * unlisted scheme is rejected loudly by the facade, never silently coerced. Module-local so the
@@ -143,6 +149,13 @@ if (!era.supportsCmaSignatureKind(era.defaultCmaSignatureKind)) {
   );
 }
 
+// For the same reason: inserts must land in a slot a removal sweeps.
+if (!CONTRACT_OPERATION_VERSIONS.includes(CONTRACT_OPERATION_VERSION)) {
+  throw new Error(
+    `ledger ${era.ledger} era binding: the era's operation version '${CONTRACT_OPERATION_VERSION}' is not among the versions it can hold`
+  );
+}
+
 /**
  * Creates the {@link ContractOperationVersion} for this era. The version literal lives here so it
  * cannot leak into era-neutral code.
@@ -160,6 +173,17 @@ export const makeContractOperationVersion = (): ContractOperationVersion =>
  */
 export const makeVersionedVerifierKey = (verifierKey: Uint8Array): ContractOperationVersionedVerifierKey =>
   new ContractOperationVersionedVerifierKey(CONTRACT_OPERATION_VERSION, verifierKey);
+
+/**
+ * Every {@link ContractOperationVersion} this era can hold a key at, ascending — what a removal
+ * sweeps, since `ContractOperation.verifierKey` exposes only the latest and the rest cannot be read
+ * back (midnightntwrk/compact-js#68). Built per call: these are WASM objects, and importing an era
+ * entry must not compile WASM.
+ *
+ * @category constructors
+ */
+export const contractOperationVersions = (): readonly ContractOperationVersion[] =>
+  CONTRACT_OPERATION_VERSIONS.map((version) => new ContractOperationVersion(version));
 
 /**
  * Adapts a platform-js signing key to ledger 9's `SigningKey`.

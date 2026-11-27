@@ -220,6 +220,28 @@ describe('ContractExecutable maintenance boundary', () => {
   );
 
   it.effect(
+    'fails in the error channel when the runtime rejects reading an operation during a removal',
+    () =>
+      Effect.gen(function* () {
+        // A removal reads the state to confirm the circuit is there, so it crosses the runtime
+        // boundary inside the same callback that builds the updates. Under that callback's own
+        // guard this would read as 'Failed to build the contract maintenance update' — the insert
+        // path's verifier-key rejection — sending a consumer whose real fault is a duplicated
+        // dependency off to audit their keys.
+        vi.spyOn(ContractState.prototype, 'operation').mockImplementationOnce(() => {
+          throw new Error('expected instance of ContractState');
+        });
+
+        const exit = yield* contract
+          .removeContractOperation(Contract.ProvableCircuitId<CounterContract>('increment'), contractContext())
+          .pipe(Effect.exit);
+
+        expectConfigurationFailure(exit, "Failed to read the operation for circuit 'increment'");
+      }),
+    30_000
+  );
+
+  it.effect(
     'fails in the error channel when the runtime rejects reading an operation during initialization',
     () =>
       Effect.gen(function* () {

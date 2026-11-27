@@ -16,9 +16,18 @@
 import { resolve } from 'node:path';
 
 import { Command } from '@effect/cli';
+import { FileSystem } from '@effect/platform';
 import { describe, it } from '@effect/vitest';
 import { maintainCommand } from '@midnightntwrk/compact-js-command/effect';
-import { sampleSigningKey } from '@midnightntwrk/ledger-v9';
+import {
+  Intent,
+  MaintenanceUpdate,
+  type PreBinding,
+  type PreProof,
+  sampleSigningKey,
+  type SignatureEnabled,
+  VerifierKeyRemove
+} from '@midnightntwrk/ledger-v9';
 import { Effect } from 'effect';
 
 import { ensureRemovePath } from './cleanup.js';
@@ -48,6 +57,7 @@ describe('Maintain Circuit Command', () => {
     () =>
       Effect.gen(function* () {
         const cli = Command.run(maintainCommand, { name: 'maintain', version: '0.0.0' });
+        const fs = yield* FileSystem.FileSystem;
 
         yield* cli([
           'node',
@@ -68,6 +78,19 @@ describe('Maintain Circuit Command', () => {
         const lines = yield* MockConsole.getLines({ stripAnsi: true });
 
         expect(lines.length).toBe(0);
+
+        // With no `--vk-path` this is a removal. The committed state holds `increment` at version
+        // `v3` (a `verifier-key[v6]` key) while this era inserts at `v4`, so a removal covering
+        // only the era's own version would clear an empty slot and leave the circuit callable —
+        // which is why every version the era can hold is swept (#68).
+        const intent = Intent.deserialize<SignatureEnabled, PreProof, PreBinding>(
+          'signature', 'pre-proof', 'pre-binding', yield* fs.readFile(COUNTER_OUTPUT_FILEPATH)
+        );
+        const updates = intent.actions.filter((action) => action instanceof MaintenanceUpdate);
+        expect(updates).toHaveLength(1);
+        const removals = updates[0].updates.filter((update) => update instanceof VerifierKeyRemove);
+        expect(removals.map((removal) => removal.operation)).toEqual(['increment', 'increment']);
+        expect(removals.map((removal) => removal.version.version)).toEqual(['v3', 'v4']);
       }).pipe(
         Effect.ensuring(ensureRemovePath(COUNTER_OUTPUT_FILEPATH)),
         Effect.provide(testLayer)

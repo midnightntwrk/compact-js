@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 // Imported directly rather than through the binding: `sampleContractAddress` is a test helper, and
 // widening the `CompactRuntime` facade for a fixture would be the wrong trade. Tests are exempt
 // from the seam's `no-restricted-imports` rule for exactly this.
 import { sampleContractAddress } from 'compact-runtime-ledger8';
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 
 import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
+import { describeWithFixture, loadEra8Counter } from './counterFixture.js';
 
 /**
  * End-to-end proof that the **ledger 8 era can execute a contract** (midnight-sdk#387, feasibility
@@ -52,25 +50,7 @@ import * as V0_16 from '../../src/effect/internal/runtime/v0_16.js';
  * The fixture is generated, not committed (`yarn compact-v8`), so the suite skips rather than fails
  * when it is absent — mirroring how `managed/` is treated for the ledger 9 fixtures.
  */
-const ERA8_COUNTER = resolve(import.meta.dirname, '../contract/managed-v8/counter');
-const FIXTURE_PRESENT = existsSync(resolve(ERA8_COUNTER, 'contract/index.js'));
-
-const describeWithFixture = FIXTURE_PRESENT ? describe : describe.skip;
-
 describeWithFixture('ledger 8 era execution', () => {
-  const loadContract = async () => {
-    const module = await import(resolve(ERA8_COUNTER, 'contract/index.js'));
-    return module as {
-      Contract: new (witnesses: Record<string, unknown>) => {
-        initialState: (context: unknown) => {
-          currentContractState: V0_16.ContractState;
-          currentPrivateState: unknown;
-        };
-        circuits: Record<string, (context: unknown) => { result: unknown; proofData: { publicTranscript: unknown[] } }>;
-      };
-    };
-  };
-
   it('binds the compact-runtime 0.16 line', () => {
     expect(V0_16.line).toBe('0.16');
   });
@@ -78,14 +58,14 @@ describeWithFixture('ledger 8 era execution', () => {
   it('loads an artifact compiled for runtime 0.16 without a version mismatch', async () => {
     // The whole point of the aliased project: this import is what throws
     // `Version mismatch: compiled code expects 0.16.0, runtime is 0.21.0` in the default one.
-    const module = await loadContract();
+    const module = await loadEra8Counter();
     expect(module.Contract).toBeTypeOf('function');
   });
 
   it('constructs initial contract state on the ledger 8 runtime', async () => {
-    const { Contract } = await loadContract();
+    const { Contract } = await loadEra8Counter();
     const contract = new Contract({
-      private_increment: ({ privateState }: { privateState: unknown }) => [privateState, []]
+      private_increment: ({ privateState }) => [privateState, []]
     });
 
     const constructorContext = V0_16.createConstructorContext({ count: 0 }, '0'.repeat(64));
@@ -98,9 +78,9 @@ describeWithFixture('ledger 8 era execution', () => {
   });
 
   it('runs a circuit and records a public transcript', async () => {
-    const { Contract } = await loadContract();
+    const { Contract } = await loadEra8Counter();
     const contract = new Contract({
-      private_increment: ({ privateState }: { privateState: unknown }) => [privateState, []]
+      private_increment: ({ privateState }) => [privateState, []]
     });
 
     const constructorContext = V0_16.createConstructorContext({ count: 0 }, '0'.repeat(64));
@@ -124,9 +104,9 @@ describeWithFixture('ledger 8 era execution', () => {
     // Pins the adapter's job from the 0.16 side. The mirror assertion for 0.21 lives in the type
     // tests (`RuntimeBinding.tst.ts`), which check `CircuitContext` carries `callProofDataTrace`
     // and `events` on that line and not on this one.
-    const { Contract } = await loadContract();
+    const { Contract } = await loadEra8Counter();
     const contract = new Contract({
-      private_increment: ({ privateState }: { privateState: unknown }) => [privateState, []]
+      private_increment: ({ privateState }) => [privateState, []]
     });
 
     const constructorContext = V0_16.createConstructorContext({ count: 0 }, '0'.repeat(64));
